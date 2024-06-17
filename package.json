@@ -4,12 +4,18 @@
   "description": "Welcome to the EZ Host project! This project aims to provide a desktop app interface for users to sign in and control the functionality of a gaming server running on your local machine. The server management is facilitated through a command line application, which is then controlled by the user-friendly desktop application.",
   "main": "main.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "electron .",
+    "dev:watch": "npx electronmon --trace-warnings ."
   },
   "keywords": [],
-  "author": "",
-  "license": "ISC",
+  "author": "Daniel Gebura",
+  "license": "MIT",
   "devDependencies": {
     "electron": "^31.0.1"
+  },
+  "dependencies": {
+    "electronmon": "^2.0.3",
+    "react-router-dom": "^6.23.1"
   }
 }
