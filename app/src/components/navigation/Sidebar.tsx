@@ -1,35 +1,35 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
 
-export const SideBar: React.FC = () => {
+interface SidebarProps {
+  isSidebarOpen: boolean;
+  toggleSidebar: () => void;
+}
+
+export const Sidebar: React.FC<SidebarProps> = ({ isSidebarOpen, toggleSidebar }) => {
   return (
-    <div className="drawer lg:drawer-open">
-      <input id="my-drawer-2" type="checkbox" className="drawer-toggle" />
-      <div className="drawer-content flex flex-col items-center justify-center">
-        {/* Page content here */}
-        <label
-          htmlFor="my-drawer-2"
-          className="btn btn-primary drawer-button lg:hidden"
+    <>
+      {/* Sidebar */}
+      <div
+        className={`fixed top-16 left-0 h-full bg-base-200 p-4 transform ${
+          isSidebarOpen ? 'translate-x-0' : '-translate-x-full'
+        } transition-transform duration-300 z-20`}
+      >
+        <button
+          className="btn btn-secondary mb-4"
+          onClick={toggleSidebar}
         >
-          Open drawer
-        </label>
+          Close Sidebar
+        </button>
+        <div>Sidebar Content</div>
       </div>
-      <div className="drawer-side">
-        <label
-          htmlFor="my-drawer-2"
-          aria-label="close sidebar"
-          className="drawer-overlay"
-        ></label>
-        <ul className="menu p-4 w-80 min-h-full bg-base-200 text-base-content">
-          {/* Sidebar content here */}
-          <li>
-            <a>Sidebar Item 1</a>
-          </li>
-          <li>
-            <a>Sidebar Item 2</a>
-          </li>
-        </ul>
-      </div>
-    </div>
+
+      {/* Overlay */}
+      {isSidebarOpen && (
+        <div
+          className="fixed inset-0 bg-black opacity-50 z-10"
+          onClick={toggleSidebar}
+        />
+      )}
+    </>
   );
 };
