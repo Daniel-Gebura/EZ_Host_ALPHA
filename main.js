@@ -8,9 +8,10 @@
  * @description Main process of the Electron application
  * @version 1.0
  */
-const { app, BrowserWindow, Notification, ipcMain } = require('electron'); // Electron modules for application
+const { app, BrowserWindow } = require('electron'); // Electron modules for application
 const url = require('url'); // Module for URL handling
 const path = require('path'); // Module for file path handling
+const { startApiServer } = require('./server/api'); // Import the API server starter function
 
 let mainWindow;
 
@@ -30,7 +31,7 @@ function createMainWindow() {
   });
 
   // DEBUGGING: Open DevTools
-  //mainWindow.webContents.openDevTools();
+  mainWindow.webContents.openDevTools();
 
   // Define the start URL for the main window
   const startUrl = url.format({
@@ -45,13 +46,11 @@ function createMainWindow() {
   // Handle full-screen events
   mainWindow.on('enter-full-screen', () => {
     console.log('Entered full-screen mode');
-    // Add any additional logic here, such as notifying the renderer process
     mainWindow.webContents.send('full-screen-changed', true);
   });
 
   mainWindow.on('leave-full-screen', () => {
     console.log('Exited full-screen mode');
-    // Add any additional logic here, such as notifying the renderer process
     mainWindow.webContents.send('full-screen-changed', false);
   });
 }
@@ -59,5 +58,19 @@ function createMainWindow() {
 // START UP CALL: Application ready event
 app.whenReady().then(() => {
   createMainWindow(); // Create the main window when the app is ready
-  // createServer(); // Uncomment to start the API server if needed
+  startApiServer(); // Start the API server
+});
+
+// Handle application re-activation (macOS)
+app.on('activate', () => {
+  if (BrowserWindow.getAllWindows().length === 0) {
+    createMainWindow();
+  }
+});
+
+// Handle all windows being closed
+app.on('window-all-closed', () => {
+  if (process.platform !== 'darwin') {
+    app.quit();
+  }
 });

@@ -30,3 +30,28 @@ contextBridge.exposeInMainWorld('ipcRenderer', {
     ipcRenderer.on(channel, (event, ...args) => func(...args)), // Listen for IPC message from main process
   removeAllListeners: (channel) => ipcRenderer.removeAllListeners(channel), // Remove all listeners for a specific channel
 });
+
+/**
+ * Expose API methods for interacting with the backend server
+ */
+contextBridge.exposeInMainWorld('api', {
+  getServers: async () => {
+    const response = await fetch('http://localhost:5000/api/servers');
+    return response.json();
+  },
+  addServer: async (server) => {
+    const response = await fetch('http://localhost:5000/api/servers', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(server),
+    });
+    return response.json();
+  },
+  deleteServer: async (id) => {
+    await fetch(`http://localhost:5000/api/servers/${id}`, {
+      method: 'DELETE',
+    });
+  },
+});
