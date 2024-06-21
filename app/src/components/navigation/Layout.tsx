@@ -20,7 +20,7 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
       <Navbar toggleSidebar={toggleSidebar} />
 
       {/* Main Content */}
-      <div className="flex flex-1 mt-16">
+      <div className="flex flex-1 mt-16 relative">
         {/* Sidebar */}
         <Sidebar isSidebarOpen={isSidebarOpen} toggleSidebar={toggleSidebar} />
 

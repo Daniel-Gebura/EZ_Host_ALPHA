@@ -5,6 +5,7 @@ import reportWebVitals from './reportWebVitals';
 import { HashRouter, Route, Routes } from 'react-router-dom';
 import { Layout } from './components/navigation/Layout';
 import { Central } from './pages/Central';
+import { Dummy } from './pages/Dummy';
 
 const root = ReactDOM.createRoot(
   document.getElementById('root') as HTMLElement
@@ -15,6 +16,7 @@ root.render(
       <Routes>
         <Route path="/" element={<Layout />}>
           <Route index element={<Central />} /> {/* This defines the home page */}
+          <Route path="/Dummy" element={<Dummy />}></Route>
         </Route>
       </Routes>
     </HashRouter>
