@@ -1,5 +1,5 @@
 import React from 'react';
-import logo from '../assets/logo/EZ_Host_Logo1.png'; // Adjust the path based on your project structure
+import logo from '../assets/logo/EZ_Host_Logo1.png';
 
 export const Central: React.FC = () => {
   return (
