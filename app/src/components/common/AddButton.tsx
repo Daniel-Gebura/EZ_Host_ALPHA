@@ -1,23 +1,37 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
+/**
+ * AddButton component
+ * Provides a button to open a modal for adding a new server.
+ * 
+ * @returns {JSX.Element}
+ */
 export const AddButton: React.FC = () => {
   const [serverName, setServerName] = useState('');
+  const [serverType, setServerType] = useState('forge'); // Default to 'forge'
+  const [directory, setDirectory] = useState('');
   const navigate = useNavigate();
 
+  /**
+   * Adds a new server by calling the backend API
+   */
   const addServer = async () => {
     const newServer = {
-      id: Date.now().toString(),
       name: serverName,
+      type: serverType,
+      directory: directory,
     };
-    await window.api.addServer(newServer);
+    const addedServer = await window.api.addServer(newServer);
     setServerName('');
+    setServerType('forge'); // Reset to default
+    setDirectory('');
     const modal = document.getElementById('add_server_modal') as HTMLDialogElement;
     if (modal) {
       modal.close();
     }
     // Navigate to the new server's page
-    navigate(`/server/${newServer.id}`);
+    navigate(`/server/${addedServer.id}`);
   };
 
   return (
@@ -41,7 +55,6 @@ export const AddButton: React.FC = () => {
       <dialog id="add_server_modal" className="modal">
         <div className="modal-box">
           <form method="dialog">
-            {/* if there is a button in form, it will close the modal */}
             <button className="btn btn-sm btn-circle btn-ghost absolute right-2 top-2">✕</button>
           </form>
           <h3 className="font-bold text-lg">Add New Server</h3>
@@ -51,6 +64,21 @@ export const AddButton: React.FC = () => {
             onChange={(e) => setServerName(e.target.value)}
             className="input input-bordered w-full mt-4"
             placeholder="Server Name"
+          />
+          <select
+            value={serverType}
+            onChange={(e) => setServerType(e.target.value)}
+            className="select select-bordered w-full mt-4"
+          >
+            <option value="forge">Forge</option>
+            <option value="fabric">Fabric</option>
+          </select>
+          <input
+            type="text"
+            value={directory}
+            onChange={(e) => setDirectory(e.target.value)}
+            className="input input-bordered w-full mt-4"
+            placeholder="Server Directory"
           />
           <button className="btn btn-primary w-full mt-4" onClick={addServer}>Add Server</button>
         </div>

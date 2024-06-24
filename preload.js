@@ -35,10 +35,20 @@ contextBridge.exposeInMainWorld('ipcRenderer', {
  * Expose API methods for interacting with the backend server
  */
 contextBridge.exposeInMainWorld('api', {
+  /**
+   * Get the list of servers
+   * @returns {Promise<Array>} List of servers
+   */
   getServers: async () => {
     const response = await fetch('http://localhost:5000/api/servers');
     return response.json();
   },
+
+  /**
+   * Add a new server
+   * @param {Object} server - Server details
+   * @returns {Promise<Object>} The added server
+   */
   addServer: async (server) => {
     const response = await fetch('http://localhost:5000/api/servers', {
       method: 'POST',
@@ -49,9 +59,62 @@ contextBridge.exposeInMainWorld('api', {
     });
     return response.json();
   },
+
+  /**
+   * Delete a server by ID
+   * @param {string} id - Server ID
+   */
   deleteServer: async (id) => {
     await fetch(`http://localhost:5000/api/servers/${id}`, {
       method: 'DELETE',
     });
+  },
+
+  /**
+   * Start a server by ID
+   * @param {string} id - Server ID
+   * @returns {Promise<string>} Response from the server
+   */
+  startServer: async (id) => {
+    const response = await fetch(`http://localhost:5000/api/servers/${id}/start`, {
+      method: 'POST',
+    });
+    return response.text();
+  },
+
+  /**
+   * Save a server by ID
+   * @param {string} id - Server ID
+   * @returns {Promise<string>} Response from the server
+   */
+  saveServer: async (id) => {
+    const response = await fetch(`http://localhost:5000/api/servers/${id}/save`, {
+      method: 'POST',
+    });
+    return response.text();
+  },
+
+  /**
+   * Restart a server by ID
+   * @param {string} id - Server ID
+   * @returns {Promise<string>} Response from the server
+   */
+  restartServer: async (id) => {
+    const response = await fetch(`http://localhost:5000/api/servers/${id}/restart`, {
+      method: 'POST',
+    });
+    return response.text();
+  },
+
+  /**
+   * Stop a server by ID
+   * @param {string} id - Server ID
+   * @returns {Promise<string>} Response from the server
+   */
+  stopServer: async (id) => {
+    const response = await fetch(`http://localhost:5000/api/servers/${id}/stop`, {
+      method: 'POST',
+    });
+    return response.text();
   },
 });

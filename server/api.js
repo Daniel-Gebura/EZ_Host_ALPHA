@@ -1,80 +1,133 @@
+/**
+ * api.js
+ * 
+ * API server for managing Minecraft servers (Forge/Fabric).
+ * Provides endpoints for creating, starting, saving, restarting, and stopping servers.
+ * 
+ * @file api.js
+ * @description Backend API for Minecraft server management
+ * @version 1.0
+ */
+
 const express = require('express');
 const fs = require('fs');
 const path = require('path');
 const cors = require('cors');
+const { exec } = require('child_process');
 
+// Path to the servers.json file
 const DATA_FILE = path.join(__dirname, 'servers.json');
+// Port on which the API server will run
 const PORT = 5000;
 
+/**
+ * Starts the API server
+ */
 const startApiServer = () => {
   const app = express();
   app.use(cors());
   app.use(express.json());
 
+  // Load existing servers from file
+  const loadServers = () => {
+    if (fs.existsSync(DATA_FILE)) {
+      return JSON.parse(fs.readFileSync(DATA_FILE));
+    }
+    return [];
+  };
+
+  // Save servers to file
+  const saveServers = (servers) => {
+    fs.writeFileSync(DATA_FILE, JSON.stringify(servers, null, 2));
+  };
+
+  // Initial server load
+  let servers = loadServers();
+
+  /**
+   * Endpoint to get the list of servers
+   */
   app.get('/api/servers', (req, res) => {
-    fs.readFile(DATA_FILE, (err, data) => {
-      if (err) {
-        console.error('Error reading servers.json:', err);
-        return res.status(500).send('Internal Server Error');
-      }
-      try {
-        const servers = JSON.parse(data);
-        res.send(servers);
-      } catch (parseErr) {
-        console.error('Error parsing servers.json:', parseErr);
-        res.status(500).send('Internal Server Error');
-      }
-    });
+    res.send(servers);
   });
 
+  /**
+   * Endpoint to create a new server
+   */
   app.post('/api/servers', (req, res) => {
-    const newServer = req.body;
-    fs.readFile(DATA_FILE, (err, data) => {
-      if (err) {
-        console.error('Error reading servers.json:', err);
-        return res.status(500).send('Internal Server Error');
-      }
-      try {
-        const servers = JSON.parse(data);
-        servers.push(newServer);
-        fs.writeFile(DATA_FILE, JSON.stringify(servers), (writeErr) => {
-          if (writeErr) {
-            console.error('Error writing to servers.json:', writeErr);
-            return res.status(500).send('Internal Server Error');
-          }
-          res.status(201).send(newServer);
-        });
-      } catch (parseErr) {
-        console.error('Error parsing servers.json:', parseErr);
-        res.status(500).send('Internal Server Error');
-      }
-    });
+    const { type, directory } = req.body;
+    const id = Date.now().toString();
+    const newServer = { id, type, directory };
+
+    servers.push(newServer);
+    saveServers(servers);
+    res.status(201).send(newServer);
   });
 
+  /**
+   * Endpoint to delete a server by ID
+   */
   app.delete('/api/servers/:id', (req, res) => {
     const { id } = req.params;
-    fs.readFile(DATA_FILE, (err, data) => {
-      if (err) {
-        console.error('Error reading servers.json:', err);
-        return res.status(500).send('Internal Server Error');
-      }
-      try {
-        let servers = JSON.parse(data);
-        servers = servers.filter(server => server.id !== id);
-        fs.writeFile(DATA_FILE, JSON.stringify(servers), (writeErr) => {
-          if (writeErr) {
-            console.error('Error writing to servers.json:', writeErr);
-            return res.status(500).send('Internal Server Error');
-          }
-          res.status(204).send();
-        });
-      } catch (parseErr) {
-        console.error('Error parsing servers.json:', parseErr);
-        res.status(500).send('Internal Server Error');
-      }
-    });
+    servers = servers.filter(server => server.id !== id);
+    saveServers(servers);
+    res.status(204).send();
   });
 
+  /**
+   * Helper function to run a script for a server
+   * @param {string} serverId - The ID of the server
+   * @param {string} scriptName - The name of the script to run
+   * @param {Object} res - The response object
+   */
+  const runScript = (serverId, scriptName, res) => {
+    const server = servers.find(s => s.id === serverId);
+    if (!server) {
+      return res.status(404).send('Server not found');
+    }
+    const scriptPath = path.join(server.directory, scriptName);
+
+    exec(`sh ${scriptPath}`, (error, stdout, stderr) => {
+      if (error) {
+        console.error(`Error executing ${scriptName}:`, error);
+        return res.status(500).send(`Error executing ${scriptName}`);
+      }
+      if (stderr) {
+        console.error(`Script stderr: ${stderr}`);
+      }
+      res.send(`Script ${scriptName} executed successfully: ${stdout}`);
+    });
+  };
+
+  /**
+   * Endpoint to start a server
+   */
+  app.post('/api/servers/:id/start', (req, res) => {
+    runScript(req.params.id, 'start.sh', res);
+  });
+
+  /**
+   * Endpoint to save a server
+   */
+  app.post('/api/servers/:id/save', (req, res) => {
+    runScript(req.params.id, 'save.sh', res);
+  });
+
+  /**
+   * Endpoint to restart a server
+   */
+  app.post('/api/servers/:id/restart', (req, res) => {
+    runScript(req.params.id, 'restart.sh', res);
+  });
+
+  /**
+   * Endpoint to stop a server
+   */
+  app.post('/api/servers/:id/stop', (req, res) => {
+    runScript(req.params.id, 'stop.sh', res);
+  });
+
+  // Start the API server
   app.listen(PORT, () => {
     console.log(`API Server is running on http://localhost:${PORT}`);
   });
