@@ -31,7 +31,7 @@ function createMainWindow() {
   });
 
   // DEBUGGING: Open DevTools
-  mainWindow.webContents.openDevTools();
+  //mainWindow.webContents.openDevTools();
 
   // Define the start URL for the main window
   const startUrl = url.format({
