@@ -9,6 +9,7 @@
  * @description Preload script for Electron application
  * @version 1.0
  */
+
 const { contextBridge, ipcRenderer } = require('electron'); // Electron modules for context bridging and IPC
 const os = require('os'); // Node.js module for operating system information
 
@@ -63,6 +64,7 @@ contextBridge.exposeInMainWorld('api', {
   /**
    * Delete a server by ID
    * @param {string} id - Server ID
+   * @returns {Promise<void>}
    */
   deleteServer: async (id) => {
     await fetch(`http://localhost:5000/api/servers/${id}`, {
@@ -117,4 +119,13 @@ contextBridge.exposeInMainWorld('api', {
     });
     return response.text();
   },
+
+  /**
+   * Open a directory chooser dialog
+   * @returns {Promise<string>} The selected directory path
+   */
+  chooseDirectory: async () => {
+    const result = await ipcRenderer.invoke('choose-directory');
+    return result;
+  }
 });

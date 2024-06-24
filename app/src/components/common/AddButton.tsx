@@ -1,5 +1,8 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { TextInput1 } from './TextInput1';
+import { ForgeFabricToggle } from './ForgeFabricToggle';
+import { ChooseFile1 } from './ChooseFile1';
 
 /**
  * AddButton component
@@ -9,7 +12,7 @@ import { useNavigate } from 'react-router-dom';
  */
 export const AddButton: React.FC = () => {
   const [serverName, setServerName] = useState('');
-  const [serverType, setServerType] = useState('forge'); // Default to 'forge'
+  const [serverType, setServerType] = useState<'forge' | 'fabric'>('forge');
   const [directory, setDirectory] = useState('');
   const navigate = useNavigate();
 
@@ -58,26 +61,18 @@ export const AddButton: React.FC = () => {
             <button className="btn btn-sm btn-circle btn-ghost absolute right-2 top-2">✕</button>
           </form>
           <h3 className="font-bold text-lg">Add New Server</h3>
-          <input
-            type="text"
+          <TextInput1
             value={serverName}
-            onChange={(e) => setServerName(e.target.value)}
-            className="input input-bordered w-full mt-4"
+            onChange={setServerName}
             placeholder="Server Name"
           />
-          <select
+          <ForgeFabricToggle
             value={serverType}
-            onChange={(e) => setServerType(e.target.value)}
-            className="select select-bordered w-full mt-4"
-          >
-            <option value="forge">Forge</option>
-            <option value="fabric">Fabric</option>
-          </select>
-          <input
-            type="text"
+            onChange={setServerType}
+          />
+          <ChooseFile1
             value={directory}
-            onChange={(e) => setDirectory(e.target.value)}
-            className="input input-bordered w-full mt-4"
+            onChange={setDirectory}
             placeholder="Server Directory"
           />
           <button className="btn btn-primary w-full mt-4" onClick={addServer}>Add Server</button>

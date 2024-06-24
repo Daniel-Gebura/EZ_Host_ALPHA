@@ -8,7 +8,7 @@
  * @description Main process of the Electron application
  * @version 1.0
  */
-const { app, BrowserWindow } = require('electron'); // Electron modules for application
+const { app, BrowserWindow, dialog, ipcMain } = require('electron'); // Electron modules for application
 const url = require('url'); // Module for URL handling
 const path = require('path'); // Module for file path handling
 const { startApiServer } = require('./server/api'); // Import the API server starter function
@@ -54,6 +54,16 @@ function createMainWindow() {
     mainWindow.webContents.send('full-screen-changed', false);
   });
 }
+
+/**
+ * Handle the choose-directory IPC call
+ */
+ipcMain.handle('choose-directory', async () => {
+  const result = await dialog.showOpenDialog(mainWindow, {
+    properties: ['openDirectory']
+  });
+  return result.filePaths[0];
+});
 
 // START UP CALL: Application ready event
 app.whenReady().then(() => {

@@ -50,6 +50,12 @@ declare global {
        * @returns {Promise<string>} Response from the server
        */
       stopServer: (id: string) => Promise<string>;
+
+      /**
+       * Choose a directory
+       * @returns {Promise<string>} Response from the server
+       */
+      chooseDirectory: () => Promise<string>;
     };
   }
 }
