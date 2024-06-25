@@ -112,18 +112,34 @@ export const ServerControl: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-base-100 p-4">
-      <div className="bg-white shadow-lg rounded-lg p-6 mb-4">
-        <div className="flex items-center mb-4">
+    <div className="min-h-screen bg-base-100 p-4 lg:pl-32 lg:pr-32"> {/* Adjusted padding for larger screens */}
+      <div className="bg-base-300 shadow-lg rounded-lg p-6 mb-4">
+        <div className="flex flex-col md:flex-row items-center mb-4">
           <IconChanger icon={icon || defaultLogo} onChangeIcon={handleChangeIcon} />
-          <ServerStatus name={serverName} status={status} />
+          <div className="ml-4">
+            <h1 className="text-3xl font-bold">{serverName}</h1>
+            <div className="flex items-center mt-2">
+              <div className={`h-4 w-4 rounded-full ${status === 'running' ? 'bg-green-500' : status === 'restarting' ? 'bg-yellow-500' : 'bg-red-500'}`} />
+              <span className="ml-2 text-lg">{status.charAt(0).toUpperCase() + status.slice(1)}</span>
+            </div>
+          </div>
         </div>
       </div>
-      <div className="bg-white shadow-lg rounded-lg p-6 mb-4">
-        <div className="flex flex-col md:flex-row items-center justify-between">
-          <div className="w-full md:w-1/2 mb-4 md:mb-0">
+      <div className="bg-base-300 shadow-lg rounded-lg p-6 mb-4">
+        <div className="flex flex-col md:flex-row">
+          <div className="flex flex-col mr-4 mb-4 md:mb-0">
+            <button className="btn btn-outline mb-2">CPU</button>
+            <button className="btn btn-outline mb-2">RAM</button>
+            <button className="btn btn-outline">Both</button>
+          </div>
+          <div className="flex-grow">
             <UsageIndicator />
           </div>
+        </div>
+      </div>
+      <div className="bg-base-300 shadow-lg rounded-lg p-6 mb-4 text-center">
+        <h2 className="text-2xl font-bold mb-4">Server Controls</h2>
+        <div className="flex justify-center">
           <ActionButtons onAction={handleAction} />
         </div>
       </div>

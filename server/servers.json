@@ -1,1 +1,9 @@
-[]
+[
+  {
+    "id": "1719343279502",
+    "name": "test",
+    "type": "fabric",
+    "directory": "D:\\Personal\\Gaming\\MinecraftServer\\TestBMC4",
+    "icon": "D:\\Personal\\Gaming\\MinecraftServer\\TestBMC4\\server-icon.png"
+  }
+]
