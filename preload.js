@@ -36,6 +36,19 @@ contextBridge.exposeInMainWorld('api', {
   },
 
   /**
+   * Get a specific server by ID
+   * @param {string} id - Server ID
+   * @returns {Promise<Object>} The server details
+   */
+    getServer: async (id) => {
+      const response = await fetch(`http://localhost:5000/api/servers/${id}`);
+      if (!response.ok) {
+        throw new Error('Server not found');
+      }
+      return response.json();
+    },
+
+  /**
    * Add a new server
    * @param {Object} server - Server details
    * @returns {Promise<Object>} The added server

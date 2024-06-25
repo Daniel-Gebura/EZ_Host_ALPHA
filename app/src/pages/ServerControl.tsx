@@ -4,6 +4,7 @@ import { IconChanger } from '../components/serverPage/IconChanger';
 import { ServerStatus } from '../components/serverPage/ServerStatus';
 import { UsageIndicator } from '../components/serverPage/UsageIndicator';
 import { ActionButtons } from '../components/serverPage/ActionButtons';
+import defaultLogo from '../assets/logo/EZ_Host_Logo1.png'; // Import the default logo
 
 /**
  * ServerControl component
@@ -16,7 +17,7 @@ export const ServerControl: React.FC = () => {
   const navigate = useNavigate();
   const [serverName, setServerName] = useState('Loading...');
   const [status, setStatus] = useState<'running' | 'restarting' | 'offline'>('offline');
-  const [icon, setIcon] = useState('/path/to/default/icon.png');
+  const [icon, setIcon] = useState<string | null>(null); // Initialize icon state
 
   useEffect(() => {
     const fetchServerDetails = async () => {
@@ -24,7 +25,7 @@ export const ServerControl: React.FC = () => {
         try {
           const server = await window.api.getServer(id);
           setServerName(server.name);
-          setIcon(server.icon || '/path/to/default/icon.png');
+          setIcon(server.icon || defaultLogo); // Set icon or default logo
         } catch (error: any) {
           console.error('Error fetching server details:', error);
         }
@@ -114,7 +115,7 @@ export const ServerControl: React.FC = () => {
     <div className="min-h-screen bg-base-100 p-4">
       <div className="bg-white shadow-lg rounded-lg p-6 mb-4">
         <div className="flex items-center mb-4">
-          <IconChanger icon={icon} onChangeIcon={handleChangeIcon} />
+          <IconChanger icon={icon || defaultLogo} onChangeIcon={handleChangeIcon} />
           <ServerStatus name={serverName} status={status} />
         </div>
       </div>
