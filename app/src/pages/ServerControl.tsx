@@ -1,5 +1,9 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
+import { IconChanger } from '../components/serverPage/IconChanger';
+import { ServerStatus } from '../components/serverPage/ServerStatus';
+import { UsageIndicator } from '../components/serverPage/UsageIndicator';
+import { ActionButtons } from '../components/serverPage/ActionButtons';
 
 /**
  * ServerControl component
@@ -10,6 +14,25 @@ import { useNavigate, useParams } from 'react-router-dom';
 export const ServerControl: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const [serverName, setServerName] = useState('Loading...');
+  const [status, setStatus] = useState<'running' | 'restarting' | 'offline'>('offline');
+  const [icon, setIcon] = useState('/path/to/default/icon.png');
+
+  useEffect(() => {
+    const fetchServerDetails = async () => {
+      if (id) {
+        try {
+          const server = await window.api.getServer(id);
+          setServerName(server.name);
+          setIcon(server.icon || '/path/to/default/icon.png');
+        } catch (error: any) {
+          console.error('Error fetching server details:', error);
+        }
+      }
+    };
+
+    fetchServerDetails();
+  }, [id]);
 
   /**
    * Handles server actions by calling the appropriate backend API
@@ -26,15 +49,18 @@ export const ServerControl: React.FC = () => {
       switch (action) {
         case 'start':
           response = await window.api.startServer(id);
+          setStatus('running');
           break;
         case 'save':
           response = await window.api.saveServer(id);
           break;
         case 'restart':
           response = await window.api.restartServer(id);
+          setStatus('restarting');
           break;
         case 'stop':
           response = await window.api.stopServer(id);
+          setStatus('offline');
           break;
         default:
           response = 'Invalid action';
@@ -63,16 +89,45 @@ export const ServerControl: React.FC = () => {
     }
   };
 
+  /**
+   * Handles icon change by opening a file dialog
+   */
+  const handleChangeIcon = async () => {
+    const selectedIcon = await window.api.chooseFile();
+    if (selectedIcon) {
+      setIcon(selectedIcon);
+
+      // Save the new icon path to the server details
+      if (id) {
+        try {
+          const server = await window.api.getServer(id);
+          server.icon = selectedIcon;
+          await window.api.updateServer(id, server);
+        } catch (error: any) {
+          console.error('Error updating server icon:', error);
+        }
+      }
+    }
+  };
+
   return (
-    <div className="flex items-center justify-center min-h-screen bg-base-100">
-      <div className="p-6 bg-white shadow-lg rounded-lg text-center">
-        <h1 className="text-2xl font-bold mb-4">Server Control</h1>
-        <p className="mb-4">Managing server with ID: {id}</p>
-        <button className="btn btn-success mt-2" onClick={() => handleAction('start')}>Start Server</button>
-        <button className="btn btn-warning mt-2" onClick={() => handleAction('save')}>Save Server</button>
-        <button className="btn btn-info mt-2" onClick={() => handleAction('restart')}>Restart Server</button>
-        <button className="btn btn-danger mt-2" onClick={() => handleAction('stop')}>Stop Server</button>
-        <button className="btn btn-danger mt-4" onClick={removeServer}>Remove Server</button>
+    <div className="min-h-screen bg-base-100 p-4">
+      <div className="bg-white shadow-lg rounded-lg p-6 mb-4">
+        <div className="flex items-center mb-4">
+          <IconChanger icon={icon} onChangeIcon={handleChangeIcon} />
+          <ServerStatus name={serverName} status={status} />
+        </div>
+      </div>
+      <div className="bg-white shadow-lg rounded-lg p-6 mb-4">
+        <div className="flex flex-col md:flex-row items-center justify-between">
+          <div className="w-full md:w-1/2 mb-4 md:mb-0">
+            <UsageIndicator />
+          </div>
+          <ActionButtons onAction={handleAction} />
+        </div>
+      </div>
+      <div className="text-center">
+        <button className="btn btn-danger" onClick={removeServer}>Remove Server</button>
       </div>
     </div>
   );

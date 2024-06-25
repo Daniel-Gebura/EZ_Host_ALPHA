@@ -45,6 +45,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isSidebarOpen, toggleSidebar }
         <HomeButton />
       </div>
       {error && <div className="text-red-500">{error}</div>}
+      {servers.length === 0 && <div className="text-center text-gray-500">No servers added</div>}
       {servers.map((server) => (
         <div className="flex justify-center mb-4" key={server.id}>
           <ServerButton id={server.id} name={server.name} />

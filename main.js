@@ -25,17 +25,17 @@ function createMainWindow() {
     height: 600,
     webPreferences: {
       contextIsolation: true,
-      nodeIntegration: true,
+      nodeIntegration: false, // Disable nodeIntegration for security
       preload: path.join(__dirname, 'preload.js'), // Preload script for additional security
     },
   });
 
   // DEBUGGING: Open DevTools
-  //mainWindow.webContents.openDevTools();
+  mainWindow.webContents.openDevTools();
 
   // Define the start URL for the main window
   const startUrl = url.format({
-    pathname: path.join(__dirname, './app/build/index.html'),
+    pathname: path.join(__dirname, 'app/build/index.html'),
     protocol: 'file:',
     slashes: true, // Ensures proper URL formatting across platforms
   });
@@ -61,6 +61,17 @@ function createMainWindow() {
 ipcMain.handle('choose-directory', async () => {
   const result = await dialog.showOpenDialog(mainWindow, {
     properties: ['openDirectory']
+  });
+  return result.filePaths[0];
+});
+
+/**
+ * Handle the choose-file IPC call
+ */
+ipcMain.handle('choose-file', async () => {
+  const result = await dialog.showOpenDialog(mainWindow, {
+    properties: ['openFile'],
+    filters: [{ name: 'Images', extensions: ['png', 'jpg', 'jpeg'] }]
   });
   return result.filePaths[0];
 });

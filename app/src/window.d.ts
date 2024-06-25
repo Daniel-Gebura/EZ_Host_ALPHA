@@ -10,11 +10,26 @@ declare global {
       getServers: () => Promise<any>;
 
       /**
+       * Get a specific server
+       * @param {string} id - Server ID
+       * @returns {Promise<any>} The requested server
+       */
+      getServer: (id: string) => Promise<any>;
+
+      /**
        * Add a new server
        * @param {any} server - Server details
        * @returns {Promise<any>} The added server
        */
       addServer: (server: any) => Promise<any>;
+
+      /**
+       * Update a server by ID
+       * @param {string} id - Server ID
+       * @param {any} server - Server details
+       * @returns {Promise<any>} The updated server
+       */
+      updateServer: (id: string, server: any) => Promise<any>;
 
       /**
        * Delete a server by ID
@@ -56,6 +71,12 @@ declare global {
        * @returns {Promise<string>} Response from the server
        */
       chooseDirectory: () => Promise<string>;
+
+      /**
+       * Choose a file
+       * @returns {Promise<string>} Response from the server
+       */
+      chooseFile: () => Promise<string>;
     };
   }
 }

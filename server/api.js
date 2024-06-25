@@ -31,7 +31,13 @@ const startApiServer = () => {
   // Load existing servers from file
   const loadServers = () => {
     if (fs.existsSync(DATA_FILE)) {
-      return JSON.parse(fs.readFileSync(DATA_FILE));
+      const fileData = fs.readFileSync(DATA_FILE);
+      try {
+        return JSON.parse(fileData);
+      } catch (err) {
+        console.error('Error parsing servers.json:', err);
+        return [];
+      }
     }
     return [];
   };
@@ -55,13 +61,42 @@ const startApiServer = () => {
    * Endpoint to create a new server
    */
   app.post('/api/servers', (req, res) => {
-    const { type, directory } = req.body;
+    const { name, type, directory, icon } = req.body;
     const id = Date.now().toString();
-    const newServer = { id, type, directory };
+    const newServer = { id, name, type, directory, icon };
 
     servers.push(newServer);
     saveServers(servers);
     res.status(201).send(newServer);
+  });
+
+  /**
+   * Endpoint to get a server by ID
+   */
+  app.get('/api/servers/:id', (req, res) => {
+    const { id } = req.params;
+    const server = servers.find(s => s.id === id);
+    if (server) {
+      res.send(server);
+    } else {
+      res.status(404).send('Server not found');
+    }
+  });
+
+  /**
+   * Endpoint to update a server by ID
+   */
+  app.put('/api/servers/:id', (req, res) => {
+    const { id } = req.params;
+    const { name, type, directory, icon } = req.body; // Include icon in destructuring
+    const serverIndex = servers.findIndex(s => s.id === id);
+    if (serverIndex !== -1) {
+      servers[serverIndex] = { id, name, type, directory, icon };
+      saveServers(servers);
+      res.send(servers[serverIndex]);
+    } else {
+      res.status(404).send('Server not found');
+    }
   });
 
   /**

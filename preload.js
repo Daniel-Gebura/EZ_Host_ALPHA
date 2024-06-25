@@ -11,16 +11,6 @@
  */
 
 const { contextBridge, ipcRenderer } = require('electron'); // Electron modules for context bridging and IPC
-const os = require('os'); // Node.js module for operating system information
-
-/**
- * Expose operating system information methods to the renderer process
- */
-contextBridge.exposeInMainWorld('electron', {
-  homeDir: () => os.homedir(), // Get the home directory of the current user
-  osVersion: () => os.version(), // Get the operating system version
-  arch: () => os.arch(), // Get the architecture of the operating system
-});
 
 /**
  * Expose IPC renderer methods to the renderer process
@@ -53,6 +43,23 @@ contextBridge.exposeInMainWorld('api', {
   addServer: async (server) => {
     const response = await fetch('http://localhost:5000/api/servers', {
       method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(server),
+    });
+    return response.json();
+  },
+
+  /**
+   * Update a server by ID
+   * @param {string} id - Server ID
+   * @param {Object} server - Server details
+   * @returns {Promise<Object>} The updated server
+   */
+  updateServer: async (id, server) => {
+    const response = await fetch(`http://localhost:5000/api/servers/${id}`, {
+      method: 'PUT',
       headers: {
         'Content-Type': 'application/json',
       },
@@ -127,5 +134,14 @@ contextBridge.exposeInMainWorld('api', {
   chooseDirectory: async () => {
     const result = await ipcRenderer.invoke('choose-directory');
     return result;
-  }
+  },
+
+  /**
+   * Open a file chooser dialog
+   * @returns {Promise<string>} The selected file path
+   */
+  chooseFile: async () => {
+    const result = await ipcRenderer.invoke('choose-file');
+    return result;
+  },
 });
