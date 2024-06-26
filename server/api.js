@@ -60,16 +60,10 @@ const startApiServer = () => {
     servers.push(newServer);
     saveServers(servers);
 
-    // Create EZScripts folder and files
-    const scriptDir = path.join(directory, 'EZScripts');
-    if (!fs.existsSync(scriptDir)) {
-      fs.mkdirSync(scriptDir);
-    }
-
-    // Copy the start-template.ps1 script to the EZScripts directory
+    // Copy the start-template.ps1 script to the server root directory
     const startScriptContent = fs.readFileSync(START_SCRIPT_TEMPLATE, 'utf8');
-    fs.writeFileSync(path.join(scriptDir, 'start.ps1'), startScriptContent);
-    fs.chmodSync(path.join(scriptDir, 'start.ps1'), '755'); // Make script executable
+    fs.writeFileSync(path.join(directory, 'start.ps1'), startScriptContent);
+    fs.chmodSync(path.join(directory, 'start.ps1'), '755'); // Make script executable
 
     const otherScripts = {
       'save.ps1': `Write-Host "Save server script\n"`,
@@ -78,8 +72,8 @@ const startApiServer = () => {
     };
 
     for (const [scriptName, scriptContent] of Object.entries(otherScripts)) {
-      fs.writeFileSync(path.join(scriptDir, scriptName), scriptContent);
-      fs.chmodSync(path.join(scriptDir, scriptName), '755'); // Make script executable
+      fs.writeFileSync(path.join(directory, scriptName), scriptContent);
+      fs.chmodSync(path.join(directory, scriptName), '755'); // Make script executable
     }
 
     res.status(201).send(newServer);
@@ -121,11 +115,14 @@ const startApiServer = () => {
     const { id } = req.params;
     const server = servers.find(s => s.id === id);
     if (server) {
-      // Remove EZScripts folder and contents
-      const scriptDir = path.join(server.directory, 'EZScripts');
-      if (fs.existsSync(scriptDir)) {
-        fs.rmSync(scriptDir, { recursive: true, force: true });
-      }
+      // Remove script files
+      const scriptFiles = ['start.ps1', 'save.ps1', 'restart.ps1', 'stop.ps1'];
+      scriptFiles.forEach(script => {
+        const scriptPath = path.join(server.directory, script);
+        if (fs.existsSync(scriptPath)) {
+          fs.rmSync(scriptPath, { force: true });
+        }
+      });
     }
 
     servers = servers.filter(server => server.id !== id);
@@ -144,15 +141,14 @@ const startApiServer = () => {
     if (!server) {
       return res.status(404).send('Server not found');
     }
-    const scriptPath = path.join(server.directory, 'EZScripts', scriptName);
+    const scriptPath = path.join(server.directory, scriptName);
 
     // Update server status to "Starting..."
     server.status = 'Starting...';
     saveServers(servers);
 
-    // Detect the platform and use the appropriate command
-    const isWin = process.platform === 'win32';
-    const command = isWin ? `powershell -ExecutionPolicy Bypass -File ${scriptPath}` : `sh ${scriptPath}`;
+    // Use the appropriate command for PowerShell scripts
+    const command = `powershell -ExecutionPolicy Bypass -File "${scriptPath}"`;
 
     const child = exec(command, (error, stdout, stderr) => {
       if (error) {
@@ -164,7 +160,7 @@ const startApiServer = () => {
       if (stderr) {
         console.error(`Script stderr: ${stderr}`);
       }
-      res.send(`Script ${scriptName} executed successfully: ${stdout}`);
+      res.json({ message: `Script ${scriptName} executed successfully`, output: stdout });
     });
 
     // Listen to the child process's stdout and stderr
