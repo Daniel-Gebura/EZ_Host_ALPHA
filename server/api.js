@@ -1,14 +1,3 @@
-/**
- * api.js
- * 
- * API server for managing Minecraft servers (Forge/Fabric).
- * Provides endpoints for creating, starting, saving, restarting, and stopping servers.
- * 
- * @file api.js
- * @description Backend API for Minecraft server management
- * @version 1.0
- */
-
 const express = require('express');
 const fs = require('fs');
 const path = require('path');
@@ -19,6 +8,9 @@ const { exec } = require('child_process');
 const DATA_FILE = path.join(__dirname, 'servers.json');
 // Port on which the API server will run
 const PORT = 5000;
+
+// Path to the start script template
+const START_SCRIPT_TEMPLATE = path.join(__dirname, 'template_scripts/start-template.ps1');
 
 /**
  * Starts the API server
@@ -63,7 +55,7 @@ const startApiServer = () => {
   app.post('/api/servers', (req, res) => {
     const { name, type, directory, icon } = req.body;
     const id = Date.now().toString();
-    const newServer = { id, name, type, directory, icon };
+    const newServer = { id, name, type, directory, icon, status: 'Offline' };
 
     servers.push(newServer);
     saveServers(servers);
@@ -74,14 +66,18 @@ const startApiServer = () => {
       fs.mkdirSync(scriptDir);
     }
 
-    const scripts = {
-      'start.sh': '#!/bin/bash\n# Start server script\n',
-      'save.sh': '#!/bin/bash\n# Save server script\n',
-      'restart.sh': '#!/bin/bash\n# Restart server script\n',
-      'stop.sh': '#!/bin/bash\n# Stop server script\n',
+    // Copy the start-template.ps1 script to the EZScripts directory
+    const startScriptContent = fs.readFileSync(START_SCRIPT_TEMPLATE, 'utf8');
+    fs.writeFileSync(path.join(scriptDir, 'start.ps1'), startScriptContent);
+    fs.chmodSync(path.join(scriptDir, 'start.ps1'), '755'); // Make script executable
+
+    const otherScripts = {
+      'save.ps1': `Write-Host "Save server script\n"`,
+      'restart.ps1': `Write-Host "Restart server script\n"`,
+      'stop.ps1': `Write-Host "Stop server script\n"`,
     };
 
-    for (const [scriptName, scriptContent] of Object.entries(scripts)) {
+    for (const [scriptName, scriptContent] of Object.entries(otherScripts)) {
       fs.writeFileSync(path.join(scriptDir, scriptName), scriptContent);
       fs.chmodSync(path.join(scriptDir, scriptName), '755'); // Make script executable
     }
@@ -110,7 +106,7 @@ const startApiServer = () => {
     const { name, type, directory, icon } = req.body; // Include icon in destructuring
     const serverIndex = servers.findIndex(s => s.id === id);
     if (serverIndex !== -1) {
-      servers[serverIndex] = { id, name, type, directory, icon };
+      servers[serverIndex] = { ...servers[serverIndex], name, type, directory, icon };
       saveServers(servers);
       res.send(servers[serverIndex]);
     } else {
@@ -125,16 +121,16 @@ const startApiServer = () => {
     const { id } = req.params;
     const server = servers.find(s => s.id === id);
     if (server) {
+      // Remove EZScripts folder and contents
       const scriptDir = path.join(server.directory, 'EZScripts');
       if (fs.existsSync(scriptDir)) {
         fs.rmSync(scriptDir, { recursive: true, force: true });
       }
-      servers = servers.filter(server => server.id !== id);
-      saveServers(servers);
-      res.status(204).send();
-    } else {
-      res.status(404).send('Server not found');
     }
+
+    servers = servers.filter(server => server.id !== id);
+    saveServers(servers);
+    res.status(204).send();
   });
 
   /**
@@ -150,15 +146,39 @@ const startApiServer = () => {
     }
     const scriptPath = path.join(server.directory, 'EZScripts', scriptName);
 
-    exec(`sh ${scriptPath}`, (error, stdout, stderr) => {
+    // Update server status to "Starting..."
+    server.status = 'Starting...';
+    saveServers(servers);
+
+    // Detect the platform and use the appropriate command
+    const isWin = process.platform === 'win32';
+    const command = isWin ? `powershell -ExecutionPolicy Bypass -File ${scriptPath}` : `sh ${scriptPath}`;
+
+    const child = exec(command, (error, stdout, stderr) => {
       if (error) {
         console.error(`Error executing ${scriptName}:`, error);
-        return res.status(500).send(`Error executing ${scriptName}`);
+        server.status = 'Offline';
+        saveServers(servers);
+        return res.status(500).send(`Error executing ${scriptName}: ${error.message}`);
       }
       if (stderr) {
         console.error(`Script stderr: ${stderr}`);
       }
       res.send(`Script ${scriptName} executed successfully: ${stdout}`);
+    });
+
+    // Listen to the child process's stdout and stderr
+    child.stdout.on('data', data => {
+      console.log(`stdout: ${data}`);
+      // Check if the server is online by looking for specific log output
+      if (data.includes('Done') && data.includes('For help, type "help"')) {
+        server.status = 'Online';
+        saveServers(servers);
+      }
+    });
+
+    child.stderr.on('data', data => {
+      console.error(`stderr: ${data}`);
     });
   };
 
@@ -166,28 +186,28 @@ const startApiServer = () => {
    * Endpoint to start a server
    */
   app.post('/api/servers/:id/start', (req, res) => {
-    runScript(req.params.id, 'start.sh', res);
+    runScript(req.params.id, 'start.ps1', res);
   });
 
   /**
    * Endpoint to save a server
    */
   app.post('/api/servers/:id/save', (req, res) => {
-    runScript(req.params.id, 'save.sh', res);
+    runScript(req.params.id, 'save.ps1', res);
   });
 
   /**
    * Endpoint to restart a server
    */
   app.post('/api/servers/:id/restart', (req, res) => {
-    runScript(req.params.id, 'restart.sh', res);
+    runScript(req.params.id, 'restart.ps1', res);
   });
 
   /**
    * Endpoint to stop a server
    */
   app.post('/api/servers/:id/stop', (req, res) => {
-    runScript(req.params.id, 'stop.sh', res);
+    runScript(req.params.id, 'stop.ps1', res);
   });
 
   // Start the API server
