@@ -1,1 +1,9 @@
-[]
+[
+  {
+    "id": "1719443549414",
+    "name": "Test",
+    "type": "forge",
+    "directory": "D:\\Personal\\Gaming\\MinecraftServer\\TestBMC4",
+    "status": "Offline"
+  }
+]

@@ -499,6 +499,26 @@ if ( ${PSScriptRoot}.Contains(" "))
     }
 }
 
+# Function to listen on the named pipe
+Function ListenPipe {
+    $pipeName = "mcCommandPipe"
+    $pipeServer = new-object System.IO.Pipes.NamedPipeServerStream($pipeName, [System.IO.Pipes.PipeDirection]::InOut, 1, [System.IO.Pipes.PipeTransmissionMode]::Byte, [System.IO.Pipes.PipeOptions]::None, 1024, 1024)
+
+    while ($true) {
+        $pipeServer.WaitForConnection()
+        $streamReader = new-object System.IO.StreamReader($pipeServer)
+        $command = $streamReader.ReadToEnd()
+        if ($command) {
+            # Send the command to the Minecraft server process
+            [System.Console]::WriteLine($command)
+        }
+        $pipeServer.Disconnect()
+    }
+}
+
+# Start the named pipe listener in a background job
+Start-Job -ScriptBlock { ListenPipe }
+
 # Main
 switch ( ${ModLoader} )
 {
@@ -550,9 +570,8 @@ if (!("${LauncherJarLocation}" -eq "do_not_manually_edit"))
 RunJavaCommand "-version"
 ""
 
+# Start the Minecraft server in a new process
 Start-Process -FilePath "powershell.exe" -ArgumentList "-NoExit", "-Command", "`"${Java} ${ServerRunCommand}`"" -NoNewWindow $false
 
-""
-"Exiting..."
-PauseScript
-exit 0
+# Keep the PowerShell window open and listening to the pipe
+Wait-Job -Name "ListenPipe"

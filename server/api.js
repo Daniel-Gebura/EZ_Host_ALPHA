@@ -9,8 +9,12 @@ const DATA_FILE = path.join(__dirname, 'servers.json');
 // Port on which the API server will run
 const PORT = 5000;
 
-// Path to the start script template
+// Paths to the script templates
 const START_SCRIPT_TEMPLATE = path.join(__dirname, 'template_scripts/start-template.ps1');
+const START_BAT_TEMPLATE = path.join(__dirname, 'template_scripts/start.bat.template');
+const SAVE_BAT_TEMPLATE = path.join(__dirname, 'template_scripts/save.bat.template');
+const RESTART_BAT_TEMPLATE = path.join(__dirname, 'template_scripts/restart.bat.template');
+const STOP_BAT_TEMPLATE = path.join(__dirname, 'template_scripts/stop.bat.template');
 
 /**
  * Starts the API server
@@ -65,15 +69,24 @@ const startApiServer = () => {
     fs.writeFileSync(path.join(directory, 'start.ps1'), startScriptContent);
     fs.chmodSync(path.join(directory, 'start.ps1'), '755'); // Make script executable
 
-    const otherScripts = {
-      'save.ps1': `Write-Host "Save server script\n"`,
-      'restart.ps1': `Write-Host "Restart server script\n"`,
-      'stop.ps1': `Write-Host "Stop server script\n"`,
+    // Create EZScripts directory
+    const ezScriptsDir = path.join(directory, 'EZScripts');
+    if (!fs.existsSync(ezScriptsDir)) {
+      fs.mkdirSync(ezScriptsDir);
+    }
+
+    // Create corresponding .bat files from templates
+    const batFiles = {
+      'start.bat': START_BAT_TEMPLATE,
+      'save.bat': SAVE_BAT_TEMPLATE,
+      'restart.bat': RESTART_BAT_TEMPLATE,
+      'stop.bat': STOP_BAT_TEMPLATE,
     };
 
-    for (const [scriptName, scriptContent] of Object.entries(otherScripts)) {
-      fs.writeFileSync(path.join(directory, scriptName), scriptContent);
-      fs.chmodSync(path.join(directory, scriptName), '755'); // Make script executable
+    for (const [batName, batTemplate] of Object.entries(batFiles)) {
+      const batContent = fs.readFileSync(batTemplate, 'utf8');
+      fs.writeFileSync(path.join(ezScriptsDir, batName), batContent);
+      fs.chmodSync(path.join(ezScriptsDir, batName), '755'); // Make script executable
     }
 
     res.status(201).send(newServer);
@@ -116,13 +129,19 @@ const startApiServer = () => {
     const server = servers.find(s => s.id === id);
     if (server) {
       // Remove script files
-      const scriptFiles = ['start.ps1', 'save.ps1', 'restart.ps1', 'stop.ps1'];
+      const scriptFiles = ['start.ps1', 'EZScripts/start.bat', 'EZScripts/save.bat', 'EZScripts/restart.bat', 'EZScripts/stop.bat'];
       scriptFiles.forEach(script => {
         const scriptPath = path.join(server.directory, script);
         if (fs.existsSync(scriptPath)) {
           fs.rmSync(scriptPath, { force: true });
         }
       });
+
+      // Remove EZScripts directory
+      const ezScriptsDir = path.join(server.directory, 'EZScripts');
+      if (fs.existsSync(ezScriptsDir)) {
+        fs.rmSync(ezScriptsDir, { recursive: true, force: true });
+      }
     }
 
     servers = servers.filter(server => server.id !== id);
@@ -131,24 +150,25 @@ const startApiServer = () => {
   });
 
   /**
-   * Helper function to run a script for a server
+   * Helper function to run a batch script for a server
    * @param {string} serverId - The ID of the server
-   * @param {string} scriptName - The name of the script to run
+   * @param {string} scriptName - The name of the batch script to run
    * @param {Object} res - The response object
    */
-  const runScript = (serverId, scriptName, res) => {
+  const runBatchScript = (serverId, scriptName, res) => {
     const server = servers.find(s => s.id === serverId);
     if (!server) {
       return res.status(404).send('Server not found');
     }
-    const scriptPath = path.join(server.directory, scriptName);
+    const scriptPath = path.join(server.directory, 'EZScripts', scriptName);
 
-    // Update server status to "Starting..."
-    server.status = 'Starting...';
-    saveServers(servers);
+    // Update server status to "Starting..." if starting the server
+    if (scriptName === 'start.bat') {
+      server.status = 'Starting...';
+      saveServers(servers);
+    }
 
-    // Use the appropriate command for PowerShell scripts
-    const command = `powershell -ExecutionPolicy Bypass -File "${scriptPath}"`;
+    const command = `"${scriptPath}"`;
 
     const child = exec(command, (error, stdout, stderr) => {
       if (error) {
@@ -182,28 +202,28 @@ const startApiServer = () => {
    * Endpoint to start a server
    */
   app.post('/api/servers/:id/start', (req, res) => {
-    runScript(req.params.id, 'start.ps1', res);
+    runBatchScript(req.params.id, 'start.bat', res);
   });
 
   /**
    * Endpoint to save a server
    */
   app.post('/api/servers/:id/save', (req, res) => {
-    runScript(req.params.id, 'save.ps1', res);
+    runBatchScript(req.params.id, 'save.bat', res);
   });
 
   /**
    * Endpoint to restart a server
    */
   app.post('/api/servers/:id/restart', (req, res) => {
-    runScript(req.params.id, 'restart.ps1', res);
+    runBatchScript(req.params.id, 'restart.bat', res);
   });
 
   /**
    * Endpoint to stop a server
    */
   app.post('/api/servers/:id/stop', (req, res) => {
-    runScript(req.params.id, 'stop.ps1', res);
+    runBatchScript(req.params.id, 'stop.bat', res);
   });
 
   // Start the API server
