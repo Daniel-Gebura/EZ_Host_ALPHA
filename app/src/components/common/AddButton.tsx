@@ -14,12 +14,18 @@ export const AddButton: React.FC = () => {
   const [serverName, setServerName] = useState('');
   const [serverType, setServerType] = useState<'forge' | 'fabric'>('forge');
   const [directory, setDirectory] = useState('');
+  const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate();
 
   /**
    * Adds a new server by calling the backend API
    */
   const addServer = async () => {
+    if (!serverName || !directory) {
+      setError('Please provide both the server name and directory.');
+      return;
+    }
+
     const newServer = {
       name: serverName,
       type: serverType,
@@ -29,6 +35,7 @@ export const AddButton: React.FC = () => {
     setServerName('');
     setServerType('forge'); // Reset to default
     setDirectory('');
+    setError(null);
     const modal = document.getElementById('add_server_modal') as HTMLDialogElement;
     if (modal) {
       modal.close();
@@ -61,6 +68,7 @@ export const AddButton: React.FC = () => {
             <button className="btn btn-sm btn-circle btn-ghost absolute right-2 top-2">✕</button>
           </form>
           <h3 className="font-bold text-lg">Add New Server</h3>
+          {error && <p className="text-red-500 mb-4">{error}</p>}
           <TextInput1
             value={serverName}
             onChange={setServerName}
