@@ -67,6 +67,25 @@ const startApiServer = () => {
 
     servers.push(newServer);
     saveServers(servers);
+
+    // Create EZScripts folder and files
+    const scriptDir = path.join(directory, 'EZScripts');
+    if (!fs.existsSync(scriptDir)) {
+      fs.mkdirSync(scriptDir);
+    }
+
+    const scripts = {
+      'start.sh': '#!/bin/bash\n# Start server script\n',
+      'save.sh': '#!/bin/bash\n# Save server script\n',
+      'restart.sh': '#!/bin/bash\n# Restart server script\n',
+      'stop.sh': '#!/bin/bash\n# Stop server script\n',
+    };
+
+    for (const [scriptName, scriptContent] of Object.entries(scripts)) {
+      fs.writeFileSync(path.join(scriptDir, scriptName), scriptContent);
+      fs.chmodSync(path.join(scriptDir, scriptName), '755'); // Make script executable
+    }
+
     res.status(201).send(newServer);
   });
 
@@ -104,9 +123,18 @@ const startApiServer = () => {
    */
   app.delete('/api/servers/:id', (req, res) => {
     const { id } = req.params;
-    servers = servers.filter(server => server.id !== id);
-    saveServers(servers);
-    res.status(204).send();
+    const server = servers.find(s => s.id === id);
+    if (server) {
+      const scriptDir = path.join(server.directory, 'EZScripts');
+      if (fs.existsSync(scriptDir)) {
+        fs.rmSync(scriptDir, { recursive: true, force: true });
+      }
+      servers = servers.filter(server => server.id !== id);
+      saveServers(servers);
+      res.status(204).send();
+    } else {
+      res.status(404).send('Server not found');
+    }
   });
 
   /**
@@ -120,7 +148,7 @@ const startApiServer = () => {
     if (!server) {
       return res.status(404).send('Server not found');
     }
-    const scriptPath = path.join(server.directory, scriptName);
+    const scriptPath = path.join(server.directory, 'EZScripts', scriptName);
 
     exec(`sh ${scriptPath}`, (error, stdout, stderr) => {
       if (error) {
