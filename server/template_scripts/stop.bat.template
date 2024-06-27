@@ -1,2 +1,7 @@
 @echo off
-echo stop > "%~dp0server-command.txt"
+REM Get the directory of the currently running batch file
+set scriptDir=%~dp0
+set commandsFile=%scriptDir%commands.txt
+
+echo stop >> %commandsFile%
+echo Command written to %commandsFile%.

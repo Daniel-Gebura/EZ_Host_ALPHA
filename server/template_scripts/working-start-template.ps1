@@ -553,81 +553,9 @@ if (!("${LauncherJarLocation}" -eq "do_not_manually_edit"))
 RunJavaCommand "-version"
 ""
 
-# Define $PSScriptRoot if not already defined
-if ($null -eq $PSScriptRoot) {
-    $PSScriptRoot = Split-Path -Parent -Path $MyInvocation.MyCommand.Definition
-}
+RunJavaCommand "${ServerRunCommand}"
 
-# Define file paths
-$commandsFile = "$PSScriptRoot\commands.txt"
-$logFile = "$PSScriptRoot\log.txt"
-
-# Function to log messages to log.txt
-function LogMessage {
-    param([string]$message)
-    Add-Content -Path $logFile -Value "$(Get-Date -Format 'yyyy-MM-dd HH:mm:ss') - $message"
-}
-
-# Function to handle incoming commands from a file
-Function HandleCommandsFromFile {
-    param ($serverProcessId, $commandsFilePath)
-    while ($true) {
-        if (Test-Path $commandsFilePath) {
-            $commands = Get-Content $commandsFilePath
-            Remove-Item $commandsFilePath
-            foreach ($command in $commands) {
-                LogMessage "Received command: $command"
-                if ($command -eq "stop") {
-                    Stop-Process -Id $serverProcessId -ErrorAction Stop
-                    LogMessage "Minecraft server stopped successfully."
-                    return
-                }
-                # Add more commands handling as needed
-            }
-        }
-        Start-Sleep -Seconds 5
-    }
-}
-
-# Create FileSystemWatcher for commands.txt
-$watcher = New-Object System.IO.FileSystemWatcher
-$watcher.Path = $PSScriptRoot
-$watcher.Filter = "commands.txt"
-$watcher.IncludeSubdirectories = $false
-$watcher.EnableRaisingEvents = $true
-
-# Event handler for when commands.txt is created
-Register-ObjectEvent -InputObject $watcher -EventName Created -Action {
-    $createdFile = $Event.SourceEventArgs.FullPath
-    LogMessage "File created: $createdFile"
-    # Handle the contents of commands.txt as needed
-}
-
-# Event handler for when commands.txt is deleted
-Register-ObjectEvent -InputObject $watcher -EventName Deleted -Action {
-    $deletedFile = $Event.SourceEventArgs.FullPath
-    LogMessage "File deleted: $deletedFile"
-    # Perform cleanup or additional actions as needed
-}
-
-# Start the watcher in the background
-Start-Job -ScriptBlock {
-    while ($true) {
-        Start-Sleep -Seconds 10  # Adjust sleep time as needed
-    }
-}
-
-# Start the Minecraft server process
-LogMessage "Starting Server..."
-$MinecraftServerProcess = Start-Process -FilePath $Java -ArgumentList $ServerRunCommand -NoNewWindow -PassThru
-$serverProcessId = $MinecraftServerProcess.Id
-LogMessage "Minecraft server process started with ID: $serverProcessId"
-
-# Handle commands while the server is running
-HandleCommandsFromFile -serverProcessId $serverProcessId -commandsFilePath $commandsFile
-
-# Wait for the Minecraft server process to exit
-LogMessage "Waiting for server exit..."
-$MinecraftServerProcess.WaitForExit()
-
-LogMessage "Server process exited."
+""
+"Exiting..."
+PauseScript
+exit 0
