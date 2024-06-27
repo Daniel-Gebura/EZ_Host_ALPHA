@@ -1,9 +1,2 @@
 @echo off
-:: Define the pipe name
-set pipeName=\\.\pipe\mcCommandPipe
-
-:: Send the "stop" command to the named pipe
-echo stop > %pipeName%
-
-:: Press any key to continue
-pause
+echo stop > "%~dp0server-command.txt"

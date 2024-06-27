@@ -69,13 +69,7 @@ const startApiServer = () => {
     fs.writeFileSync(path.join(directory, 'start.ps1'), startScriptContent);
     fs.chmodSync(path.join(directory, 'start.ps1'), '755'); // Make script executable
 
-    // Create EZScripts directory
-    const ezScriptsDir = path.join(directory, 'EZScripts');
-    if (!fs.existsSync(ezScriptsDir)) {
-      fs.mkdirSync(ezScriptsDir);
-    }
-
-    // Create corresponding .bat files from templates
+    // Create corresponding .bat files from templates directly in the server root directory
     const batFiles = {
       'start.bat': START_BAT_TEMPLATE,
       'save.bat': SAVE_BAT_TEMPLATE,
@@ -85,8 +79,8 @@ const startApiServer = () => {
 
     for (const [batName, batTemplate] of Object.entries(batFiles)) {
       const batContent = fs.readFileSync(batTemplate, 'utf8');
-      fs.writeFileSync(path.join(ezScriptsDir, batName), batContent);
-      fs.chmodSync(path.join(ezScriptsDir, batName), '755'); // Make script executable
+      fs.writeFileSync(path.join(directory, batName), batContent);
+      fs.chmodSync(path.join(directory, batName), '755'); // Make script executable
     }
 
     res.status(201).send(newServer);
@@ -129,19 +123,13 @@ const startApiServer = () => {
     const server = servers.find(s => s.id === id);
     if (server) {
       // Remove script files
-      const scriptFiles = ['start.ps1', 'EZScripts/start.bat', 'EZScripts/save.bat', 'EZScripts/restart.bat', 'EZScripts/stop.bat'];
+      const scriptFiles = ['start.ps1', 'start.bat', 'save.bat', 'restart.bat', 'stop.bat'];
       scriptFiles.forEach(script => {
         const scriptPath = path.join(server.directory, script);
         if (fs.existsSync(scriptPath)) {
           fs.rmSync(scriptPath, { force: true });
         }
       });
-
-      // Remove EZScripts directory
-      const ezScriptsDir = path.join(server.directory, 'EZScripts');
-      if (fs.existsSync(ezScriptsDir)) {
-        fs.rmSync(ezScriptsDir, { recursive: true, force: true });
-      }
     }
 
     servers = servers.filter(server => server.id !== id);
@@ -160,7 +148,7 @@ const startApiServer = () => {
     if (!server) {
       return res.status(404).send('Server not found');
     }
-    const scriptPath = path.join(server.directory, 'EZScripts', scriptName);
+    const scriptPath = path.join(server.directory, scriptName);
 
     // Update server status to "Starting..." if starting the server
     if (scriptName === 'start.bat') {
