@@ -20,7 +20,4 @@ echo "Executing mcrcon save command" >> save.log
 REM Execute mcrcon save command with the provided path
 "%MCRCON_PATH%" -H localhost -P %rcon_port% -p %rcon_password% -c %rcon_save_command% >> save.log 2>&1
 
-REM Pause to ensure save completes
-timeout /t 5 /nobreak
-
 endlocal

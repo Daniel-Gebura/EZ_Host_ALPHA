@@ -31,17 +31,24 @@ export const AddButton: React.FC = () => {
       type: serverType,
       directory: directory,
     };
-    const addedServer = await window.api.addServer(newServer);
-    setServerName('');
-    setServerType('forge'); // Reset to default
-    setDirectory('');
-    setError(null);
-    const modal = document.getElementById('add_server_modal') as HTMLDialogElement;
-    if (modal) {
-      modal.close();
+    try {
+      const addedServer = await window.api.addServer(newServer);
+      // Initialize the server
+      await window.api.initServer(addedServer.id);
+      setServerName('');
+      setServerType('forge'); // Reset to default
+      setDirectory('');
+      setError(null);
+      const modal = document.getElementById('add_server_modal') as HTMLDialogElement;
+      if (modal) {
+        modal.close();
+      }
+      // Navigate to the new server's page
+      navigate(`/server/${addedServer.id}`);
+    } catch (err) {
+      setError('Failed to add and initialize the server.');
+      console.error(err);
     }
-    // Navigate to the new server's page
-    navigate(`/server/${addedServer.id}`);
   };
 
   return (
