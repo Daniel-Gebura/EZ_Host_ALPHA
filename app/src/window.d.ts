@@ -39,6 +39,13 @@ declare global {
       deleteServer: (id: string) => Promise<void>;
 
       /**
+       * Init a server by ID
+       * @param {string} id - Server ID
+       * @returns {Promise<string>} Response from the server
+       */
+      initServer: (id: string) => Promise<string>;
+
+      /**
        * Start a server by ID
        * @param {string} id - Server ID
        * @returns {Promise<string>} Response from the server

@@ -92,6 +92,18 @@ contextBridge.exposeInMainWorld('api', {
     });
   },
 
+    /**
+   * Init a server by ID
+   * @param {string} id - Server ID
+   * @returns {Promise<string>} Response from the server
+   */
+    initServer: async (id) => {
+      const response = await fetch(`http://localhost:5000/api/servers/${id}/initServer`, {
+        method: 'POST',
+      });
+      return response.text();
+    },
+
   /**
    * Start a server by ID
    * @param {string} id - Server ID
