@@ -2,7 +2,7 @@ const express = require('express');
 const fs = require('fs');
 const path = require('path');
 const cors = require('cors');
-const { exec } = require('child_process');
+const { execFile } = require('child_process');
 
 // Path to the servers.json file
 const DATA_FILE = path.join(__dirname, 'servers.json');
@@ -16,6 +16,9 @@ const START_BAT_TEMPLATE = path.join(__dirname, 'template_scripts/start.bat.temp
 const SAVE_BAT_TEMPLATE = path.join(__dirname, 'template_scripts/save.bat.template');
 const RESTART_BAT_TEMPLATE = path.join(__dirname, 'template_scripts/restart.bat.template');
 const STOP_BAT_TEMPLATE = path.join(__dirname, 'template_scripts/stop.bat.template');
+
+// Path to mcrcon.exe
+const MCRCON_PATH = path.join(__dirname, '..', 'resources', 'mcrcon', 'mcrcon.exe');
 
 /**
  * Starts the API server
@@ -84,7 +87,11 @@ const startApiServer = () => {
     };
 
     for (const [batName, batTemplate] of Object.entries(batFiles)) {
-      const batContent = fs.readFileSync(batTemplate, 'utf8');
+      let batContent = fs.readFileSync(batTemplate, 'utf8');
+      if (batName === 'stop.bat' || batName === 'save.bat') {
+        // Replace placeholder with the environment variable for mcrcon path
+        batContent = batContent.replace('%MCRCON_PATH%', '%MCRCON_PATH%');
+      }
       fs.writeFileSync(path.join(directory, batName), batContent);
       fs.chmodSync(path.join(directory, batName), '755'); // Make script executable
     }
@@ -156,15 +163,24 @@ const startApiServer = () => {
     }
     const scriptPath = path.join(server.directory, scriptName);
 
+    // Log the script path and arguments
+    console.log(`Running script: ${scriptPath}`);
+    if (scriptName === 'stop.bat' || scriptName === 'save.bat') {
+      console.log(`Setting MCRCON_PATH: ${MCRCON_PATH}`);
+    }
+
     // Update server status to "Starting..." if starting the server
     if (scriptName === 'start.bat') {
       server.status = 'Starting...';
       saveServers(servers);
     }
 
-    const command = `"${scriptPath}"`;
+    const options = { shell: true };
+    if (scriptName === 'stop.bat' || scriptName === 'save.bat') {
+      options.env = { ...process.env, MCRCON_PATH };
+    }
 
-    const child = exec(command, (error, stdout, stderr) => {
+    const child = execFile(scriptPath, [], options, (error, stdout, stderr) => {
       if (error) {
         console.error(`Error executing ${scriptName}:`, error);
         server.status = 'Offline';
@@ -174,6 +190,7 @@ const startApiServer = () => {
       if (stderr) {
         console.error(`Script stderr: ${stderr}`);
       }
+      console.log(`Script stdout: ${stdout}`);
       res.json({ message: `Script ${scriptName} executed successfully`, output: stdout });
     });
 

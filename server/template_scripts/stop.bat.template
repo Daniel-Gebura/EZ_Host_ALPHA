@@ -1,7 +1,30 @@
 @echo off
+setlocal
+
+REM Log the path and arguments
+echo "Running stop.bat" >> stop.log
+echo "mcrcon path: %MCRCON_PATH%" >> stop.log
+
+if "%MCRCON_PATH%"=="" (
+    echo "Path to mcrcon.exe is not provided." >> stop.log
+    exit /b 1
+)
+
 set rcon_password=password
 set rcon_port=25575
-set rcon_command=stop
-set mcrcon_path=C:\git\EZ_Host_ALPHA\resources\mcrcon\mcrcon.exe
+set rcon_save_command=save-all
+set rcon_stop_command=stop
 
-%mcrcon_path% -H localhost -P %rcon_port% -p %rcon_password% -c %rcon_command%
+REM Log command execution
+echo "Executing mcrcon save command" >> stop.log
+
+REM Execute mcrcon save command with the provided path
+"%MCRCON_PATH%" -H localhost -P %rcon_port% -p %rcon_password% -c %rcon_save_command% >> stop.log 2>&1
+
+REM Log stop command execution
+echo "Executing mcrcon stop command" >> stop.log
+
+REM Execute mcrcon stop command with the provided path
+"%MCRCON_PATH%" -H localhost -P %rcon_port% -p %rcon_password% -c %rcon_stop_command% >> stop.log 2>&1
+
+endlocal
