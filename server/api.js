@@ -12,6 +12,7 @@ const PORT = 5000;
 // Paths to the script templates
 const START_SCRIPT_TEMPLATE = path.join(__dirname, 'template_scripts/simple-start-template.ps1');
 const INIT_SCRIPT_TEMPLATE = path.join(__dirname, 'template_scripts/initServer-template.ps1');
+const INIT_BAT_TEMPLATE = path.join(__dirname, 'template_scripts/initServer.bat.template');
 const START_BAT_TEMPLATE = path.join(__dirname, 'template_scripts/start.bat.template');
 const SAVE_BAT_TEMPLATE = path.join(__dirname, 'template_scripts/save.bat.template');
 const RESTART_BAT_TEMPLATE = path.join(__dirname, 'template_scripts/restart.bat.template');
@@ -80,6 +81,7 @@ const startApiServer = () => {
 
     // Create corresponding .bat files from templates directly in the server root directory
     const batFiles = {
+      'initServer.bat': INIT_BAT_TEMPLATE,
       'start.bat': START_BAT_TEMPLATE,
       'save.bat': SAVE_BAT_TEMPLATE,
       'restart.bat': RESTART_BAT_TEMPLATE,
@@ -88,7 +90,7 @@ const startApiServer = () => {
 
     for (const [batName, batTemplate] of Object.entries(batFiles)) {
       let batContent = fs.readFileSync(batTemplate, 'utf8');
-      if (batName === 'stop.bat' || batName === 'save.bat') {
+      if (batName !== 'start.bat' && batName !== 'initServer.bat') {
         // Replace placeholder with the environment variable for mcrcon path
         batContent = batContent.replace('%MCRCON_PATH%', '%MCRCON_PATH%');
       }
@@ -128,27 +130,40 @@ const startApiServer = () => {
     }
   });
 
-  /**
-   * Endpoint to delete a server by ID
-   */
-  app.delete('/api/servers/:id', (req, res) => {
-    const { id } = req.params;
-    const server = servers.find(s => s.id === id);
-    if (server) {
-      // Remove script files
-      const scriptFiles = ['initServer.ps1', 'start.ps1', 'start.bat', 'save.bat', 'restart.bat', 'stop.bat'];
-      scriptFiles.forEach(script => {
-        const scriptPath = path.join(server.directory, script);
-        if (fs.existsSync(scriptPath)) {
-          fs.rmSync(scriptPath, { force: true });
-        }
-      });
-    }
+/**
+ * Endpoint to delete a server by ID
+ */
+app.delete('/api/servers/:id', (req, res) => {
+  const { id } = req.params;
+  const server = servers.find(s => s.id === id);
+  if (server) {
+    // List of files to be removed
+    const filesToRemove = [
+      'initServer.ps1', 
+      'start.ps1', 
+      'start.bat', 
+      'save.bat', 
+      'restart.bat', 
+      'stop.bat', 
+      'initServer.bat',
+      'launcher_jar.txt',
+      'server_run_command.txt'
+    ];
 
-    servers = servers.filter(server => server.id !== id);
-    saveServers(servers);
-    res.status(204).send();
-  });
+    // Remove each file if it exists
+    filesToRemove.forEach(file => {
+      const filePath = path.join(server.directory, file);
+      if (fs.existsSync(filePath)) {
+        fs.rmSync(filePath, { force: true });
+      }
+    });
+  }
+
+  servers = servers.filter(server => server.id !== id);
+  saveServers(servers);
+  res.status(204).send();
+});
+
 
   /**
    * Helper function to run a batch script for a server
@@ -165,7 +180,7 @@ const startApiServer = () => {
 
     // Log the script path and arguments
     console.log(`Running script: ${scriptPath}`);
-    if (scriptName === 'stop.bat' || scriptName === 'save.bat') {
+    if (scriptName !== 'start.bat' && scriptName !== 'initServer.bat') {
       console.log(`Setting MCRCON_PATH: ${MCRCON_PATH}`);
     }
 
@@ -176,7 +191,7 @@ const startApiServer = () => {
     }
 
     const options = { shell: true };
-    if (scriptName === 'stop.bat' || scriptName === 'save.bat') {
+    if (scriptName !== 'start.bat' && scriptName !== 'initServer.bat') {
       options.env = { ...process.env, MCRCON_PATH };
     }
 
@@ -208,6 +223,13 @@ const startApiServer = () => {
       console.error(`stderr: ${data}`);
     });
   };
+
+  /**
+   * Endpoint to initialize a server
+   */
+  app.post('/api/servers/:id/initServer', (req, res) => {
+    runBatchScript(req.params.id, 'initServer.bat', res);
+  });
 
   /**
    * Endpoint to start a server
