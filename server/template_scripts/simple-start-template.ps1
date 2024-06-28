@@ -41,7 +41,7 @@ Function Crash {
 
 Function global:RunJavaCommand {
     param ($CommandToRun)
-    CMD /C "`"${Java}`" ${CommandToRun}"
+    CMD /C "$CommandToRun"
 }
 
 Function PauseScript {
