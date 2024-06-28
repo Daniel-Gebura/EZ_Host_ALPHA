@@ -10,7 +10,8 @@ const DATA_FILE = path.join(__dirname, 'servers.json');
 const PORT = 5000;
 
 // Paths to the script templates
-const START_SCRIPT_TEMPLATE = path.join(__dirname, 'template_scripts/start-template.ps1');
+const START_SCRIPT_TEMPLATE = path.join(__dirname, 'template_scripts/simple-start-template.ps1');
+const INIT_SCRIPT_TEMPLATE = path.join(__dirname, 'template_scripts/initServer-template.ps1');
 const START_BAT_TEMPLATE = path.join(__dirname, 'template_scripts/start.bat.template');
 const SAVE_BAT_TEMPLATE = path.join(__dirname, 'template_scripts/save.bat.template');
 const RESTART_BAT_TEMPLATE = path.join(__dirname, 'template_scripts/restart.bat.template');
@@ -63,6 +64,11 @@ const startApiServer = () => {
 
     servers.push(newServer);
     saveServers(servers);
+
+    // Copy the initServer-template.ps1 script to the server root directory
+    const initScriptContent = fs.readFileSync(INIT_SCRIPT_TEMPLATE, 'utf8');
+    fs.writeFileSync(path.join(directory, 'initServer.ps1'), initScriptContent);
+    fs.chmodSync(path.join(directory, 'initServer.ps1'), '755'); // Make script executable
 
     // Copy the start-template.ps1 script to the server root directory
     const startScriptContent = fs.readFileSync(START_SCRIPT_TEMPLATE, 'utf8');
@@ -123,7 +129,7 @@ const startApiServer = () => {
     const server = servers.find(s => s.id === id);
     if (server) {
       // Remove script files
-      const scriptFiles = ['start.ps1', 'start.bat', 'save.bat', 'restart.bat', 'stop.bat'];
+      const scriptFiles = ['initServer.ps1', 'start.ps1', 'start.bat', 'save.bat', 'restart.bat', 'stop.bat'];
       scriptFiles.forEach(script => {
         const scriptPath = path.join(server.directory, script);
         if (fs.existsSync(scriptPath)) {

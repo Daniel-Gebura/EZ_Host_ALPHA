@@ -3,5 +3,10 @@ REM Get the directory of the currently running batch file
 set scriptDir=%~dp0
 set commandsFile=%scriptDir%commands.txt
 
-echo stop >> %commandsFile%
-echo Command written to %commandsFile%.
+echo stop >> "%commandsFile%"
+echo Command written to "%commandsFile%".
+
+REM Wait for 10 seconds to allow PowerShell to detect and process commands.txt
+ping 127.0.0.1 -n 11 > nul
+
+exit /b 0

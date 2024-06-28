@@ -1,2 +1,2 @@
 @echo off
-powershell.exe -ExecutionPolicy Bypass -File "%~dp0\..\restart.ps1"
+powershell.exe -ExecutionPolicy Bypass -File "%~dp0\initServer.ps1"

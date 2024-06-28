@@ -577,16 +577,25 @@ Function HandleCommandsFromFile {
             Remove-Item $commandsFilePath
             foreach ($command in $commands) {
                 LogMessage "Received command: $command"
-                if ($command -eq "stop") {
-                    Stop-Process -Id $serverProcessId -ErrorAction Stop
-                    LogMessage "Minecraft server stopped successfully."
-                    return
-                }
+                # Pass command to main script logic for processing
+                ProcessCommand $command
                 # Add more commands handling as needed
             }
         }
         Start-Sleep -Seconds 5
     }
+}
+
+# Function to process commands in the main script
+Function ProcessCommand {
+    param ($command)
+    # Handle the command as needed
+    if ($command -eq "stop") {
+        # Stop the Minecraft server process
+        Stop-Process -Id $serverProcessId -ErrorAction Stop
+        LogMessage "Minecraft server stopped successfully."
+    }
+    # Add more command processing as needed
 }
 
 # Create FileSystemWatcher for commands.txt
@@ -600,7 +609,24 @@ $watcher.EnableRaisingEvents = $true
 Register-ObjectEvent -InputObject $watcher -EventName Created -Action {
     $createdFile = $Event.SourceEventArgs.FullPath
     LogMessage "File created: $createdFile"
-    # Handle the contents of commands.txt as needed
+
+    # Wait briefly to ensure the file is ready to be read
+    Start-Sleep -Milliseconds 500
+
+    # Check if the file still exists (in case it was deleted quickly)
+    if (Test-Path $createdFile) {
+        # Read and process commands from commands.txt
+        $commands = Get-Content $createdFile
+        foreach ($command in $commands) {
+            LogMessage "Processing command from file: $command"
+            # Pass command to main script logic for processing
+            ProcessCommand $command
+        }
+        # Remove commands.txt after processing
+        Remove-Item $createdFile
+    } else {
+        LogMessage "File $createdFile does not exist."
+    }
 }
 
 # Event handler for when commands.txt is deleted
