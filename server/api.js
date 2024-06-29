@@ -58,20 +58,26 @@ const startApiServer = () => {
     const { name, type, directory, icon, rconPassword } = req.body;
     const id = Date.now().toString();
     const newServer = { id, name, type, directory, icon, rconPassword, status: 'Offline' };
-
+  
     servers.push(newServer);
     saveServers(servers);
-
-    // Copy the initServer-template.ps1 script to the server root directory
+  
+    // Create EZHost directory
+    const ezHostDirectory = path.join(directory, 'EZHost');
+    if (!fs.existsSync(ezHostDirectory)) {
+      fs.mkdirSync(ezHostDirectory);
+    }
+  
+    // Copy the initServer-template.ps1 script to the EZHost directory
     const initScriptContent = fs.readFileSync(INIT_SCRIPT_TEMPLATE, 'utf8');
-    fs.writeFileSync(path.join(directory, 'initServer.ps1'), initScriptContent);
-    fs.chmodSync(path.join(directory, 'initServer.ps1'), '755'); // Make script executable
-
-    // Copy the start-template.ps1 script to the server root directory
+    fs.writeFileSync(path.join(ezHostDirectory, 'initServer.ps1'), initScriptContent);
+    fs.chmodSync(path.join(ezHostDirectory, 'initServer.ps1'), '755'); // Make script executable
+  
+    // Copy the start-template.ps1 script to the EZHost directory
     const startScriptContent = fs.readFileSync(START_SCRIPT_TEMPLATE, 'utf8');
-    fs.writeFileSync(path.join(directory, 'start.ps1'), startScriptContent);
-    fs.chmodSync(path.join(directory, 'start.ps1'), '755'); // Make script executable
-
+    fs.writeFileSync(path.join(ezHostDirectory, 'start.ps1'), startScriptContent);
+    fs.chmodSync(path.join(ezHostDirectory, 'start.ps1'), '755'); // Make script executable
+  
     // Update server.properties with the RCON settings
     const serverPropertiesPath = path.join(directory, 'server.properties');
     let serverPropertiesContent = '';
@@ -84,10 +90,9 @@ const startApiServer = () => {
       serverPropertiesContent = `enable-rcon=true\nrcon.port=25575\nrcon.password=${rconPassword}\n`;
     }
     fs.writeFileSync(serverPropertiesPath, serverPropertiesContent);
-
+  
     res.status(201).send(newServer);
   });
-
 
   /**
    * Endpoint to get a server by ID
@@ -125,21 +130,11 @@ const startApiServer = () => {
     const { id } = req.params;
     const server = servers.find(s => s.id === id);
     if (server) {
-      // List of files to be removed
-      const filesToRemove = [
-        'initServer.ps1', 
-        'start.ps1', 
-        'launcher_jar.txt',
-        'server_run_command.txt'
-      ];
-
-      // Remove each file if it exists
-      filesToRemove.forEach(file => {
-        const filePath = path.join(server.directory, file);
-        if (fs.existsSync(filePath)) {
-          fs.rmSync(filePath, { force: true });
-        }
-      });
+      // Remove the EZHost directory and all its contents
+      const ezHostDirectory = path.join(server.directory, 'EZHost');
+      if (fs.existsSync(ezHostDirectory)) {
+        fs.rmSync(ezHostDirectory, { recursive: true, force: true });
+      }
     }
 
     servers = servers.filter(server => server.id !== id);
@@ -158,7 +153,7 @@ const startApiServer = () => {
     if (!server) {
       return res.status(404).send('Server not found');
     }
-    const scriptPath = path.join(server.directory, scriptName);
+    const scriptPath = path.join(server.directory, 'EZHost', scriptName);
 
     // Update server status to "Starting..." if starting the server
     if (scriptName === 'start.ps1') {

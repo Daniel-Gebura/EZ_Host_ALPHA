@@ -1,8 +1,8 @@
-# Set the working directory to the directory where the script is located
-Set-Location -Path $PSScriptRoot
+# Set the working directory to the parent directory of where the script is located
+Set-Location -Path (Get-Item $PSScriptRoot).Parent.FullName
 
-# Acquire variable hashtable from variables.txt
-$ExternalVariablesFile = Join-Path $PSScriptRoot "variables.txt"
+# Acquire variable hashtable from variables.txt in the server root directory
+$ExternalVariablesFile = Join-Path (Get-Item $PSScriptRoot).Parent.FullName "variables.txt"
 $ExternalVariables = Get-Content -raw -LiteralPath $ExternalVariablesFile | ConvertFrom-StringData
 
 # Set our in-script variables from contents of variables.txt-hashtable
@@ -277,7 +277,7 @@ Function global:Minecraft {
 }
 
 Function Eula {
-    $eulaPath = Join-Path $PSScriptRoot 'eula.txt'
+    $eulaPath = Join-Path (Get-Item $PSScriptRoot).Parent.FullName 'eula.txt'
     if (!(Test-Path -Path $eulaPath -PathType Leaf)) {
         # By adding the server, the user has already agreed to EULA
         "#By changing the setting below to TRUE you are indicating your agreement to our EULA (https://aka.ms/MinecraftEULA).`neula=true" | Out-File $eulaPath -Encoding utf8
