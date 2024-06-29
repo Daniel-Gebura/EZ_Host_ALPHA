@@ -277,23 +277,18 @@ Function global:Minecraft {
 }
 
 Function Eula {
-    if (!(Test-Path -Path 'eula.txt' -PathType Leaf)) {
-        "Mojang's EULA has not yet been accepted. In order to run a Minecraft server, you must accept Mojang's EULA."
-        "Mojang's EULA is available to read at https://aka.ms/MinecraftEULA"
-        "If you agree to Mojang's EULA then type 'I agree'"
-        $Answer = Read-Host -Prompt 'Answer: '
-        if (${Answer} -eq "I agree") {
-            "User agreed to Mojang's EULA."
-            "#By changing the setting below to TRUE you are indicating your agreement to our EULA (https://aka.ms/MinecraftEULA).`n" +
-            "eula=true" | Out-File eula.txt -encoding utf8
-        } else {
-            "User did not agree to Mojang's EULA."
-            "Entered: ${Answer}"
-            "You can not run a Minecraft server unless you agree to Mojang#s EULA."
-            Crash
-        }
+    $eulaPath = Join-Path $PSScriptRoot 'eula.txt'
+    if (!(Test-Path -Path $eulaPath -PathType Leaf)) {
+        # By adding the server, the user has already agreed to EULA
+        "#By changing the setting below to TRUE you are indicating your agreement to our EULA (https://aka.ms/MinecraftEULA).`neula=true" | Out-File $eulaPath -Encoding utf8
+    } else {
+        (Get-Content $eulaPath) | ForEach-Object {
+            $_ -replace '^eula=.*', 'eula=true'
+        } | Set-Content $eulaPath
     }
+    Write-Host "EULA agreement set to true."
 }
+
 
 switch ( ${ModLoader} ) {
     Forge { SetupForge }

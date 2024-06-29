@@ -15,6 +15,7 @@ export const AddButton: React.FC = () => {
   const [serverType, setServerType] = useState<'forge' | 'fabric'>('forge');
   const [directory, setDirectory] = useState('');
   const [rconPassword, setRconPassword] = useState('');
+  const [agreeEula, setAgreeEula] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate();
 
@@ -22,8 +23,8 @@ export const AddButton: React.FC = () => {
    * Adds a new server by calling the backend API
    */
   const addServer = async () => {
-    if (!serverName || !directory || !rconPassword) {
-      setError('Please provide the server name, directory, and RCON password.');
+    if (!serverName || !directory || !rconPassword || !agreeEula) {
+      setError('Please provide the server name, directory, RCON password, and agree to the EULA.');
       return;
     }
 
@@ -41,6 +42,7 @@ export const AddButton: React.FC = () => {
       setServerType('forge'); // Reset to default
       setDirectory('');
       setRconPassword('');
+      setAgreeEula(false);
       setError(null);
       const modal = document.getElementById('add_server_modal') as HTMLDialogElement;
       if (modal) {
@@ -98,7 +100,18 @@ export const AddButton: React.FC = () => {
             onChange={setRconPassword}
             placeholder="RCON Password"
           />
-          <button className="btn btn-primary w-full mt-4" onClick={addServer}>Add Server</button>
+          <div className="form-control">
+            <label className="cursor-pointer label">
+              <input 
+                type="checkbox" 
+                checked={agreeEula} 
+                onChange={() => setAgreeEula(!agreeEula)} 
+                className="checkbox checkbox-primary" 
+              />
+              <span className="label-text">I agree to the EULA</span>
+            </label>
+          </div>
+          <button className="btn btn-primary w-full mt-4" onClick={addServer} disabled={!agreeEula}>Add Server</button>
         </div>
       </dialog>
     </>
