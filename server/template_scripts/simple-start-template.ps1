@@ -109,5 +109,5 @@ RunJavaCommand "${ServerRunCommand}"
 Write-Host "Server run command executed" # Debug log
 
 Write-Host "Exiting..."
-PauseScript
+#PauseScript
 exit 0
