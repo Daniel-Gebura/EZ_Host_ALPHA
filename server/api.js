@@ -3,6 +3,7 @@ const fs = require('fs');
 const path = require('path');
 const cors = require('cors');
 const { execFile } = require('child_process');
+const { Rcon } = require('rcon-client'); // RCON client for sending commands
 
 // Path to the servers.json file
 const DATA_FILE = path.join(__dirname, 'servers.json');
@@ -12,13 +13,8 @@ const PORT = 5000;
 // Paths to the script templates
 const START_SCRIPT_TEMPLATE = path.join(__dirname, 'template_scripts/simple-start-template.ps1');
 const INIT_SCRIPT_TEMPLATE = path.join(__dirname, 'template_scripts/initServer-template.ps1');
-const INIT_BAT_TEMPLATE = path.join(__dirname, 'template_scripts/initServer.bat.template');
-const START_BAT_TEMPLATE = path.join(__dirname, 'template_scripts/start.bat.template');
-const SAVE_BAT_TEMPLATE = path.join(__dirname, 'template_scripts/save.bat.template');
-const RESTART_BAT_TEMPLATE = path.join(__dirname, 'template_scripts/restart.bat.template');
-const STOP_BAT_TEMPLATE = path.join(__dirname, 'template_scripts/stop.bat.template');
 
-// Path to mcrcon.exe
+// Path to mcrcon.exe (if needed)
 const MCRCON_PATH = path.join(__dirname, '..', 'resources', 'mcrcon', 'mcrcon.exe');
 
 /**
@@ -79,25 +75,6 @@ const startApiServer = () => {
     fs.writeFileSync(path.join(directory, 'start.ps1'), startScriptContent);
     fs.chmodSync(path.join(directory, 'start.ps1'), '755'); // Make script executable
 
-    // Create corresponding .bat files from templates directly in the server root directory
-    const batFiles = {
-      'initServer.bat': INIT_BAT_TEMPLATE,
-      'start.bat': START_BAT_TEMPLATE,
-      'save.bat': SAVE_BAT_TEMPLATE,
-      'restart.bat': RESTART_BAT_TEMPLATE,
-      'stop.bat': STOP_BAT_TEMPLATE,
-    };
-
-    for (const [batName, batTemplate] of Object.entries(batFiles)) {
-      let batContent = fs.readFileSync(batTemplate, 'utf8');
-      if (batName !== 'start.bat' && batName !== 'initServer.bat') {
-        // Replace placeholder with the environment variable for mcrcon path
-        batContent = batContent.replace('%MCRCON_PATH%', '%MCRCON_PATH%');
-      }
-      fs.writeFileSync(path.join(directory, batName), batContent);
-      fs.chmodSync(path.join(directory, batName), '755'); // Make script executable
-    }
-
     res.status(201).send(newServer);
   });
 
@@ -130,72 +107,57 @@ const startApiServer = () => {
     }
   });
 
-/**
- * Endpoint to delete a server by ID
- */
-app.delete('/api/servers/:id', (req, res) => {
-  const { id } = req.params;
-  const server = servers.find(s => s.id === id);
-  if (server) {
-    // List of files to be removed
-    const filesToRemove = [
-      'initServer.ps1', 
-      'start.ps1', 
-      'start.bat', 
-      'save.bat', 
-      'restart.bat', 
-      'stop.bat', 
-      'initServer.bat',
-      'launcher_jar.txt',
-      'server_run_command.txt'
-    ];
+  /**
+   * Endpoint to delete a server by ID
+   */
+  app.delete('/api/servers/:id', (req, res) => {
+    const { id } = req.params;
+    const server = servers.find(s => s.id === id);
+    if (server) {
+      // List of files to be removed
+      const filesToRemove = [
+        'initServer.ps1', 
+        'start.ps1', 
+        'launcher_jar.txt',
+        'server_run_command.txt'
+      ];
 
-    // Remove each file if it exists
-    filesToRemove.forEach(file => {
-      const filePath = path.join(server.directory, file);
-      if (fs.existsSync(filePath)) {
-        fs.rmSync(filePath, { force: true });
-      }
-    });
-  }
+      // Remove each file if it exists
+      filesToRemove.forEach(file => {
+        const filePath = path.join(server.directory, file);
+        if (fs.existsSync(filePath)) {
+          fs.rmSync(filePath, { force: true });
+        }
+      });
+    }
 
-  servers = servers.filter(server => server.id !== id);
-  saveServers(servers);
-  res.status(204).send();
-});
-
+    servers = servers.filter(server => server.id !== id);
+    saveServers(servers);
+    res.status(204).send();
+  });
 
   /**
-   * Helper function to run a batch script for a server
+   * Helper function to run a PowerShell script for a server
    * @param {string} serverId - The ID of the server
-   * @param {string} scriptName - The name of the batch script to run
+   * @param {string} scriptName - The name of the PowerShell script to run
    * @param {Object} res - The response object
    */
-  const runBatchScript = (serverId, scriptName, res) => {
+  const runPowerShellScript = (serverId, scriptName, res) => {
     const server = servers.find(s => s.id === serverId);
     if (!server) {
       return res.status(404).send('Server not found');
     }
     const scriptPath = path.join(server.directory, scriptName);
 
-    // Log the script path and arguments
-    console.log(`Running script: ${scriptPath}`);
-    if (scriptName !== 'start.bat' && scriptName !== 'initServer.bat') {
-      console.log(`Setting MCRCON_PATH: ${MCRCON_PATH}`);
-    }
-
     // Update server status to "Starting..." if starting the server
-    if (scriptName === 'start.bat') {
+    if (scriptName === 'start.ps1') {
       server.status = 'Starting...';
       saveServers(servers);
     }
 
     const options = { shell: true };
-    if (scriptName !== 'start.bat' && scriptName !== 'initServer.bat') {
-      options.env = { ...process.env, MCRCON_PATH };
-    }
 
-    const child = execFile(scriptPath, [], options, (error, stdout, stderr) => {
+    const child = execFile('powershell.exe', ['-ExecutionPolicy', 'Bypass', '-File', scriptPath], options, (error, stdout, stderr) => {
       if (error) {
         console.error(`Error executing ${scriptName}:`, error);
         server.status = 'Offline';
@@ -225,38 +187,69 @@ app.delete('/api/servers/:id', (req, res) => {
   };
 
   /**
+   * Helper function to send an RCON command to the server
+   * @param {string} serverId - The ID of the server
+   * @param {string} command - The RCON command to send
+   * @param {Object} res - The response object
+   */
+  const sendRconCommand = async (serverId, command, res) => {
+    const server = servers.find(s => s.id === serverId);
+    if (!server) {
+      return res.status(404).send('Server not found');
+    }
+
+    try {
+      const rcon = await Rcon.connect({
+        host: 'localhost',
+        port: 25575,
+        password: 'password',
+      });
+
+      const response = await rcon.send(command);
+      await rcon.end();
+      console.log(`RCON response: ${response}`);
+      res.json({ message: `Command ${command} executed successfully`, output: response });
+    } catch (error) {
+      console.error(`Error sending RCON command:`, error);
+      res.status(500).send(`Error sending RCON command: ${error.message}`);
+    }
+  };
+
+  /**
    * Endpoint to initialize a server
    */
   app.post('/api/servers/:id/initServer', (req, res) => {
-    runBatchScript(req.params.id, 'initServer.bat', res);
+    runPowerShellScript(req.params.id, 'initServer.ps1', res);
   });
 
   /**
    * Endpoint to start a server
    */
   app.post('/api/servers/:id/start', (req, res) => {
-    runBatchScript(req.params.id, 'start.bat', res);
+    runPowerShellScript(req.params.id, 'start.ps1', res);
   });
 
   /**
    * Endpoint to save a server
    */
   app.post('/api/servers/:id/save', (req, res) => {
-    runBatchScript(req.params.id, 'save.bat', res);
+    sendRconCommand(req.params.id, 'save-all', res);
   });
 
   /**
    * Endpoint to restart a server
    */
   app.post('/api/servers/:id/restart', (req, res) => {
-    runBatchScript(req.params.id, 'restart.bat', res);
+    sendRconCommand(req.params.id, 'save-all', res); // Save the server
+    sendRconCommand(req.params.id, 'stop', res); // Stop the server
+    runPowerShellScript(req.params.id, 'start.ps1', res); // Start the server again
   });
 
   /**
    * Endpoint to stop a server
    */
   app.post('/api/servers/:id/stop', (req, res) => {
-    runBatchScript(req.params.id, 'stop.bat', res);
+    sendRconCommand(req.params.id, 'stop', res);
   });
 
   // Start the API server

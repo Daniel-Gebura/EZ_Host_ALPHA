@@ -28,7 +28,9 @@ function createMainWindow() {
       nodeIntegration: false, // Disable nodeIntegration for security
       preload: path.join(__dirname, 'preload.js'), // Preload script for additional security
     },
+    autoHideMenuBar: true, // This line hides the menu bar
   });
+  
 
   // DEBUGGING: Open DevTools
   //mainWindow.webContents.openDevTools();

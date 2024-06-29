@@ -19,6 +19,7 @@
     "electronmon": "^2.0.3",
     "express": "^4.19.2",
     "fs": "^0.0.1-security",
+    "rcon-client": "^4.2.4",
     "react-router-dom": "^6.23.1"
   }
 }
