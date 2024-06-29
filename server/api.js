@@ -58,26 +58,26 @@ const startApiServer = () => {
     const { name, type, directory, icon, rconPassword } = req.body;
     const id = Date.now().toString();
     const newServer = { id, name, type, directory, icon, rconPassword, status: 'Offline' };
-  
+
     servers.push(newServer);
     saveServers(servers);
-  
+
     // Create EZHost directory
     const ezHostDirectory = path.join(directory, 'EZHost');
     if (!fs.existsSync(ezHostDirectory)) {
       fs.mkdirSync(ezHostDirectory);
     }
-  
+
     // Copy the initServer-template.ps1 script to the EZHost directory
     const initScriptContent = fs.readFileSync(INIT_SCRIPT_TEMPLATE, 'utf8');
     fs.writeFileSync(path.join(ezHostDirectory, 'initServer.ps1'), initScriptContent);
     fs.chmodSync(path.join(ezHostDirectory, 'initServer.ps1'), '755'); // Make script executable
-  
+
     // Copy the start-template.ps1 script to the EZHost directory
     const startScriptContent = fs.readFileSync(START_SCRIPT_TEMPLATE, 'utf8');
     fs.writeFileSync(path.join(ezHostDirectory, 'start.ps1'), startScriptContent);
     fs.chmodSync(path.join(ezHostDirectory, 'start.ps1'), '755'); // Make script executable
-  
+
     // Update server.properties with the RCON settings
     const serverPropertiesPath = path.join(directory, 'server.properties');
     let serverPropertiesContent = '';
@@ -90,7 +90,7 @@ const startApiServer = () => {
       serverPropertiesContent = `enable-rcon=true\nrcon.port=25575\nrcon.password=${rconPassword}\n`;
     }
     fs.writeFileSync(serverPropertiesPath, serverPropertiesContent);
-  
+
     res.status(201).send(newServer);
   });
 
@@ -162,6 +162,8 @@ const startApiServer = () => {
     }
 
     const options = { shell: true };
+
+    console.log(`Executing script: ${scriptPath}`); // Debug log
 
     const child = execFile('powershell.exe', ['-ExecutionPolicy', 'Bypass', '-File', scriptPath], options, (error, stdout, stderr) => {
       if (error) {

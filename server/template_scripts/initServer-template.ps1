@@ -316,5 +316,5 @@ $LauncherJarFile = Join-Path $PSScriptRoot "launcher_jar.txt"
 ""
 "Initialization complete. Server is ready to be started with start.ps1."
 ""
-PauseScript
+#PauseScript
 exit 0
