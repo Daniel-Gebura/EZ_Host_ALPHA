@@ -14,9 +14,6 @@ const PORT = 5000;
 const START_SCRIPT_TEMPLATE = path.join(__dirname, 'template_scripts/simple-start-template.ps1');
 const INIT_SCRIPT_TEMPLATE = path.join(__dirname, 'template_scripts/initServer-template.ps1');
 
-// Path to mcrcon.exe (if needed)
-const MCRCON_PATH = path.join(__dirname, '..', 'resources', 'mcrcon', 'mcrcon.exe');
-
 /**
  * Starts the API server
  */
@@ -58,9 +55,9 @@ const startApiServer = () => {
    * Endpoint to create a new server
    */
   app.post('/api/servers', (req, res) => {
-    const { name, type, directory, icon } = req.body;
+    const { name, type, directory, icon, rconPassword } = req.body;
     const id = Date.now().toString();
-    const newServer = { id, name, type, directory, icon, status: 'Offline' };
+    const newServer = { id, name, type, directory, icon, rconPassword, status: 'Offline' };
 
     servers.push(newServer);
     saveServers(servers);
@@ -75,8 +72,22 @@ const startApiServer = () => {
     fs.writeFileSync(path.join(directory, 'start.ps1'), startScriptContent);
     fs.chmodSync(path.join(directory, 'start.ps1'), '755'); // Make script executable
 
+    // Update server.properties with the RCON settings
+    const serverPropertiesPath = path.join(directory, 'server.properties');
+    let serverPropertiesContent = '';
+    if (fs.existsSync(serverPropertiesPath)) {
+      serverPropertiesContent = fs.readFileSync(serverPropertiesPath, 'utf8');
+      serverPropertiesContent = serverPropertiesContent.replace(/^enable-rcon=.*$/m, 'enable-rcon=true');
+      serverPropertiesContent = serverPropertiesContent.replace(/^rcon.port=.*$/m, 'rcon.port=25575');
+      serverPropertiesContent = serverPropertiesContent.replace(/^rcon.password=.*$/m, `rcon.password=${rconPassword}`);
+    } else {
+      serverPropertiesContent = `enable-rcon=true\nrcon.port=25575\nrcon.password=${rconPassword}\n`;
+    }
+    fs.writeFileSync(serverPropertiesPath, serverPropertiesContent);
+
     res.status(201).send(newServer);
   });
+
 
   /**
    * Endpoint to get a server by ID
@@ -202,7 +213,7 @@ const startApiServer = () => {
       const rcon = await Rcon.connect({
         host: 'localhost',
         port: 25575,
-        password: 'password',
+        password: server.rconPassword,
       });
 
       const response = await rcon.send(command);
@@ -239,9 +250,9 @@ const startApiServer = () => {
   /**
    * Endpoint to restart a server
    */
-  app.post('/api/servers/:id/restart', (req, res) => {
-    sendRconCommand(req.params.id, 'save-all', res); // Save the server
-    sendRconCommand(req.params.id, 'stop', res); // Stop the server
+  app.post('/api/servers/:id/restart', async (req, res) => {
+    await sendRconCommand(req.params.id, 'save-all', res); // Save the server
+    await sendRconCommand(req.params.id, 'stop', res); // Stop the server
     runPowerShellScript(req.params.id, 'start.ps1', res); // Start the server again
   });
 

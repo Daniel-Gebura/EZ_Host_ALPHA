@@ -318,24 +318,6 @@ $ServerRunCommandFile = Join-Path $PSScriptRoot "server_run_command.txt"
 $LauncherJarFile = Join-Path $PSScriptRoot "launcher_jar.txt"
 "${LauncherJarLocation}" | Out-File -FilePath $LauncherJarFile -Encoding utf8
 
-# Function to update server.properties file
-Function UpdateServerProperties {
-    $propertiesFile = Join-Path $PSScriptRoot "server.properties"
-    if (Test-Path -Path $propertiesFile -PathType Leaf) {
-        (Get-Content $propertiesFile) | ForEach-Object {
-            $_ -replace '^enable-rcon=.*', 'enable-rcon=true' `
-               -replace '^rcon.port=.*', 'rcon.port=25575' `
-               -replace '^rcon.password=.*', 'rcon.password=password'
-        } | Set-Content $propertiesFile
-        Write-Host "server.properties updated successfully."
-    } else {
-        Write-Host "server.properties not found. Please ensure the file exists and try again."
-    }
-}
-
-# Update the server.properties file
-UpdateServerProperties
-
 ""
 "Initialization complete. Server is ready to be started with start.ps1."
 ""

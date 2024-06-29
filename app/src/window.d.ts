@@ -21,7 +21,12 @@ declare global {
        * @param {any} server - Server details
        * @returns {Promise<any>} The added server
        */
-      addServer: (server: any) => Promise<any>;
+      addServer: (server: {
+        name: string;
+        type: 'forge' | 'fabric';
+        directory: string;
+        rconPassword: string;
+      }) => Promise<any>;
 
       /**
        * Update a server by ID
