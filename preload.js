@@ -1,3 +1,15 @@
+/**
+ * preload.js
+ * 
+ * Preload script for the Electron application.
+ * This script is used to expose specific APIs to the renderer process
+ * through the context bridge to enhance security.
+ * 
+ * @file preload.js
+ * @description Preload script for Electron application
+ * @version 1.0
+ */
+
 const { contextBridge, ipcRenderer } = require('electron'); // Electron modules for context bridging and IPC
 
 /**
@@ -16,29 +28,30 @@ contextBridge.exposeInMainWorld('ipcRenderer', {
 contextBridge.exposeInMainWorld('api', {
   /**
    * Get the list of servers
-   * @returns {Promise<{ success: boolean, message: string, data?: any }>} List of servers
+   * @returns {Promise<Array>} List of servers
    */
   getServers: async () => {
     const response = await fetch('http://localhost:5000/api/servers');
-    const data = await response.json();
-    return { success: response.ok, message: response.ok ? 'Servers fetched successfully' : data.message, data };
+    return response.json();
   },
 
   /**
    * Get a specific server by ID
    * @param {string} id - Server ID
-   * @returns {Promise<{ success: boolean, message: string, data?: any }>} The server details
+   * @returns {Promise<Object>} The server details
    */
-  getServer: async (id) => {
-    const response = await fetch(`http://localhost:5000/api/servers/${id}`);
-    const data = await response.json();
-    return { success: response.ok, message: response.ok ? 'Server fetched successfully' : data.message, data };
-  },
+    getServer: async (id) => {
+      const response = await fetch(`http://localhost:5000/api/servers/${id}`);
+      if (!response.ok) {
+        throw new Error('Server not found');
+      }
+      return response.json();
+    },
 
   /**
    * Add a new server
    * @param {Object} server - Server details
-   * @returns {Promise<{ success: boolean, message: string, data?: any }>} The added server
+   * @returns {Promise<Object>} The added server
    */
   addServer: async (server) => {
     const response = await fetch('http://localhost:5000/api/servers', {
@@ -48,15 +61,14 @@ contextBridge.exposeInMainWorld('api', {
       },
       body: JSON.stringify(server),
     });
-    const data = await response.json();
-    return { success: response.ok, message: response.ok ? 'Server added successfully' : data.message, data };
+    return response.json();
   },
 
   /**
    * Update a server by ID
    * @param {string} id - Server ID
    * @param {Object} server - Server details
-   * @returns {Promise<{ success: boolean, message: string, data?: any }>} The updated server
+   * @returns {Promise<Object>} The updated server
    */
   updateServer: async (id, server) => {
     const response = await fetch(`http://localhost:5000/api/servers/${id}`, {
@@ -66,103 +78,95 @@ contextBridge.exposeInMainWorld('api', {
       },
       body: JSON.stringify(server),
     });
-    const data = await response.json();
-    return { success: response.ok, message: response.ok ? 'Server updated successfully' : data.message, data };
+    return response.json();
   },
 
   /**
    * Delete a server by ID
    * @param {string} id - Server ID
-   * @returns {Promise<{ success: boolean, message: string }>}
+   * @returns {Promise<void>}
    */
   deleteServer: async (id) => {
-    const response = await fetch(`http://localhost:5000/api/servers/${id}`, {
+    await fetch(`http://localhost:5000/api/servers/${id}`, {
       method: 'DELETE',
     });
-    const data = await response.json();
-    return { success: response.ok, message: response.ok ? 'Server deleted successfully' : data.message };
   },
 
-  /**
+    /**
    * Init a server by ID
    * @param {string} id - Server ID
-   * @returns {Promise<{ success: boolean, message: string }>}
+   * @returns {Promise<string>} Response from the server
    */
-  initServer: async (id) => {
-    const response = await fetch(`http://localhost:5000/api/servers/${id}/initServer`, {
-      method: 'POST',
-    });
-    const data = await response.text();
-    return { success: response.ok, message: data };
-  },
+    initServer: async (id) => {
+      const response = await fetch(`http://localhost:5000/api/servers/${id}/initServer`, {
+        method: 'POST',
+      });
+      return response.text();
+    },
 
   /**
    * Start a server by ID
    * @param {string} id - Server ID
-   * @returns {Promise<{ success: boolean, message: string }>}
+   * @returns {Promise<string>} Response from the server
    */
   startServer: async (id) => {
     const response = await fetch(`http://localhost:5000/api/servers/${id}/start`, {
       method: 'POST',
     });
-    const data = await response.text();
-    return { success: response.ok, message: data };
+    return response.text();
   },
 
   /**
    * Save a server by ID
    * @param {string} id - Server ID
-   * @returns {Promise<{ success: boolean, message: string }>}
+   * @returns {Promise<string>} Response from the server
    */
   saveServer: async (id) => {
     const response = await fetch(`http://localhost:5000/api/servers/${id}/save`, {
       method: 'POST',
     });
-    const data = await response.text();
-    return { success: response.ok, message: data };
+    return response.text();
   },
 
   /**
    * Restart a server by ID
    * @param {string} id - Server ID
-   * @returns {Promise<{ success: boolean, message: string }>}
+   * @returns {Promise<string>} Response from the server
    */
   restartServer: async (id) => {
     const response = await fetch(`http://localhost:5000/api/servers/${id}/restart`, {
       method: 'POST',
     });
-    const data = await response.text();
-    return { success: response.ok, message: data };
+    return response.text();
   },
 
   /**
    * Stop a server by ID
    * @param {string} id - Server ID
-   * @returns {Promise<{ success: boolean, message: string }>}
+   * @returns {Promise<string>} Response from the server
    */
   stopServer: async (id) => {
     const response = await fetch(`http://localhost:5000/api/servers/${id}/stop`, {
       method: 'POST',
     });
-    const data = await response.text();
-    return { success: response.ok, message: data };
+    return response.text();
   },
 
   /**
    * Open a directory chooser dialog
-   * @returns {Promise<{ success: boolean, message: string, path?: string }>}
+   * @returns {Promise<string>} The selected directory path
    */
   chooseDirectory: async () => {
     const result = await ipcRenderer.invoke('choose-directory');
-    return { success: true, message: 'Directory chosen successfully', path: result };
+    return result;
   },
 
   /**
    * Open a file chooser dialog
-   * @returns {Promise<{ success: boolean, message: string, path?: string }>}
+   * @returns {Promise<string>} The selected file path
    */
   chooseFile: async () => {
     const result = await ipcRenderer.invoke('choose-file');
-    return { success: true, message: 'File chosen successfully', path: result };
+    return result;
   },
 });

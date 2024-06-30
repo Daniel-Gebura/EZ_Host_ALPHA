@@ -91,7 +91,7 @@ const startApiServer = () => {
     }
     fs.writeFileSync(serverPropertiesPath, serverPropertiesContent);
 
-    res.status(201).send({ success: true, message: 'Server created successfully', data: newServer });
+    res.status(201).send(newServer);
   });
 
   /**
@@ -151,34 +151,34 @@ const startApiServer = () => {
   const runPowerShellScript = (serverId, scriptName, res) => {
     const server = servers.find(s => s.id === serverId);
     if (!server) {
-      return res.status(404).json({ message: 'Server not found', success: false });
+      return res.status(404).send('Server not found');
     }
     const scriptPath = path.join(server.directory, 'EZHost', scriptName);
-  
+
     // Update server status to "Starting..." if starting the server
     if (scriptName === 'start.ps1') {
       server.status = 'Starting...';
       saveServers(servers);
     }
-  
+
     const options = { shell: true };
-  
+
     console.log(`Executing script: ${scriptPath}`); // Debug log
-  
+
     const child = execFile('powershell.exe', ['-ExecutionPolicy', 'Bypass', '-File', scriptPath], options, (error, stdout, stderr) => {
       if (error) {
         console.error(`Error executing ${scriptName}:`, error);
         server.status = 'Offline';
         saveServers(servers);
-        return res.status(500).json({ message: `Error executing ${scriptName}: ${error.message}`, success: false });
+        return res.status(500).send(`Error executing ${scriptName}: ${error.message}`);
       }
       if (stderr) {
         console.error(`Script stderr: ${stderr}`);
       }
       console.log(`Script stdout: ${stdout}`);
-      res.json({ message: `Script ${scriptName} executed successfully`, output: stdout, success: true });
+      res.json({ message: `Script ${scriptName} executed successfully`, output: stdout });
     });
-  
+
     // Listen to the child process's stdout and stderr
     child.stdout.on('data', data => {
       console.log(`stdout: ${data}`);
@@ -188,7 +188,7 @@ const startApiServer = () => {
         saveServers(servers);
       }
     });
-  
+
     child.stderr.on('data', data => {
       console.error(`stderr: ${data}`);
     });
@@ -203,23 +203,23 @@ const startApiServer = () => {
   const sendRconCommand = async (serverId, command, res) => {
     const server = servers.find(s => s.id === serverId);
     if (!server) {
-      return res.status(404).json({ message: 'Server not found', success: false });
+      return res.status(404).send('Server not found');
     }
-  
+
     try {
       const rcon = await Rcon.connect({
         host: 'localhost',
         port: 25575,
         password: server.rconPassword,
       });
-  
+
       const response = await rcon.send(command);
       await rcon.end();
       console.log(`RCON response: ${response}`);
-      res.json({ message: `Command ${command} executed successfully`, output: response, success: true });
+      res.json({ message: `Command ${command} executed successfully`, output: response });
     } catch (error) {
       console.error(`Error sending RCON command:`, error);
-      res.status(500).json({ message: `Error sending RCON command: ${error.message}`, success: false });
+      res.status(500).send(`Error sending RCON command: ${error.message}`);
     }
   };
 

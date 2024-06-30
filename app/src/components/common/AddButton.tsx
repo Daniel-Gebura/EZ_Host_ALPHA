@@ -35,27 +35,21 @@ export const AddButton: React.FC = () => {
       rconPassword: rconPassword,
     };
     try {
-      const response = await window.api.addServer(newServer);
-      if (response.success) {
-        const addedServer = response.data;
-        // Initialize the server
-        await window.api.initServer(addedServer.id);
-        setServerName('');
-        setServerType('forge'); // Reset to default
-        setDirectory('');
-        setRconPassword('');
-        setAgreeEula(false);
-        setError(null);
-        const modal = document.getElementById('add_server_modal') as HTMLDialogElement;
-        if (modal) {
-          modal.close();
-        }
-        // Navigate to the new server's page
-        navigate(`/server/${addedServer.id}`);
-      } else {
-        setError('Failed to add and initialize the server.');
-        console.error(response.message);
+      const addedServer = await window.api.addServer(newServer);
+      // Initialize the server
+      await window.api.initServer(addedServer.id);
+      setServerName('');
+      setServerType('forge'); // Reset to default
+      setDirectory('');
+      setRconPassword('');
+      setAgreeEula(false);
+      setError(null);
+      const modal = document.getElementById('add_server_modal') as HTMLDialogElement;
+      if (modal) {
+        modal.close();
       }
+      // Navigate to the new server's page
+      navigate(`/server/${addedServer.id}`);
     } catch (err) {
       setError('Failed to add and initialize the server.');
       console.error(err);

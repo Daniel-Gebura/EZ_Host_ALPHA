@@ -19,11 +19,11 @@ export const Sidebar: React.FC<SidebarProps> = ({ isSidebarOpen, toggleSidebar }
 
   const fetchServers = async () => {
     try {
-      const response = await window.api.getServers();
-      if (response.success && Array.isArray(response.data)) {
-        setServers(response.data);
+      const serverList = await window.api.getServers();
+      if (Array.isArray(serverList)) {
+        setServers(serverList);
       } else {
-        throw new Error(response.message || 'Server data is not an array');
+        throw new Error('Server data is not an array');
       }
     } catch (err) {
       setError('Failed to fetch servers');
