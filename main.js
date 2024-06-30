@@ -64,7 +64,7 @@ ipcMain.handle('choose-directory', async () => {
   const result = await dialog.showOpenDialog(mainWindow, {
     properties: ['openDirectory']
   });
-  return result.filePaths[0];
+  return result.filePaths[0] || '';  // Return the path or an empty string if no directory was selected
 });
 
 /**
@@ -75,7 +75,7 @@ ipcMain.handle('choose-file', async () => {
     properties: ['openFile'],
     filters: [{ name: 'Images', extensions: ['png', 'jpg', 'jpeg'] }]
   });
-  return result.filePaths[0];
+  return result.filePaths[0] || '';  // Return the path or an empty string if no file was selected
 });
 
 // START UP CALL: Application ready event

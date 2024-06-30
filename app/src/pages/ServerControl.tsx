@@ -23,9 +23,14 @@ export const ServerControl: React.FC = () => {
     const fetchServerDetails = async () => {
       if (id) {
         try {
-          const server = await window.api.getServer(id);
-          setServerName(server.name);
-          setIcon(server.icon || defaultLogo); // Set icon or default logo
+          const response = await window.api.getServer(id);
+          if (response.success) {
+            const server = response.data;
+            setServerName(server.name);
+            setIcon(server.icon || defaultLogo); // Set icon or default logo
+          } else {
+            console.error('Error fetching server details:', response.message);
+          }
         } catch (error: any) {
           console.error('Error fetching server details:', error);
         }
@@ -50,26 +55,27 @@ export const ServerControl: React.FC = () => {
       switch (action) {
         case 'start':
           response = await window.api.startServer(id);
-          setStatus('running');
+          if (response.success) setStatus('running');
           break;
         case 'save':
           response = await window.api.saveServer(id);
           break;
         case 'restart':
           response = await window.api.restartServer(id);
-          setStatus('restarting');
+          if (response.success) setStatus('restarting');
           break;
         case 'stop':
           response = await window.api.stopServer(id);
-          setStatus('offline');
+          if (response.success) setStatus('offline');
           break;
         default:
-          response = 'Invalid action';
+          response = { success: false, message: 'Invalid action' };
       }
-      alert(response);
+      if (!response.success) {
+        console.error(`Failed to ${action} server: ${response.message}`);
+      }
     } catch (error: any) { // Explicitly typing error as any
       console.error(`Error performing action '${action}':`, error);
-      alert(`Failed to ${action} server: ${error.message}`);
     }
   };
 
@@ -79,11 +85,14 @@ export const ServerControl: React.FC = () => {
   const removeServer = async () => {
     if (id) {
       try {
-        await window.api.deleteServer(id);
-        navigate('/');
+        const response = await window.api.deleteServer(id);
+        if (response.success) {
+          navigate('/');
+        } else {
+          console.error('Error deleting server:', response.message);
+        }
       } catch (error: any) { // Explicitly typing error as any
         console.error('Error deleting server:', error);
-        alert(`Failed to delete server: ${error.message}`);
       }
     } else {
       console.error('Server ID is undefined');
@@ -95,15 +104,20 @@ export const ServerControl: React.FC = () => {
    */
   const handleChangeIcon = async () => {
     const selectedIcon = await window.api.chooseFile();
-    if (selectedIcon) {
-      setIcon(selectedIcon);
+    if (selectedIcon && selectedIcon.path) {
+      setIcon(selectedIcon.path);
 
       // Save the new icon path to the server details
       if (id) {
         try {
-          const server = await window.api.getServer(id);
-          server.icon = selectedIcon;
-          await window.api.updateServer(id, server);
+          const serverResponse = await window.api.getServer(id);
+          if (serverResponse.success) {
+            const server = serverResponse.data;
+            server.icon = selectedIcon.path;
+            await window.api.updateServer(id, server);
+          } else {
+            console.error('Error updating server icon:', serverResponse.message);
+          }
         } catch (error: any) {
           console.error('Error updating server icon:', error);
         }

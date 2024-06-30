@@ -5,90 +5,90 @@ declare global {
     api: {
       /**
        * Get the list of servers
-       * @returns {Promise<any>} List of servers
+       * @returns {Promise<{ success: boolean, message: string, data?: any }>} List of servers
        */
-      getServers: () => Promise<any>;
+      getServers: () => Promise<{ success: boolean, message: string, data?: any }>;
 
       /**
        * Get a specific server
        * @param {string} id - Server ID
-       * @returns {Promise<any>} The requested server
+       * @returns {Promise<{ success: boolean, message: string, data?: any }>} The requested server
        */
-      getServer: (id: string) => Promise<any>;
+      getServer: (id: string) => Promise<{ success: boolean, message: string, data?: any }>;
 
       /**
        * Add a new server
        * @param {any} server - Server details
-       * @returns {Promise<any>} The added server
+       * @returns {Promise<{ success: boolean, message: string, data?: any }>} The added server
        */
       addServer: (server: {
         name: string;
         type: 'forge' | 'fabric';
         directory: string;
         rconPassword: string;
-      }) => Promise<any>;
+      }) => Promise<{ success: boolean, message: string, data?: any }>;
 
       /**
        * Update a server by ID
        * @param {string} id - Server ID
        * @param {any} server - Server details
-       * @returns {Promise<any>} The updated server
+       * @returns {Promise<{ success: boolean, message: string, data?: any }>} The updated server
        */
-      updateServer: (id: string, server: any) => Promise<any>;
+      updateServer: (id: string, server: any) => Promise<{ success: boolean, message: string, data?: any }>;
 
       /**
        * Delete a server by ID
        * @param {string} id - Server ID
-       * @returns {Promise<void>}
+       * @returns {Promise<{ success: boolean, message: string }>}
        */
-      deleteServer: (id: string) => Promise<void>;
+      deleteServer: (id: string) => Promise<{ success: boolean, message: string }>;
 
       /**
        * Init a server by ID
        * @param {string} id - Server ID
-       * @returns {Promise<string>} Response from the server
+       * @returns {Promise<{ success: boolean, message: string }>}
        */
-      initServer: (id: string) => Promise<string>;
+      initServer: (id: string) => Promise<{ success: boolean, message: string }>;
 
       /**
        * Start a server by ID
        * @param {string} id - Server ID
-       * @returns {Promise<string>} Response from the server
+       * @returns {Promise<{ success: boolean, message: string }>}
        */
-      startServer: (id: string) => Promise<string>;
+      startServer: (id: string) => Promise<{ success: boolean, message: string }>;
 
       /**
        * Save a server by ID
        * @param {string} id - Server ID
-       * @returns {Promise<string>} Response from the server
+       * @returns {Promise<{ success: boolean, message: string }>}
        */
-      saveServer: (id: string) => Promise<string>;
+      saveServer: (id: string) => Promise<{ success: boolean, message: string }>;
 
       /**
        * Restart a server by ID
        * @param {string} id - Server ID
-       * @returns {Promise<string>} Response from the server
+       * @returns {Promise<{ success: boolean, message: string }>}
        */
-      restartServer: (id: string) => Promise<string>;
+      restartServer: (id: string) => Promise<{ success: boolean, message: string }>;
 
       /**
        * Stop a server by ID
        * @param {string} id - Server ID
-       * @returns {Promise<string>} Response from the server
+       * @returns {Promise<{ success: boolean, message: string }>}
        */
-      stopServer: (id: string) => Promise<string>;
+      stopServer: (id: string) => Promise<{ success: boolean, message: string }>;
 
       /**
        * Choose a directory
-       * @returns {Promise<string>} Response from the server
+       * @returns {Promise<{ success: boolean, message: string, path?: string }>}
        */
-      chooseDirectory: () => Promise<string>;
+      chooseDirectory: () => Promise<{ success: boolean, message: string, path?: string }>;
 
       /**
        * Choose a file
-       * @returns {Promise<string>} Response from the server
+       * @returns {Promise<{ success: boolean, message: string, path?: string }>}
        */
-      chooseFile: () => Promise<string>;
+      chooseFile: () => Promise<{ success: boolean, message: string, path?: string }>;
     };
   }
 }
