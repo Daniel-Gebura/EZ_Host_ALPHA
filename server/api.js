@@ -4,7 +4,6 @@ const path = require('path');
 const cors = require('cors');
 const { execFile } = require('child_process');
 const { Rcon } = require('rcon-client'); // RCON client for sending commands
-const WebSocket = require('ws');
 
 // Path to the servers.json file
 const DATA_FILE = path.join(__dirname, 'servers.json');
@@ -22,16 +21,6 @@ const startApiServer = () => {
   const app = express();
   app.use(cors());
   app.use(express.json());
-
-  const wss = new WebSocket.Server({ noServer: true });
-
-  const sendUpdate = () => {
-    wss.clients.forEach(client => {
-      if (client.readyState === WebSocket.OPEN) {
-        client.send('update');
-      }
-    });
-  };
 
   // Load existing servers from file
   const loadServers = () => {
@@ -274,16 +263,6 @@ const startApiServer = () => {
   // Start the API server
   app.listen(PORT, () => {
     console.log(`API Server is running on http://localhost:${PORT}`);
-  });
-
-  const server = app.listen(PORT, () => {
-    console.log(`API server listening on port ${PORT}`);
-  });
-
-  server.on('upgrade', (request, socket, head) => {
-    wss.handleUpgrade(request, socket, head, (ws) => {
-      wss.emit('connection', ws, request);
-    });
   });
 };
 

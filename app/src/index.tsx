@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import ReactDOM from 'react-dom/client';
 import './index.css';
 import reportWebVitals from './reportWebVitals';
@@ -11,37 +11,17 @@ import { ServerControl } from './pages/ServerControl';
 const root = ReactDOM.createRoot(
   document.getElementById('root') as HTMLElement
 );
-
-const App = () => {
-  useEffect(() => {
-    const ws = new WebSocket('ws://localhost:5000');
-    ws.onmessage = (event) => {
-      if (event.data === 'update') {
-        window.location.reload();
-      }
-    };
-
-    return () => {
-      ws.close();
-    };
-  }, []);
-
-  return (
+root.render(
+  <React.StrictMode>
     <HashRouter>
       <Routes>
         <Route path="/" element={<Layout />}>
-          <Route index element={<Central />} />
+          <Route index element={<Central />} /> {/* This defines the home page */}
           <Route path="/Dummy" element={<Dummy />} />
           <Route path="/server/:id" element={<ServerControl />} />
         </Route>
       </Routes>
     </HashRouter>
-  );
-};
-
-root.render(
-  <React.StrictMode>
-    <App />
   </React.StrictMode>
 );
 

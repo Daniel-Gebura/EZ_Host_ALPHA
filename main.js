@@ -12,7 +12,6 @@ const { app, BrowserWindow, dialog, ipcMain } = require('electron'); // Electron
 const url = require('url'); // Module for URL handling
 const path = require('path'); // Module for file path handling
 const { startApiServer } = require('./server/api'); // Import the API server starter function
-const WebSocket = require('ws');
 
 let mainWindow;
 
@@ -83,26 +82,6 @@ ipcMain.handle('choose-file', async () => {
 app.whenReady().then(() => {
   createMainWindow(); // Create the main window when the app is ready
   startApiServer(); // Start the API server
-
-  const ws = new WebSocket('ws://localhost:5000');
-
-  ws.on('open', () => {
-    console.log('WebSocket connection established');
-  });
-
-  ws.on('message', (message) => {
-    if (message === 'update') {
-      mainWindow.webContents.send('update');
-    }
-  });
-
-  ws.on('error', (error) => {
-    console.error('WebSocket error:', error);
-  });
-
-  ws.on('close', () => {
-    console.log('WebSocket connection closed');
-  });
 });
 
 // Handle application re-activation (macOS)
