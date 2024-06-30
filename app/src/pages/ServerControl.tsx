@@ -19,20 +19,31 @@ export const ServerControl: React.FC = () => {
   const [status, setStatus] = useState<'running' | 'restarting' | 'offline'>('offline');
   const [icon, setIcon] = useState<string | null>(null); // Initialize icon state
 
+  const fetchServerDetails = async () => {
+    if (id) {
+      try {
+        const server = await window.api.getServer(id);
+        setServerName(server.name);
+        setIcon(server.icon || defaultLogo); // Set icon or default logo
+      } catch (error: any) {
+        console.error('Error fetching server details:', error);
+      }
+    }
+  };
+
   useEffect(() => {
-    const fetchServerDetails = async () => {
-      if (id) {
-        try {
-          const server = await window.api.getServer(id);
-          setServerName(server.name);
-          setIcon(server.icon || defaultLogo); // Set icon or default logo
-        } catch (error: any) {
-          console.error('Error fetching server details:', error);
-        }
+    fetchServerDetails();
+
+    const ws = new WebSocket('ws://localhost:5000');
+    ws.onmessage = (event) => {
+      if (event.data === 'update') {
+        fetchServerDetails();
       }
     };
 
-    fetchServerDetails();
+    return () => {
+      ws.close();
+    };
   }, [id]);
 
   /**

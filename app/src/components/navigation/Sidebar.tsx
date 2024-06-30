@@ -33,6 +33,16 @@ export const Sidebar: React.FC<SidebarProps> = ({ isSidebarOpen, toggleSidebar }
 
   useEffect(() => {
     fetchServers();
+    const ws = new WebSocket('ws://localhost:5000');
+    ws.onmessage = (event) => {
+      if (event.data === 'update') {
+        fetchServers();
+      }
+    };
+
+    return () => {
+      ws.close();
+    };
   }, []);
 
   return (
