@@ -78,7 +78,7 @@ export const AddButton: React.FC = () => {
           <h3 className="font-bold text-lg text-center mb-4">Add New Server</h3>
           {error && <p className="text-red-500 mb-4">{error}</p>}
 
-          <div className="mb-6">
+          <div className="mb-4 p-4 bg-base-300 rounded-lg">
             <label className="label">
               <span className="label-text">Server Name</span>
             </label>
@@ -89,7 +89,7 @@ export const AddButton: React.FC = () => {
             />
           </div>
 
-          <div className="mb-6">
+          <div className="mb-4 p-4 bg-base-300 rounded-lg">
             <label className="label">
               <span className="label-text">Server Directory</span>
             </label>
@@ -100,7 +100,7 @@ export const AddButton: React.FC = () => {
             />
           </div>
 
-          <div className="mb-6">
+          <div className="mb-4 p-4 bg-base-300 rounded-lg">
             <label className="label">
               <span className="label-text">RCON Password</span>
             </label>
@@ -111,7 +111,7 @@ export const AddButton: React.FC = () => {
             />
           </div>
 
-          <div className="form-control mb-4">
+          <div className="form-control mb-4 p-4 bg-base-300 rounded-lg">
             <label className="cursor-pointer flex items-center">
               <input 
                 type="checkbox" 
