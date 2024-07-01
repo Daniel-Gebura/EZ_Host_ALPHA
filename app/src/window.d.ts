@@ -45,7 +45,6 @@ declare global {
        */
       addServer: (server: {
         name: string;
-        type: 'forge' | 'fabric';
         directory: string;
         rconPassword: string;
       }) => Promise<any>;

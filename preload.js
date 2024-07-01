@@ -92,7 +92,7 @@ contextBridge.exposeInMainWorld('api', {
     });
   },
 
-    /**
+  /**
    * Init a server by ID
    * @param {string} id - Server ID
    * @returns {Promise<string>} Response from the server

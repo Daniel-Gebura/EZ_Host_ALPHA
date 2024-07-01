@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { TextInput1 } from './TextInput1';
-import { ForgeFabricToggle } from './ForgeFabricToggle';
 import { ChooseFile1 } from './ChooseFile1';
 
 /**
@@ -12,7 +11,6 @@ import { ChooseFile1 } from './ChooseFile1';
  */
 export const AddButton: React.FC = () => {
   const [serverName, setServerName] = useState('');
-  const [serverType, setServerType] = useState<'forge' | 'fabric'>('forge');
   const [directory, setDirectory] = useState('');
   const [rconPassword, setRconPassword] = useState('');
   const [agreeEula, setAgreeEula] = useState(false);
@@ -30,7 +28,6 @@ export const AddButton: React.FC = () => {
 
     const newServer = {
       name: serverName,
-      type: serverType,
       directory: directory,
       rconPassword: rconPassword,
     };
@@ -39,7 +36,6 @@ export const AddButton: React.FC = () => {
       // Initialize the server
       await window.api.initServer(addedServer.id);
       setServerName('');
-      setServerType('forge'); // Reset to default
       setDirectory('');
       setRconPassword('');
       setAgreeEula(false);
@@ -79,39 +75,55 @@ export const AddButton: React.FC = () => {
           <form method="dialog">
             <button className="btn btn-sm btn-circle btn-ghost absolute right-2 top-2">✕</button>
           </form>
-          <h3 className="font-bold text-lg">Add New Server</h3>
+          <h3 className="font-bold text-lg text-center mb-4">Add New Server</h3>
           {error && <p className="text-red-500 mb-4">{error}</p>}
-          <TextInput1
-            value={serverName}
-            onChange={setServerName}
-            placeholder="Server Name"
-          />
-          <ForgeFabricToggle
-            value={serverType}
-            onChange={setServerType}
-          />
-          <ChooseFile1
-            value={directory}
-            onChange={setDirectory}
-            placeholder="Server Directory"
-          />
-          <TextInput1
-            value={rconPassword}
-            onChange={setRconPassword}
-            placeholder="RCON Password"
-          />
-          <div className="form-control">
-            <label className="cursor-pointer label">
+
+          <div className="mb-6">
+            <label className="label">
+              <span className="label-text">Server Name</span>
+            </label>
+            <TextInput1
+              value={serverName}
+              onChange={setServerName}
+              placeholder="Server Name"
+            />
+          </div>
+
+          <div className="mb-6">
+            <label className="label">
+              <span className="label-text">Server Directory</span>
+            </label>
+            <ChooseFile1
+              value={directory}
+              onChange={setDirectory}
+              placeholder="Server Directory"
+            />
+          </div>
+
+          <div className="mb-6">
+            <label className="label">
+              <span className="label-text">RCON Password</span>
+            </label>
+            <TextInput1
+              value={rconPassword}
+              onChange={setRconPassword}
+              placeholder="RCON Password"
+            />
+          </div>
+
+          <div className="form-control mb-4">
+            <label className="cursor-pointer flex items-center">
               <input 
                 type="checkbox" 
                 checked={agreeEula} 
                 onChange={() => setAgreeEula(!agreeEula)} 
                 className="checkbox checkbox-primary" 
               />
-              <span className="label-text">I agree to the EULA</span>
+              <span className="label-text ml-2">I agree to the EULA</span>
             </label>
           </div>
-          <button className="btn btn-primary w-full mt-4" onClick={addServer} disabled={!agreeEula}>Add Server</button>
+
+          <button className="btn btn-primary w-full" onClick={addServer} disabled={!agreeEula}>Add Server</button>
         </div>
       </dialog>
     </>
