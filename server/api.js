@@ -268,22 +268,22 @@ const startApiServer = () => {
   });
 
   /**
-   * Endpoint to restart a server
-   */
-  app.post('/api/servers/:id/restart', async (req, res) => {
-    const serverId = req.params.id;
+ * Endpoint to restart a server
+ */
+app.post('/api/servers/:id/restart', async (req, res) => {
+  const serverId = req.params.id;
 
-    const handleStopAndStart = async () => {
-      // Ensure the server is stopped before starting
-      await sendRconCommand(serverId, 'stop', res, () => {
-        // Run the start.ps1 PowerShell script to start the server
-        runPowerShellScript(serverId, 'start.ps1', res);
-      });
-    };
+  const handleStopAndStart = async () => {
+    // Ensure the server is stopped before starting
+    await sendRconCommand(serverId, 'stop', res, () => {
+      // Run the start.ps1 PowerShell script to start the server
+      runPowerShellScript(serverId, 'start.ps1', res);
+    });
+  };
 
-    // First, save the server
-    await sendRconCommand(serverId, 'save-all', res, handleStopAndStart);
-  });
+  // First, save the server
+  await sendRconCommand(serverId, 'save-all', res, handleStopAndStart);
+});
 
 
   /**

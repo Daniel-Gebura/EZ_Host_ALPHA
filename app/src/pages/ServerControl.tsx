@@ -16,24 +16,37 @@ export const ServerControl: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const [serverName, setServerName] = useState('Loading...');
-  const [status, setStatus] = useState<'running' | 'restarting' | 'offline'>('offline');
+  const [status, setStatus] = useState<'Offline' | 'Starting...' | 'Online' | 'Stopping...' | 'Restarting...'>('Offline');
   const [icon, setIcon] = useState<string | null>(null); // Initialize icon state
 
-  useEffect(() => {
-    const fetchServerDetails = async () => {
-      if (id) {
-        try {
-          const server = await window.api.getServer(id);
-          setServerName(server.name);
-          setIcon(server.icon || defaultLogo); // Set icon or default logo
-        } catch (error: any) {
-          console.error('Error fetching server details:', error);
-        }
+  const fetchServerDetails = async () => {
+    if (id) {
+      try {
+        const server = await window.api.getServer(id);
+        setServerName(server.name);
+        setStatus(server.status);
+        setIcon(server.icon || defaultLogo); // Set icon or default logo
+      } catch (error: any) {
+        console.error('Error fetching server details:', error);
       }
-    };
+    }
+  };
 
+  useEffect(() => {
     fetchServerDetails();
   }, [id]);
+
+  useEffect(() => {
+    const handleServersJsonChanged = () => {
+      fetchServerDetails();
+    };
+
+    window.ipcRenderer.on('servers-json-changed', handleServersJsonChanged);
+
+    return () => {
+      window.ipcRenderer.removeAllListeners('servers-json-changed');
+    };
+  }, []);
 
   /**
    * Handles server actions by calling the appropriate backend API
@@ -45,28 +58,27 @@ export const ServerControl: React.FC = () => {
       return;
     }
 
-    let response;
     try {
+      let response;
       switch (action) {
         case 'start':
           response = await window.api.startServer(id);
-          setStatus('running');
           break;
         case 'save':
           response = await window.api.saveServer(id);
           break;
         case 'restart':
           response = await window.api.restartServer(id);
-          setStatus('restarting');
           break;
         case 'stop':
           response = await window.api.stopServer(id);
-          setStatus('offline');
           break;
         default:
           response = 'Invalid action';
       }
       alert(response);
+      // Fetch updated server details after performing an action
+      await fetchServerDetails();
     } catch (error: any) { // Explicitly typing error as any
       console.error(`Error performing action '${action}':`, error);
       alert(`Failed to ${action} server: ${error.message}`);
@@ -117,11 +129,7 @@ export const ServerControl: React.FC = () => {
         <div className="flex flex-col md:flex-row items-center mb-4">
           <IconChanger icon={icon || defaultLogo} onChangeIcon={handleChangeIcon} />
           <div className="ml-4">
-            <h1 className="text-3xl font-bold">{serverName}</h1>
-            <div className="flex items-center mt-2">
-              <div className={`h-4 w-4 rounded-full ${status === 'running' ? 'bg-green-500' : status === 'restarting' ? 'bg-yellow-500' : 'bg-red-500'}`} />
-              <span className="ml-2 text-lg">{status.charAt(0).toUpperCase() + status.slice(1)}</span>
-            </div>
+            <ServerStatus name={serverName} status={status} />
           </div>
         </div>
       </div>
