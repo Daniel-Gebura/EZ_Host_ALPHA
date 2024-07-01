@@ -33,17 +33,21 @@ export const Sidebar: React.FC<SidebarProps> = ({ isSidebarOpen, toggleSidebar }
 
   useEffect(() => {
     fetchServers();
-  }, []);
 
-  useEffect(() => {
     const handleServersJsonChanged = () => {
       fetchServers();
     };
 
     window.ipcRenderer.on('servers-json-changed', handleServersJsonChanged);
 
+    // Polling mechanism as a fallback to ensure data is refreshed periodically
+    const interval = setInterval(() => {
+      fetchServers();
+    }, 2000); // Poll every 2 seconds
+
     return () => {
       window.ipcRenderer.removeAllListeners('servers-json-changed');
+      clearInterval(interval);
     };
   }, []);
 
