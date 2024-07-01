@@ -35,6 +35,18 @@ export const Sidebar: React.FC<SidebarProps> = ({ isSidebarOpen, toggleSidebar }
     fetchServers();
   }, []);
 
+  useEffect(() => {
+    const handleServersJsonChanged = () => {
+      fetchServers();
+    };
+
+    window.ipcRenderer.on('servers-json-changed', handleServersJsonChanged);
+
+    return () => {
+      window.ipcRenderer.removeAllListeners('servers-json-changed');
+    };
+  }, []);
+
   return (
     <div
       className={`fixed top-[5rem] left-0 h-[calc(100%-5rem)] bg-base-200 p-4 transform ${

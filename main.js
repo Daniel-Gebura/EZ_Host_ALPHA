@@ -11,6 +11,7 @@
 const { app, BrowserWindow, dialog, ipcMain } = require('electron'); // Electron modules for application
 const url = require('url'); // Module for URL handling
 const path = require('path'); // Module for file path handling
+const chokidar = require('chokidar'); // Module for watching file changes
 const { startApiServer } = require('./server/api'); // Import the API server starter function
 
 let mainWindow;
@@ -30,7 +31,6 @@ function createMainWindow() {
     },
     autoHideMenuBar: true, // This line hides the menu bar
   });
-  
 
   // DEBUGGING: Open DevTools
   //mainWindow.webContents.openDevTools();
@@ -54,6 +54,18 @@ function createMainWindow() {
   mainWindow.on('leave-full-screen', () => {
     console.log('Exited full-screen mode');
     mainWindow.webContents.send('full-screen-changed', false);
+  });
+
+  // Initialize the watcher
+  const watcher = chokidar.watch(path.join(__dirname, 'server', 'servers.json'), {
+    persistent: true,
+  });
+
+  watcher.on('change', () => {
+    if (mainWindow) {
+      // Send a message to the renderer process to refresh
+      mainWindow.webContents.send('servers-json-changed');
+    }
   });
 }
 

@@ -15,6 +15,7 @@
     "electron": "^31.0.2"
   },
   "dependencies": {
+    "chokidar": "^3.6.0",
     "cors": "^2.8.5",
     "electronmon": "^2.0.3",
     "express": "^4.19.2",

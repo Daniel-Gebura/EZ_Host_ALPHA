@@ -2,6 +2,28 @@ export {};
 
 declare global {
   interface Window {
+    ipcRenderer: {
+      /**
+       * Send an IPC message to the main process.
+       * @param {string} channel - The channel to send the message on.
+       * @param {any} [data] - The data to send with the message.
+       */
+      send: (channel: string, data?: any) => void;
+
+      /**
+       * Listen for an IPC message from the main process.
+       * @param {string} channel - The channel to listen on.
+       * @param {function} listener - The function to call when a message is received.
+       */
+      on: (channel: string, listener: (event: Electron.IpcRendererEvent, ...args: any[]) => void) => void;
+
+      /**
+       * Remove all listeners for a specific channel.
+       * @param {string} channel - The channel to remove listeners from.
+       */
+      removeAllListeners: (channel: string) => void;
+    };
+
     api: {
       /**
        * Get the list of servers
