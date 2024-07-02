@@ -4,14 +4,17 @@ import { Link } from 'react-router-dom';
 interface ServerButtonProps {
   id: string;
   name: string;
-  icon: string; // Add icon prop
+  icon: string;
 }
 
 export const ServerButton: React.FC<ServerButtonProps> = ({ id, name, icon }) => {
   return (
-    <Link to={`/server/${id}`} className="btn btn-outline mb-2 w-full flex items-center justify-start px-4 py-2">
-      <img src={icon} alt={`${name} icon`} className="h-6 w-6 mr-2" />
-      <span>{name}</span>
+    <Link to={`/server/${id}`} className="relative btn btn-square btn-outline mb-2 w-16 h-16 flex items-center justify-center p-0">
+      <div className="tooltip tooltip-top" data-tip={name}>
+        <div className="w-14 h-14 p-1 rounded">
+          <img src={icon} alt={`${name} icon`} className="w-full h-full object-cover rounded" />
+        </div>
+      </div>
     </Link>
   );
 };
