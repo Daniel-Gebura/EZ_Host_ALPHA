@@ -2,7 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { IconChanger } from '../components/serverPage/IconChanger';
 import { ServerStatus } from '../components/serverPage/ServerStatus';
-import { ActionButtons } from '../components/serverPage/ActionButtons';
+import { HomeTab } from '../components/serverPage/HomeTab';
+import { ServerPropertiesTab } from '../components/serverPage/ServerPropertiesTab';
+import { ConsoleTab } from '../components/serverPage/ConsoleTab';
 import defaultLogo from '../assets/logo/EZ_Host_Logo1.png';
 
 export const ServerControl: React.FC = () => {
@@ -11,6 +13,7 @@ export const ServerControl: React.FC = () => {
   const [serverName, setServerName] = useState('');
   const [status, setStatus] = useState<'Offline' | 'Starting...' | 'Online' | 'Stopping...' | 'Restarting...'>('Offline');
   const [icon, setIcon] = useState<string | null>(null);
+  const [activeTab, setActiveTab] = useState<'home' | 'properties' | 'console'>('home');
 
   const fetchServerDetails = async () => {
     if (id) {
@@ -113,16 +116,31 @@ export const ServerControl: React.FC = () => {
             <ServerStatus name={serverName} status={status} onNameChange={setServerName} />
           </div>
         </div>
-      </div>
-      <div className="bg-base-300 shadow-lg rounded-lg p-6 mb-4 text-center">
-        <h2 className="text-2xl font-bold mb-4">Server Controls</h2>
-        <div className="flex justify-center">
-          <ActionButtons onAction={handleAction} disabled={status === 'Starting...' || status === 'Stopping...' || status === 'Restarting...'} />
+        <div className="tabs tabs-boxed mt-4">
+          <a
+            className={`tab ${activeTab === 'home' ? 'tab-active' : ''}`}
+            onClick={() => setActiveTab('home')}
+          >
+            Home
+          </a>
+          <a
+            className={`tab ${activeTab === 'properties' ? 'tab-active' : ''}`}
+            onClick={() => setActiveTab('properties')}
+          >
+            Server Properties
+          </a>
+          <a
+            className={`tab ${activeTab === 'console' ? 'tab-active' : ''}`}
+            onClick={() => setActiveTab('console')}
+          >
+            Console
+          </a>
         </div>
       </div>
-      <div className="text-center">
-        <button className="btn btn-danger" onClick={removeServer} disabled={status !== 'Offline'}>Remove Server</button>
-      </div>
+
+      {activeTab === 'home' && <HomeTab status={status} handleAction={handleAction} removeServer={removeServer} />}
+      {activeTab === 'properties' && <ServerPropertiesTab />}
+      {activeTab === 'console' && <ConsoleTab />}
     </div>
   );
 };
