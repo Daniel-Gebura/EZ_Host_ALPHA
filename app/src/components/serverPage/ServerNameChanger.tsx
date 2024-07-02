@@ -1,35 +1,15 @@
 import React, { useState } from 'react';
 import { useParams } from 'react-router-dom';
 
-interface ServerStatusProps {
+interface ServerNameChangerProps {
   name: string;
-  status: 'Offline' | 'Starting...' | 'Online' | 'Stopping...' | 'Restarting...';
   onNameChange: (newName: string) => void;
 }
 
-export const ServerStatus: React.FC<ServerStatusProps> = ({ name, status, onNameChange }) => {
+export const ServerNameChanger: React.FC<ServerNameChangerProps> = ({ name, onNameChange }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [newName, setNewName] = useState(name);
   const { id } = useParams<{ id: string }>();
-
-  const getStatusDotColor = () => {
-    switch (status) {
-      case 'Offline':
-        return 'bg-red-500';
-      case 'Online':
-        return 'bg-green-500';
-      case 'Starting...':
-        return 'bg-blue-500';
-      case 'Stopping...':
-        return 'bg-yellow-500';
-      case 'Restarting...':
-        return 'bg-orange-500';
-      default:
-        return 'bg-gray-500';
-    }
-  };
-
-  const isLoading = status === 'Starting...' || status === 'Stopping...' || status === 'Restarting...';
 
   const handleNameChange = async () => {
     if (newName.length > 0 && newName.length <= 20) {
@@ -49,14 +29,9 @@ export const ServerStatus: React.FC<ServerStatusProps> = ({ name, status, onName
 
   return (
     <div>
-      <h1 className="text-3xl font-bold cursor-pointer" onClick={() => setIsModalOpen(true)}>
+      <button className="btn btn-outline" onClick={() => setIsModalOpen(true)}>
         {name}
-      </h1>
-      <div className="flex items-center mt-1 text-gray-500">
-        <span className={`h-4 w-4 rounded-full mr-2 ${getStatusDotColor()}`} />
-        <span className="text-lg">{status}</span>
-        {isLoading && <span className="loading loading-bars loading-xs ml-2"></span>}
-      </div>
+      </button>
       {isModalOpen && (
         <div className="modal modal-open">
           <div className="modal-box">
