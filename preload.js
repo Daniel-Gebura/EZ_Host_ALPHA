@@ -1,10 +1,10 @@
 /**
  * preload.js
- * 
+ *
  * Preload script for the Electron application.
  * This script is used to expose specific APIs to the renderer process
  * through the context bridge to enhance security.
- * 
+ *
  * @file preload.js
  * @description Preload script for Electron application
  * @version 1.0
@@ -40,13 +40,13 @@ contextBridge.exposeInMainWorld('api', {
    * @param {string} id - Server ID
    * @returns {Promise<Object>} The server details
    */
-    getServer: async (id) => {
-      const response = await fetch(`http://localhost:5000/api/servers/${id}`);
-      if (!response.ok) {
-        throw new Error('Server not found');
-      }
-      return response.json();
-    },
+  getServer: async (id) => {
+    const response = await fetch(`http://localhost:5000/api/servers/${id}`);
+    if (!response.ok) {
+      throw new Error('Server not found');
+    }
+    return response.json();
+  },
 
   /**
    * Add a new server
@@ -97,12 +97,12 @@ contextBridge.exposeInMainWorld('api', {
    * @param {string} id - Server ID
    * @returns {Promise<string>} Response from the server
    */
-    initServer: async (id) => {
-      const response = await fetch(`http://localhost:5000/api/servers/${id}/initServer`, {
-        method: 'POST',
-      });
-      return response.text();
-    },
+  initServer: async (id) => {
+    const response = await fetch(`http://localhost:5000/api/servers/${id}/initServer`, {
+      method: 'POST',
+    });
+    return response.text();
+  },
 
   /**
    * Start a server by ID
@@ -170,6 +170,11 @@ contextBridge.exposeInMainWorld('api', {
     return result;
   },
 
+  /**
+   * Get server properties by ID
+   * @param {string} id - Server ID
+   * @returns {Promise<Object>} The server properties
+   */
   getServerProperties: async (id) => {
     const response = await fetch(`http://localhost:5000/api/servers/${id}/properties`);
     if (!response.ok) {
@@ -177,7 +182,13 @@ contextBridge.exposeInMainWorld('api', {
     }
     return response.json();
   },
-  
+
+  /**
+   * Save server properties by ID
+   * @param {string} id - Server ID
+   * @param {Object} properties - The updated properties
+   * @returns {Promise<void>}
+   */
   saveServerProperties: async (id, properties) => {
     await fetch(`http://localhost:5000/api/servers/${id}/properties`, {
       method: 'PUT',
@@ -186,6 +197,12 @@ contextBridge.exposeInMainWorld('api', {
     });
   },
 
+  /**
+   * Send an RCON command to the server
+   * @param {string} id - Server ID
+   * @param {string} command - The RCON command to send
+   * @returns {Promise<string>} The server response
+   */
   sendRconCommand: async (id, command) => {
     const response = await fetch(`http://localhost:5000/api/servers/${id}/rcon`, {
       method: 'POST',

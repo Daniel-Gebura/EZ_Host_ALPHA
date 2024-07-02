@@ -118,19 +118,19 @@ export const ServerControl: React.FC = () => {
         </div>
         <div className="tabs tabs-boxed mt-4">
           <a
-            className={`tab ${activeTab === 'home' ? 'tab-active' : ''}`}
+            className={`tab ${activeTab === 'home' ? 'tab-active bg-blue-500' : ''}`}
             onClick={() => setActiveTab('home')}
           >
             Home
           </a>
           <a
-            className={`tab ${activeTab === 'properties' ? 'tab-active' : ''}`}
+            className={`tab ${activeTab === 'properties' ? 'tab-active bg-blue-500' : ''}`}
             onClick={() => setActiveTab('properties')}
           >
             Server Properties
           </a>
           <a
-            className={`tab ${activeTab === 'console' ? 'tab-active' : ''}`}
+            className={`tab ${activeTab === 'console' ? 'tab-active bg-blue-500' : ''}`}
             onClick={() => setActiveTab('console')}
           >
             Console
@@ -139,7 +139,7 @@ export const ServerControl: React.FC = () => {
       </div>
 
       {activeTab === 'home' && <HomeTab status={status} handleAction={handleAction} removeServer={removeServer} />}
-      {activeTab === 'properties' && <ServerPropertiesTab serverId={id!} serverStatus={status}/>}
+      {activeTab === 'properties' && <ServerPropertiesTab serverId={id!} serverStatus={status} />}
       {activeTab === 'console' && <ConsoleTab />}
     </div>
   );

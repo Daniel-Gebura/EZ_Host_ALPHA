@@ -112,7 +112,7 @@ const startApiServer = () => {
    */
   app.put('/api/servers/:id', (req, res) => {
     const { id } = req.params;
-    const { name, type, directory, icon } = req.body; // Include icon in destructuring
+    const { name, type, directory, icon } = req.body;
     const serverIndex = servers.findIndex(s => s.id === id);
     if (serverIndex !== -1) {
       servers[serverIndex] = { ...servers[serverIndex], name, type, directory, icon };
@@ -245,7 +245,6 @@ const startApiServer = () => {
     }
   };
 
-
   /**
    * Endpoint to initialize a server
    */
@@ -268,23 +267,22 @@ const startApiServer = () => {
   });
 
   /**
- * Endpoint to restart a server
- */
-app.post('/api/servers/:id/restart', async (req, res) => {
-  const serverId = req.params.id;
+   * Endpoint to restart a server
+   */
+  app.post('/api/servers/:id/restart', async (req, res) => {
+    const serverId = req.params.id;
 
-  const handleStopAndStart = async () => {
-    // Ensure the server is stopped before starting
-    await sendRconCommand(serverId, 'stop', res, () => {
-      // Run the start.ps1 PowerShell script to start the server
-      runPowerShellScript(serverId, 'start.ps1', res);
-    });
-  };
+    const handleStopAndStart = async () => {
+      // Ensure the server is stopped before starting
+      await sendRconCommand(serverId, 'stop', res, () => {
+        // Run the start.ps1 PowerShell script to start the server
+        runPowerShellScript(serverId, 'start.ps1', res);
+      });
+    };
 
-  // First, save the server
-  await sendRconCommand(serverId, 'save-all', res, handleStopAndStart);
-});
-
+    // First, save the server
+    await sendRconCommand(serverId, 'save-all', res, handleStopAndStart);
+  });
 
   /**
    * Endpoint to stop a server
@@ -293,6 +291,11 @@ app.post('/api/servers/:id/restart', async (req, res) => {
     sendRconCommand(req.params.id, 'stop', res);
   });
 
+  /**
+   * Helper function to read properties from a file
+   * @param {string} filePath - Path to the properties file
+   * @returns {Object} Parsed properties
+   */
   const readPropertiesFile = (filePath) => {
     const properties = {};
     const propertiesContent = fs.readFileSync(filePath, 'utf8');
@@ -307,6 +310,11 @@ app.post('/api/servers/:id/restart', async (req, res) => {
     return properties;
   };
 
+  /**
+   * Helper function to write properties to a file
+   * @param {string} filePath - Path to the properties file
+   * @param {Object} properties - Properties to write
+   */
   const writePropertiesFile = (filePath, properties) => {
     const lines = [];
     Object.entries(properties).forEach(([key, value]) => {
@@ -315,6 +323,9 @@ app.post('/api/servers/:id/restart', async (req, res) => {
     fs.writeFileSync(filePath, lines.join('\n'), 'utf8');
   };
 
+  /**
+   * Endpoint to get server properties by ID
+   */
   app.get('/api/servers/:id/properties', (req, res) => {
     const { id } = req.params;
     const server = servers.find(s => s.id === id);
@@ -331,6 +342,9 @@ app.post('/api/servers/:id/restart', async (req, res) => {
     res.json(properties);
   });
 
+  /**
+   * Endpoint to update server properties by ID
+   */
   app.put('/api/servers/:id/properties', (req, res) => {
     const { id } = req.params;
     const server = servers.find(s => s.id === id);
@@ -353,6 +367,9 @@ app.post('/api/servers/:id/restart', async (req, res) => {
     res.status(200).send('Properties updated');
   });
 
+  /**
+   * Endpoint to send an RCON command to the server
+   */
   app.post('/api/servers/:id/rcon', async (req, res) => {
     const { id } = req.params;
     const { command } = req.body;
