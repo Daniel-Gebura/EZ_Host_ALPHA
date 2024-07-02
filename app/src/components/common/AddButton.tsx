@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { TextInput1 } from './TextInput1';
 import { ChooseFile1 } from './ChooseFile1';
+import defaultLogo from '../../assets/logo/EZ_Host_Logo1.png';
 
 /**
  * AddButton component
@@ -12,6 +13,7 @@ import { ChooseFile1 } from './ChooseFile1';
 export const AddButton: React.FC = () => {
   const [serverName, setServerName] = useState('');
   const [directory, setDirectory] = useState('');
+  const [serverIcon, setServerIcon] = useState(defaultLogo);
   const [rconPassword, setRconPassword] = useState('');
   const [agreeEula, setAgreeEula] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -29,6 +31,7 @@ export const AddButton: React.FC = () => {
     const newServer = {
       name: serverName,
       directory: directory,
+      icon: serverIcon,
       rconPassword: rconPassword,
     };
     try {
@@ -37,6 +40,7 @@ export const AddButton: React.FC = () => {
       await window.api.initServer(addedServer.id);
       setServerName('');
       setDirectory('');
+      setServerIcon(defaultLogo);
       setRconPassword('');
       setAgreeEula(false);
       setError(null);
