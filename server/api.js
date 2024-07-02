@@ -293,6 +293,72 @@ app.post('/api/servers/:id/restart', async (req, res) => {
     sendRconCommand(req.params.id, 'stop', res);
   });
 
+  const readPropertiesFile = (filePath) => {
+    const properties = {};
+    const propertiesContent = fs.readFileSync(filePath, 'utf8');
+    propertiesContent.split('\n').forEach(line => {
+      if (line.trim() && !line.startsWith('#')) {
+        const [key, value] = line.split('=');
+        if (key && value) {
+          properties[key.trim()] = value.trim();
+        }
+      }
+    });
+    return properties;
+  };
+
+  const writePropertiesFile = (filePath, properties) => {
+    const lines = [];
+    Object.entries(properties).forEach(([key, value]) => {
+      lines.push(`${key}=${value}`);
+    });
+    fs.writeFileSync(filePath, lines.join('\n'), 'utf8');
+  };
+
+  app.get('/api/servers/:id/properties', (req, res) => {
+    const { id } = req.params;
+    const server = servers.find(s => s.id === id);
+    if (!server) {
+      return res.status(404).send('Server not found');
+    }
+
+    const serverPropertiesPath = path.join(server.directory, 'server.properties');
+    if (!fs.existsSync(serverPropertiesPath)) {
+      return res.status(404).send('server.properties not found');
+    }
+
+    const properties = readPropertiesFile(serverPropertiesPath);
+    res.json(properties);
+  });
+
+  app.put('/api/servers/:id/properties', (req, res) => {
+    const { id } = req.params;
+    const server = servers.find(s => s.id === id);
+    if (!server) {
+      return res.status(404).send('Server not found');
+    }
+
+    const serverPropertiesPath = path.join(server.directory, 'server.properties');
+    const newProperties = req.body;
+
+    let serverProperties = {};
+    if (fs.existsSync(serverPropertiesPath)) {
+      serverProperties = readPropertiesFile(serverPropertiesPath);
+    }
+
+    const updatedProperties = { ...serverProperties, ...newProperties };
+
+    writePropertiesFile(serverPropertiesPath, updatedProperties);
+
+    res.status(200).send('Properties updated');
+  });
+
+  app.post('/api/servers/:id/rcon', async (req, res) => {
+    const { id } = req.params;
+    const { command } = req.body;
+    await sendRconCommand(id, command, res);
+  });
+
   // Start the API server
   app.listen(PORT, () => {
     console.log(`API Server is running on http://localhost:${PORT}`);

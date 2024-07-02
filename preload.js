@@ -169,4 +169,29 @@ contextBridge.exposeInMainWorld('api', {
     const result = await ipcRenderer.invoke('choose-file');
     return result;
   },
+
+  getServerProperties: async (id) => {
+    const response = await fetch(`http://localhost:5000/api/servers/${id}/properties`);
+    if (!response.ok) {
+      throw new Error('Server properties not found');
+    }
+    return response.json();
+  },
+  
+  saveServerProperties: async (id, properties) => {
+    await fetch(`http://localhost:5000/api/servers/${id}/properties`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(properties),
+    });
+  },
+
+  sendRconCommand: async (id, command) => {
+    const response = await fetch(`http://localhost:5000/api/servers/${id}/rcon`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ command }),
+    });
+    return response.text();
+  },
 });

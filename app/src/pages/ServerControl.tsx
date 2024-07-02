@@ -139,7 +139,7 @@ export const ServerControl: React.FC = () => {
       </div>
 
       {activeTab === 'home' && <HomeTab status={status} handleAction={handleAction} removeServer={removeServer} />}
-      {activeTab === 'properties' && <ServerPropertiesTab />}
+      {activeTab === 'properties' && <ServerPropertiesTab serverId={id!} serverStatus={status}/>}
       {activeTab === 'console' && <ConsoleTab />}
     </div>
   );

@@ -110,6 +110,29 @@ declare global {
        * @returns {Promise<string>} Response from the server
        */
       chooseFile: () => Promise<string>;
+      
+      /**
+       * Retrieve fields from server.properties
+       * @param {string} id - Server ID
+       * @returns {Promise<any>} The updated properties
+       */
+      getServerProperties: (id: string) => Promise<any>;
+
+      /**
+       * Update fields in server.properties
+       * @param {string} id - Server ID
+       * @param {any} properties - The updated properties
+       * @returns {Promise<any>} The updated properties
+       */
+      saveServerProperties: (id: string, properties: any) => Promise<void>;
+
+      /**
+       * Update fields in server.properties
+       * @param {string} id - Server ID
+       * @param {string} command - The rcon command to send
+       * @returns {Promise<string>} The server response
+       */
+      sendRconCommand: (id: string, command: string) => Promise<string>;
     };
   }
 }
