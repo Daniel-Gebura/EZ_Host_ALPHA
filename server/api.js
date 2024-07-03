@@ -162,10 +162,18 @@ const startApiServer = () => {
     }
 
     const options = { shell: true };
+    const timeout = setTimeout(() => {
+      console.error(`Timeout executing ${scriptName}`);
+      server.status = 'Offline';
+      saveServers(servers);
+      res.status(500).send(`Timeout executing ${scriptName}`);
+    }, 150000); // Set timeout to 150 seconds (2.5 minutes)
 
     console.log(`Executing script: ${scriptPath}`); // Debug log
 
     const child = execFile('powershell.exe', ['-ExecutionPolicy', 'Bypass', '-File', scriptPath], options, (error, stdout, stderr) => {
+      clearTimeout(timeout); // Clear the timeout if the script finishes
+      console.log(`Clearing Timeout for: ${scriptPath}`); // Debug log
       if (error) {
         console.error(`Error executing ${scriptName}:`, error);
         server.status = 'Offline';
@@ -176,6 +184,14 @@ const startApiServer = () => {
         console.error(`Script stderr: ${stderr}`);
       }
       console.log(`Script stdout: ${stdout}`);
+      // Additional check for successful startup message
+      if (stdout.includes('Done') && stdout.includes('For help, type "help"')) {
+        server.status = 'Online';
+        saveServers(servers);
+      } else {
+        server.status = 'Offline';
+        saveServers(servers);
+      }
       res.json({ message: `Script ${scriptName} executed successfully`, output: stdout });
     });
 
@@ -184,6 +200,8 @@ const startApiServer = () => {
       console.log(`stdout: ${data}`);
       // Check if the server is online by looking for specific log output
       if (data.includes('Done') && data.includes('For help, type "help"')) {
+        clearTimeout(timeout); // Clear the timeout if server starts successfully
+        console.log(`Clearing Timeout for: ${scriptPath}`); // Debug log
         server.status = 'Online';
         saveServers(servers);
       }
@@ -191,19 +209,6 @@ const startApiServer = () => {
 
     child.stderr.on('data', data => {
       console.error(`stderr: ${data}`);
-    });
-
-    // Add a timeout to handle script execution failures
-    const timeout = setTimeout(() => {
-      console.error(`Script ${scriptName} timed out.`);
-      server.status = 'Offline';
-      saveServers(servers);
-      res.status(500).send(`Error executing ${scriptName}: Timed out.`);
-      child.kill();
-    }, 300000); // 5 minutes timeout
-
-    child.on('close', () => {
-      clearTimeout(timeout); // Clear the timeout on successful completion
     });
   };
 
