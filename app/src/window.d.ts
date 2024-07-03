@@ -101,13 +101,13 @@ declare global {
 
       /**
        * Choose a directory
-       * @returns {Promise<string>} Response from the server
+       * @returns {Promise<string>} The selected directory
        */
       chooseDirectory: () => Promise<string>;
 
       /**
        * Choose a file
-       * @returns {Promise<string>} Response from the server
+       * @returns {Promise<string>} The selected file
        */
       chooseFile: () => Promise<string>;
       

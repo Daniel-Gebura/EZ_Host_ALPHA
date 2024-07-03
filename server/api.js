@@ -192,6 +192,19 @@ const startApiServer = () => {
     child.stderr.on('data', data => {
       console.error(`stderr: ${data}`);
     });
+
+    // Add a timeout to handle script execution failures
+    const timeout = setTimeout(() => {
+      console.error(`Script ${scriptName} timed out.`);
+      server.status = 'Offline';
+      saveServers(servers);
+      res.status(500).send(`Error executing ${scriptName}: Timed out.`);
+      child.kill();
+    }, 300000); // 5 minutes timeout
+
+    child.on('close', () => {
+      clearTimeout(timeout); // Clear the timeout on successful completion
+    });
   };
 
   /**
@@ -205,6 +218,11 @@ const startApiServer = () => {
     const server = servers.find(s => s.id === serverId);
     if (!server) {
       return res.status(404).send('Server not found');
+    }
+
+    // Check if server is online before sending RCON command
+    if (server.status !== 'Online') {
+      return res.status(400).send('Server is not online.');
     }
 
     // Update server status based on the command
