@@ -224,9 +224,10 @@ const startApiServer = () => {
     if (!server) {
       return res.status(404).send('Server not found');
     }
-
+  
     // Check if server is online before sending RCON command
     if (server.status !== 'Online') {
+      console.log('Start server before sending rcon command.');
       return res.status(400).send('Server is not online.');
     }
 
@@ -237,26 +238,26 @@ const startApiServer = () => {
       server.status = 'Restarting...';
     }
     saveServers(servers);
-
+  
     try {
       const rcon = await Rcon.connect({
         host: 'localhost',
         port: 25575,
         password: server.rconPassword,
       });
-
+  
       const response = await rcon.send(command);
       await rcon.end();
       console.log(`RCON response: ${response}`);
-
+  
       // Update server status based on the command
       if (command === 'stop') {
         server.status = 'Offline';
       }
-
+  
       saveServers(servers);
       res.json({ message: `Command ${command} executed successfully`, output: response });
-
+  
       if (callback) {
         callback();
       }
@@ -265,8 +266,12 @@ const startApiServer = () => {
       server.status = 'Offline';
       saveServers(servers);
       res.status(500).send(`Error sending RCON command: ${error.message}`);
+      if (callback) {
+        callback(error);
+      }
     }
   };
+  
 
   /**
    * Endpoint to initialize a server
@@ -294,18 +299,18 @@ const startApiServer = () => {
    */
   app.post('/api/servers/:id/restart', async (req, res) => {
     const serverId = req.params.id;
-
+  
     const handleStopAndStart = async () => {
-      // Ensure the server is stopped before starting
-      await sendRconCommand(serverId, 'stop', res, () => {
-        // Run the start.ps1 PowerShell script to start the server
-        runPowerShellScript(serverId, 'start.ps1', res);
-      });
+      // Run the start.ps1 PowerShell script to start the server
+      runPowerShellScript(serverId, 'start.ps1', res);
     };
-
-    // First, save the server
-    await sendRconCommand(serverId, 'save-all', res, handleStopAndStart);
+  
+    // First, save the server, then stop it, and finally start it again
+    await sendRconCommand(serverId, 'save-all', res, () => {
+      sendRconCommand(serverId, 'stop', res, handleStopAndStart);
+    });
   });
+  
 
   /**
    * Endpoint to stop a server
