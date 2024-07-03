@@ -32,9 +32,6 @@ export const ServerPropertiesTab: React.FC<ServerPropertiesTabProps> = ({ server
   const saveProperties = async () => {
     try {
       await window.api.saveServerProperties(serverId, properties);
-      if (serverStatus === 'Online') {
-        await window.api.sendRconCommand(serverId, '/reload');
-      }
       setNotification({ message: 'Server properties saved successfully.', type: 'success' });
     } catch (error) {
       console.error('Error saving server properties:', error);
