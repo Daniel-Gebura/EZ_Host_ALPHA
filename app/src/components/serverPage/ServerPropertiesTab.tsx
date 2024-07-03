@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { Notification } from '../common/Notification';
 
 interface ServerPropertiesTabProps {
   serverId: string;
@@ -17,6 +18,7 @@ export const ServerPropertiesTab: React.FC<ServerPropertiesTabProps> = ({ server
     'spawn-monsters': 'true',
     'spawn-npcs': 'true',
   });
+  const [notification, setNotification] = useState<{ message: string, type: 'success' | 'error' } | null>(null);
 
   const fetchProperties = async () => {
     try {
@@ -33,10 +35,10 @@ export const ServerPropertiesTab: React.FC<ServerPropertiesTabProps> = ({ server
       if (serverStatus === 'Online') {
         await window.api.sendRconCommand(serverId, '/reload');
       }
-      alert('Server properties saved successfully.');
+      setNotification({ message: 'Server properties saved successfully.', type: 'success' });
     } catch (error) {
       console.error('Error saving server properties:', error);
-      alert('Failed to save server properties.');
+      setNotification({ message: 'Failed to save server properties.', type: 'error' });
     }
   };
 
@@ -54,6 +56,7 @@ export const ServerPropertiesTab: React.FC<ServerPropertiesTabProps> = ({ server
 
   return (
     <div className="bg-base-300 shadow-lg rounded-lg p-6 mb-4">
+      {notification && <Notification message={notification.message} type={notification.type} />}
       <h2 className="text-2xl font-bold mb-4">Server Properties</h2>
       <div className="grid grid-cols-1 gap-4">
         <div>
