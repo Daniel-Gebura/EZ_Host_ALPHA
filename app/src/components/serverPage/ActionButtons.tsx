@@ -23,14 +23,6 @@ export const ActionButtons: React.FC<ActionButtonsProps> = ({ onAction, status }
       >
         Save Server
       </button>
-
-      <button
-        className="btn btn-warning mb-2 md:mb-0"
-        onClick={() => onAction('restart')}
-        disabled={status !== 'Online'}
-      >
-        Restart Server
-      </button>
       
       <button
         className="btn btn-secondary mb-2 md:mb-0"
