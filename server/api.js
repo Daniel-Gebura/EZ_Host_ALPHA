@@ -184,14 +184,6 @@ const startApiServer = () => {
         console.error(`Script stderr: ${stderr}`);
       }
       console.log(`Script stdout: ${stdout}`);
-      // Additional check for successful startup message
-      if (stdout.includes('Done') && stdout.includes('For help, type "help"')) {
-        server.status = 'Online';
-        saveServers(servers);
-      } else {
-        server.status = 'Offline';
-        saveServers(servers);
-      }
       res.json({ message: `Script ${scriptName} executed successfully`, output: stdout });
     });
 
@@ -222,13 +214,15 @@ const startApiServer = () => {
   const sendRconCommand = async (serverId, command, res, callback) => {
     const server = servers.find(s => s.id === serverId);
     if (!server) {
-      return res.status(404).send('Server not found');
+      if (res) res.status(404).send('Server not found');
+      return;
     }
-  
+
     // Check if server is online before sending RCON command
     if (server.status !== 'Online') {
       console.log('Start server before sending rcon command.');
-      return res.status(400).send('Server is not online.');
+      if (res) res.status(400).send('Server is not online.');
+      return;
     }
 
     // Update server status based on the command
@@ -238,26 +232,29 @@ const startApiServer = () => {
       server.status = 'Restarting...';
     }
     saveServers(servers);
-  
+
     try {
       const rcon = await Rcon.connect({
         host: 'localhost',
         port: 25575,
         password: server.rconPassword,
       });
-  
+
       const response = await rcon.send(command);
       await rcon.end();
       console.log(`RCON response: ${response}`);
-  
+
       // Update server status based on the command
       if (command === 'stop') {
-        server.status = 'Offline';
+        setTimeout(() => {
+          server.status = 'Offline';
+          saveServers(servers);
+        }, 7000); // Delay for 7 seconds before setting to Offline
       }
-  
+
       saveServers(servers);
-      res.json({ message: `Command ${command} executed successfully`, output: response });
-  
+      if (res) res.json({ message: `Command ${command} executed successfully`, output: response });
+
       if (callback) {
         callback();
       }
@@ -265,13 +262,12 @@ const startApiServer = () => {
       console.error(`Error sending RCON command:`, error);
       server.status = 'Offline';
       saveServers(servers);
-      res.status(500).send(`Error sending RCON command: ${error.message}`);
+      if (res) res.status(500).send(`Error sending RCON command: ${error.message}`);
       if (callback) {
         callback(error);
       }
     }
   };
-  
 
   /**
    * Endpoint to initialize a server
