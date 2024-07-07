@@ -199,7 +199,7 @@ const startApiServer = () => {
       server.status = 'Offline';
       saveServers(servers);
       res.status(500).send(`Timeout executing ${scriptName}`);
-    }, 150000); // Set timeout to 150 seconds (2.5 minutes)
+    }, 300000); // Set timeout to 300 seconds (5 minutes)
 
     console.log(`Executing script: ${scriptPath}`); // Debug log
 

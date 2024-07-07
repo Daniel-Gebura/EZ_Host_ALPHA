@@ -16,6 +16,7 @@ export const ServerControl: React.FC = () => {
   const [icon, setIcon] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<'home' | 'properties' | 'console'>('home');
   const [notification, setNotification] = useState<{ message: string, type: 'success' | 'error' } | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   const fetchServerDetails = async () => {
     if (id) {
@@ -53,6 +54,16 @@ export const ServerControl: React.FC = () => {
     }
 
     try {
+      // Check if any server is online
+      if (action === 'start') {
+        const servers = await window.api.getServers();
+        const onlineServer = servers.find((server: any) => server.status === 'Online');
+        if (onlineServer) {
+          setIsModalOpen(true);
+          return;
+        }
+      }
+
       let response;
       switch (action) {
         case 'start':
@@ -146,6 +157,18 @@ export const ServerControl: React.FC = () => {
       {activeTab === 'home' && <HomeTab status={status} handleAction={handleAction} removeServer={removeServer} />}
       {activeTab === 'properties' && <ServerPropertiesTab serverId={id!} serverStatus={status} />}
       {activeTab === 'console' && <ConsoleTab />}
+      
+      {isModalOpen && (
+        <div className="modal modal-open">
+          <div className="modal-box">
+            <h3 className="font-bold text-lg">Warning</h3>
+            <p>Only one server can be online at a time. Please stop the currently running server before starting a new one.</p>
+            <div className="modal-action">
+              <button className="btn" onClick={() => setIsModalOpen(false)}>Close</button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
