@@ -424,6 +424,30 @@ const startApiServer = () => {
   });
 
   /**
+   * Endpoint to update RAM allocation for a server
+   */
+  app.put('/api/servers/:id/ram', (req, res) => {
+    const { id } = req.params;
+    const { ram } = req.body;
+    const server = servers.find(s => s.id === id);
+    if (!server) {
+      return res.status(404).send('Server not found');
+    }
+
+    const variablesFilePath = path.join(server.directory, 'variables.txt');
+    if (!fs.existsSync(variablesFilePath)) {
+      return res.status(404).send('variables.txt not found');
+    }
+
+    let variablesContent = fs.readFileSync(variablesFilePath, 'utf8');
+    const ramRegex = /-Xmx\d+G/;
+    variablesContent = variablesContent.replace(ramRegex, `-Xmx${ram}G`);
+
+    fs.writeFileSync(variablesFilePath, variablesContent, 'utf8');
+    res.status(200).send('RAM allocation updated');
+  });
+
+  /**
    * Endpoint to send an RCON command to the server
    */
   app.post('/api/servers/:id/rcon', async (req, res) => {

@@ -5,9 +5,9 @@ export const Central: React.FC = () => {
   return (
     <div className="p-6 bg-base-200 rounded-lg shadow-lg text-center">
       <div>
-        <h1 className="text-4xl font-bold mb-4">Welcome to the Home Page</h1>
+        <h1 className="text-4xl font-bold mb-4">Welcome to EZ Host!</h1>
         <p className="text-lg">
-          This is the home page of your application. Customize it as needed.
+          To get started, simply download a server pack from CurseForge and add an EZ Host server to its root directory.
         </p>
       </div>
       <img src={logo} alt="Logo" className="mx-auto mb-4 h-48" />{' '}

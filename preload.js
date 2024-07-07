@@ -208,6 +208,20 @@ contextBridge.exposeInMainWorld('api', {
     });
   },
 
+  updateRamAllocation: async (id, ram) => {
+    const response = await fetch(`http://localhost:5000/api/servers/${id}/ram`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ ram }),
+    });
+    if (!response.ok) {
+      throw new Error('Failed to update RAM allocation');
+    }
+    return response.text();
+  },
+
   /**
    * Send an RCON command to the server
    * @param {string} id - Server ID
