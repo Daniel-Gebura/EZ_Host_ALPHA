@@ -281,7 +281,7 @@ const startApiServer = () => {
         setTimeout(() => {
           server.status = 'Offline';
           saveServers(servers);
-        }, 7000); // Delay for 7 seconds before setting to Offline
+        }, 10000); // Delay for 10 seconds before setting to Offline
       }
 
       saveServers(servers);
