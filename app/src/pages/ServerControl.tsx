@@ -4,7 +4,7 @@ import { IconChanger } from '../components/serverPage/IconChanger';
 import { ServerStatus } from '../components/serverPage/ServerStatus';
 import { HomeTab } from '../components/serverPage/HomeTab';
 import { ServerPropertiesTab } from '../components/serverPage/ServerPropertiesTab';
-import { ServerDetailsTab } from '../components/serverPage/ServerDetailsTab'; // Import ServerDetailsTab
+import { ServerDetailsTab } from '../components/serverPage/ServerDetailsTab'; // Import the new component
 import { Notification } from '../components/common/Notification';
 import defaultLogo from '../assets/logo/EZ_Host_Logo1.png';
 
@@ -14,9 +14,11 @@ export const ServerControl: React.FC = () => {
   const [serverName, setServerName] = useState('');
   const [status, setStatus] = useState<'Offline' | 'Starting...' | 'Online' | 'Stopping...' | 'Restarting...'>('Offline');
   const [icon, setIcon] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState<'home' | 'properties' | 'serverDetails'>('home'); // Update tab state
+  const [activeTab, setActiveTab] = useState<'home' | 'properties' | 'details'>('home'); // Update tab state
   const [notification, setNotification] = useState<{ message: string, type: 'success' | 'error' } | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [ramAllocation, setRamAllocation] = useState(4); // Add state for RAM allocation
+  const [ip, setIp] = useState('127.0.0.1'); // Replace with actual server IP
 
   const fetchServerDetails = async () => {
     if (id) {
@@ -25,6 +27,7 @@ export const ServerControl: React.FC = () => {
         setServerName(server.name);
         setStatus(server.status);
         setIcon(server.icon || defaultLogo);
+        // Fetch and set additional server details like RAM allocation and IP address here
       } catch (error: any) {
         console.error('Error fetching server details:', error);
       }
@@ -122,6 +125,23 @@ export const ServerControl: React.FC = () => {
     }
   };
 
+  const handleRamChange = async (newRam: number) => {
+    // Call the backend to update the variables.txt file with the new RAM allocation
+    if (!id) {
+      console.error('Server ID is undefined');
+      return;
+    }
+
+    try {
+      await window.api.updateRamAllocation(id, newRam); // Implement this API call in the backend
+      setRamAllocation(newRam);
+      setNotification({ message: 'RAM allocation updated successfully. Please restart the server for changes to take effect.', type: 'success' });
+    } catch (error: any) {
+      console.error('Error updating RAM allocation:', error);
+      setNotification({ message: 'Failed to update RAM allocation.', type: 'error' });
+    }
+  };
+
   return (
     <div className="min-h-screen bg-base-100 p-4 lg:pl-32 lg:pr-32">
       {notification && <Notification message={notification.message} type={notification.type} />}
@@ -146,8 +166,8 @@ export const ServerControl: React.FC = () => {
             Server Properties
           </a>
           <a
-            className={`tab ${activeTab === 'serverDetails' ? 'tab-active bg-blue-500' : ''}`}
-            onClick={() => setActiveTab('serverDetails')}
+            className={`tab ${activeTab === 'details' ? 'tab-active bg-blue-500' : ''}`}
+            onClick={() => setActiveTab('details')}
           >
             Server Details
           </a>
@@ -156,7 +176,7 @@ export const ServerControl: React.FC = () => {
 
       {activeTab === 'home' && <HomeTab status={status} handleAction={handleAction} removeServer={removeServer} />}
       {activeTab === 'properties' && <ServerPropertiesTab serverId={id!} serverStatus={status} />}
-      {activeTab === 'serverDetails' && <ServerDetailsTab serverId={id!} />}
+      {activeTab === 'details' && <ServerDetailsTab ip={ip} ramAllocation={ramAllocation} onRamChange={handleRamChange} />}
       
       {isModalOpen && (
         <div className="modal modal-open">

@@ -209,13 +209,16 @@ contextBridge.exposeInMainWorld('api', {
   },
 
   updateRamAllocation: async (id, ram) => {
-    const response = await fetch(`http://localhost:5000/api/servers/${id}/ramAllocation`, {
+    const response = await fetch(`http://localhost:5000/api/servers/${id}/ram`, {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({ ram }),
     });
+    if (!response.ok) {
+      throw new Error('Failed to update RAM allocation');
+    }
     return response.text();
   },
 
@@ -231,11 +234,6 @@ contextBridge.exposeInMainWorld('api', {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ command }),
     });
-    return response.text();
-  },
-  
-  getIpAddress: async () => {
-    const response = await fetch('http://localhost:5000/api/ipAddress');
     return response.text();
   },
 });

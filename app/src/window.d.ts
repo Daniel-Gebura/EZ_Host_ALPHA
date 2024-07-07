@@ -141,8 +141,6 @@ declare global {
        * @returns {Promise<string>} The server response
        */
       sendRconCommand: (id: string, command: string) => Promise<string>;
-
-      getIpAddress: () => Promise<string>;
     };
   }
 }

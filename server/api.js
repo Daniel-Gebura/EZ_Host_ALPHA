@@ -1,5 +1,4 @@
 const express = require('express');
-const os = require('os');
 const fs = require('fs');
 const path = require('path');
 const cors = require('cors');
@@ -14,18 +13,6 @@ const PORT = 5000;
 // Paths to the script templates
 const START_SCRIPT_TEMPLATE = path.join(__dirname, 'template_scripts/simple-start-template.ps1');
 const INIT_SCRIPT_TEMPLATE = path.join(__dirname, 'template_scripts/initServer-template.ps1');
-
-const getIpAddress = () => {
-  const interfaces = os.networkInterfaces();
-  for (const name of Object.keys(interfaces)) {
-    for (const net of interfaces[name]) {
-      if (net.family === 'IPv4' && !net.internal) {
-        return net.address;
-      }
-    }
-  }
-  return '127.0.0.1';
-};
 
 /**
  * Starts the API server
@@ -437,9 +424,9 @@ const startApiServer = () => {
   });
 
   /**
-   * Endpoint to update the RAM allocation for a server
+   * Endpoint to update RAM allocation for a server
    */
-  app.put('/api/servers/:id/ramAllocation', (req, res) => {
+  app.put('/api/servers/:id/ram', (req, res) => {
     const { id } = req.params;
     const { ram } = req.body;
     const server = servers.find(s => s.id === id);
@@ -452,12 +439,12 @@ const startApiServer = () => {
       return res.status(404).send('variables.txt not found');
     }
 
-    const variablesContent = fs.readFileSync(variablesFilePath, 'utf8');
-    const updatedVariablesContent = variablesContent.replace(/-Xmx\d+G/g, `-Xmx${ram}G`);
+    let variablesContent = fs.readFileSync(variablesFilePath, 'utf8');
+    const ramRegex = /-Xmx\d+G/;
+    variablesContent = variablesContent.replace(ramRegex, `-Xmx${ram}G`);
 
-    fs.writeFileSync(variablesFilePath, updatedVariablesContent);
-
-    res.send('RAM allocation updated successfully');
+    fs.writeFileSync(variablesFilePath, variablesContent, 'utf8');
+    res.status(200).send('RAM allocation updated');
   });
 
   /**
@@ -472,10 +459,6 @@ const startApiServer = () => {
   // Start the API server
   app.listen(PORT, () => {
     console.log(`API Server is running on http://localhost:${PORT}`);
-  });
-
-  app.get('/api/ipAddress', (req, res) => {
-    res.send(getIpAddress());
   });
 };
 
