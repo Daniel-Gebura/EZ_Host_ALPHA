@@ -17,6 +17,8 @@ declare global {
        */
       on: (channel: string, listener: (event: Electron.IpcRendererEvent, ...args: any[]) => void) => void;
 
+      removeListener(channel: string, listener: (...args: any[]) => void): this;
+
       /**
        * Remove all listeners for a specific channel.
        * @param {string} channel - The channel to remove listeners from.

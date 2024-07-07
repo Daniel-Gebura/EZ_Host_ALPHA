@@ -1,24 +1,11 @@
-/**
- * main.js
- * 
- * Entry point for the Electron application.
- * This script handles the backend lifecycle events of the application.
- * 
- * @file main.js
- * @description Main process of the Electron application
- * @version 1.0
- */
-const { app, BrowserWindow, dialog, ipcMain } = require('electron'); // Electron modules for application
-const url = require('url'); // Module for URL handling
-const path = require('path'); // Module for file path handling
-const chokidar = require('chokidar'); // Module for watching file changes
-const { startApiServer } = require('./server/api'); // Import the API server starter function
+const { app, BrowserWindow, dialog, ipcMain } = require('electron');
+const url = require('url');
+const path = require('path');
+const chokidar = require('chokidar');
+const { startApiServer } = require('./server/api');
 
 let mainWindow;
 
-/**
- * Create the main application window.
- */
 function createMainWindow() {
   mainWindow = new BrowserWindow({
     title: 'EZ Host',
@@ -26,52 +13,45 @@ function createMainWindow() {
     height: 600,
     webPreferences: {
       contextIsolation: true,
-      nodeIntegration: false, // Disable nodeIntegration for security
-      preload: path.join(__dirname, 'preload.js'), // Preload script for additional security
+      nodeIntegration: false,
+      preload: path.join(__dirname, 'preload.js'),
     },
-    autoHideMenuBar: true, // This line hides the menu bar
+    autoHideMenuBar: true,
   });
 
-  // DEBUGGING: Open DevTools
-  //mainWindow.webContents.openDevTools();
-
-  // Define the start URL for the main window
   const startUrl = url.format({
     pathname: path.join(__dirname, 'app/build/index.html'),
     protocol: 'file:',
-    slashes: true, // Ensures proper URL formatting across platforms
+    slashes: true,
   });
 
-  // Load the start URL in the main window
   mainWindow.loadURL(startUrl);
 
-  // Handle full-screen events
-  mainWindow.on('enter-full-screen', () => {
-    console.log('Entered full-screen mode');
-    mainWindow.webContents.send('full-screen-changed', true);
-  });
-
-  mainWindow.on('leave-full-screen', () => {
-    console.log('Exited full-screen mode');
-    mainWindow.webContents.send('full-screen-changed', false);
-  });
-
-  // Initialize the watcher
   const watcher = chokidar.watch(path.join(__dirname, 'server', 'servers.json'), {
     persistent: true,
   });
 
   watcher.on('change', () => {
     if (mainWindow) {
-      // Send a message to the renderer process to refresh
       mainWindow.webContents.send('servers-json-changed');
     }
   });
+
+  const logMessage = (message) => {
+    if (mainWindow) {
+      mainWindow.webContents.send('log-message', message);
+    }
+  };
+
+  // Example of sending log messages
+  logMessage('Server started successfully');
+
+  // Replace this with your own logic to log messages from the server
+  setInterval(() => {
+    logMessage('Periodic log message');
+  }, 10000);
 }
 
-/**
- * Handle the choose-directory IPC call
- */
 ipcMain.handle('choose-directory', async () => {
   const result = await dialog.showOpenDialog(mainWindow, {
     properties: ['openDirectory']
@@ -79,9 +59,6 @@ ipcMain.handle('choose-directory', async () => {
   return result.filePaths[0];
 });
 
-/**
- * Handle the choose-file IPC call
- */
 ipcMain.handle('choose-file', async () => {
   const result = await dialog.showOpenDialog(mainWindow, {
     properties: ['openFile'],
@@ -90,20 +67,17 @@ ipcMain.handle('choose-file', async () => {
   return result.filePaths[0];
 });
 
-// START UP CALL: Application ready event
 app.whenReady().then(() => {
-  createMainWindow(); // Create the main window when the app is ready
-  startApiServer(); // Start the API server
+  createMainWindow();
+  startApiServer();
 });
 
-// Handle application re-activation (macOS)
 app.on('activate', () => {
   if (BrowserWindow.getAllWindows().length === 0) {
     createMainWindow();
   }
 });
 
-// Handle all windows being closed
 app.on('window-all-closed', () => {
   if (process.platform !== 'darwin') {
     app.quit();

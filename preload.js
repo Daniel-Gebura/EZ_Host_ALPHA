@@ -19,6 +19,8 @@ contextBridge.exposeInMainWorld('ipcRenderer', {
   send: (channel, data) => ipcRenderer.send(channel, data), // Send IPC message to main process
   on: (channel, func) =>
     ipcRenderer.on(channel, (event, ...args) => func(...args)), // Listen for IPC message from main process
+  removeListener: (channel, func) =>
+    ipcRenderer.removeListener(channel, func),
   removeAllListeners: (channel) => ipcRenderer.removeAllListeners(channel), // Remove all listeners for a specific channel
 });
 
