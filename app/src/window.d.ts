@@ -58,6 +58,12 @@ declare global {
       updateServer: (id: string, server: any) => Promise<any>;
 
       /**
+       * Check the status of all servers
+       * @returns {Promise<void>} The server response
+       */
+      checkServerStatus: () => Promise<void>;
+
+      /**
        * Delete a server by ID
        * @param {string} id - Server ID
        * @returns {Promise<void>}

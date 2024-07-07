@@ -143,6 +143,38 @@ const startApiServer = () => {
   });
 
   /**
+   * Endpoint to check the status of all servers
+   */
+  app.post('/api/servers/check-status', async (req, res) => {
+    const updatedServers = await Promise.all(servers.map(async server => {
+      try {
+        const rcon = await Rcon.connect({
+          host: 'localhost',
+          port: 25575,
+          password: server.rconPassword,
+        });
+
+        const response = await rcon.send('list');
+        await rcon.end();
+
+        if (response.includes('players online')) {
+          server.status = 'Online';
+        } else {
+          server.status = 'Offline';
+        }
+      } catch (error) {
+        console.error(`Error checking status for server ${server.name}:`, error);
+        server.status = 'Offline';
+      }
+
+      return server;
+    }));
+
+    saveServers(updatedServers);
+    res.json({ message: 'Server statuses updated successfully', servers: updatedServers });
+  });
+
+  /**
    * Helper function to run a PowerShell script for a server
    * @param {string} serverId - The ID of the server
    * @param {string} scriptName - The name of the PowerShell script to run

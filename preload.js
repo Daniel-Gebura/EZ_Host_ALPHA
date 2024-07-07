@@ -82,6 +82,17 @@ contextBridge.exposeInMainWorld('api', {
   },
 
   /**
+   * Check the status of all servers
+   * @returns {Promise<void>}
+   */
+  checkServerStatus: async () => {
+    const response = await fetch('http://localhost:5000/api/servers/check-status', {
+      method: 'POST',
+    });
+    return response.json();
+  },
+
+  /**
    * Delete a server by ID
    * @param {string} id - Server ID
    * @returns {Promise<void>}
