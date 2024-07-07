@@ -17,6 +17,7 @@ export const AddButton: React.FC = () => {
   const [rconPassword, setRconPassword] = useState('');
   const [agreeEula, setAgreeEula] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
 
   /**
@@ -28,6 +29,7 @@ export const AddButton: React.FC = () => {
       return;
     }
 
+    setIsLoading(true);
     const newServer = {
       name: serverName,
       directory: directory,
@@ -53,6 +55,8 @@ export const AddButton: React.FC = () => {
     } catch (err) {
       setError('Failed to add and initialize the server.');
       console.error(err);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -127,7 +131,13 @@ export const AddButton: React.FC = () => {
             </label>
           </div>
 
-          <button className="btn btn-primary w-full" onClick={addServer} disabled={!agreeEula}>Add Server</button>
+          <button className="btn btn-primary w-full" onClick={addServer} disabled={!agreeEula || isLoading}>
+            {isLoading ? (
+              <span className="loading loading-spinner"></span>
+            ) : (
+              'Add Server'
+            )}
+          </button>
         </div>
       </dialog>
     </>
