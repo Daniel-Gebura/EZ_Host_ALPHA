@@ -28,6 +28,29 @@ const getIpAddress = () => {
   return '127.0.0.1'; // Default IP address if none found
 };
 
+// Function to fetch the list of players
+const getPlayersList = async (rconPassword) => {
+  try {
+    const rcon = await Rcon.connect({
+      host: 'localhost',
+      port: 25575,
+      password: rconPassword,
+    });
+
+    const response = await rcon.send('list');
+    await rcon.end();
+
+    // Parse the response to extract player names
+    const match = response.match(/There are \d+\/\d+ players online: (.+)/);
+    const players = match ? match[1].split(', ') : [];
+
+    return players;
+  } catch (error) {
+    console.error('Error fetching players list:', error);
+    return [];
+  }
+};
+
 /**
  * Starts the API server
  */
@@ -498,6 +521,49 @@ const startApiServer = () => {
     const { id } = req.params;
     const { command } = req.body;
     await sendRconCommand(id, command, res);
+  });
+
+  /**
+   * Endpoint to get the list of players
+   */
+  app.get('/api/servers/:id/players', async (req, res) => {
+    const { id } = req.params;
+    const server = servers.find(s => s.id === id);
+    if (!server) {
+      return res.status(404).send('Server not found');
+    }
+
+    const players = await getPlayersList(server.rconPassword);
+    res.json(players);
+  });
+
+  /**
+   * Endpoint to OP/Un-OP a player
+   */
+  app.post('/api/servers/:id/player/:playerName/op', async (req, res) => {
+    const { id, playerName } = req.params;
+    const { op } = req.body; // true to OP, false to un-OP
+    const server = servers.find(s => s.id === id);
+    if (!server) {
+      return res.status(404).send('Server not found');
+    }
+  
+    const command = op ? `op ${playerName}` : `deop ${playerName}`;
+    try {
+      const rcon = await Rcon.connect({
+        host: 'localhost',
+        port: 25575,
+        password: server.rconPassword,
+      });
+  
+      const response = await rcon.send(command);
+      await rcon.end();
+  
+      res.json({ message: `Player ${op ? 'OPed' : 'un-OPed'} successfully`, response });
+    } catch (error) {
+      console.error(`Error executing ${command}:`, error);
+      res.status(500).send(`Error executing ${command}: ${error.message}`);
+    }
   });
 
   // Start the API server

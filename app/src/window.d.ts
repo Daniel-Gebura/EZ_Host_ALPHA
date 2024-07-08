@@ -149,6 +149,9 @@ declare global {
        * @returns {Promise<string>} The server response
        */
       sendRconCommand: (id: string, command: string) => Promise<string>;
+
+      getPlayers: (id: string) => Promise<string[]>;
+      setPlayerOp: (id: string, playerName: string, op: boolean) => Promise<string>;
     };
   }
 }

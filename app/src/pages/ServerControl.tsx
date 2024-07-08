@@ -182,7 +182,7 @@ export const ServerControl: React.FC = () => {
         </div>
       </div>
 
-      {activeTab === 'home' && <HomeTab status={status} handleAction={handleAction} removeServer={removeServer} />}
+      {activeTab === 'home' && <HomeTab status={status} handleAction={handleAction} removeServer={removeServer} serverId={currentServerId!} />}
       {activeTab === 'properties' && <ServerPropertiesTab serverId={currentServerId!} serverStatus={status} />}
       {activeTab === 'details' && <ServerDetailsTab ip={ip} ramAllocation={ramAllocation} onRamChange={handleRamChange} />}
       

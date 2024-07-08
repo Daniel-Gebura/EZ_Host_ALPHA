@@ -264,4 +264,38 @@ contextBridge.exposeInMainWorld('api', {
     });
     return response.text();
   },
+
+  /**
+   * Get the list of players on a server
+   * @param {string} id - Server ID
+   * @returns {Promise<string[]>} List of player names
+   */
+   getPlayers: async (id) => {
+    const response = await fetch(`http://localhost:5000/api/servers/${id}/players`);
+    if (!response.ok) {
+      throw new Error('Failed to fetch players list');
+    }
+    return response.json();
+  },
+
+  /**
+   * OP or un-OP a player
+   * @param {string} id - Server ID
+   * @param {string} playerName - Player name
+   * @param {boolean} op - true to OP, false to un-OP
+   * @returns {Promise<string>} Response from the server
+   */
+  setPlayerOp: async (id, playerName, op) => {
+    const response = await fetch(`http://localhost:5000/api/servers/${id}/player/${playerName}/op`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ op }),
+    });
+    if (!response.ok) {
+      throw new Error(`Failed to ${op ? 'OP' : 'un-OP'} player`);
+    }
+    return response.json();
+  },
 });
