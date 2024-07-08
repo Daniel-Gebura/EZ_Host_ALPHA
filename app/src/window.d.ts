@@ -132,6 +132,8 @@ declare global {
        */
       saveServerProperties: (id: string, properties: any) => Promise<void>;
 
+      getRamAllocation: (id: string) => Promise<number>;
+
       updateRamAllocation: (id: string, ram: number) => Promise<string>;
 
       /**

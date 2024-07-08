@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 
 interface ServerDetailsTabProps {
   ip: string;
@@ -9,6 +9,10 @@ interface ServerDetailsTabProps {
 export const ServerDetailsTab: React.FC<ServerDetailsTabProps> = ({ ip, ramAllocation, onRamChange }) => {
   const [ram, setRam] = useState(ramAllocation);
   const [isModalOpen, setIsModalOpen] = useState(false);
+
+  useEffect(() => {
+    setRam(ramAllocation);
+  }, [ramAllocation]);
 
   const handleIncrement = () => {
     if (ram < 16) {

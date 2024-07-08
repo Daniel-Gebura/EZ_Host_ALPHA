@@ -208,6 +208,20 @@ contextBridge.exposeInMainWorld('api', {
     });
   },
 
+  /**
+   * Get RAM allocation from variables.txt
+    * @param {string} id - Server ID
+    * @returns {Promise<number>} The RAM allocation in GB
+    */
+  getRamAllocation: async (id) => {
+    const response = await fetch(`http://localhost:5000/api/servers/${id}/ram`);
+    if (!response.ok) {
+      throw new Error('Failed to fetch RAM allocation');
+    }
+    const { ram } = await response.json();
+    return ram;
+  },
+
   updateRamAllocation: async (id, ram) => {
     const response = await fetch(`http://localhost:5000/api/servers/${id}/ram`, {
       method: 'PUT',

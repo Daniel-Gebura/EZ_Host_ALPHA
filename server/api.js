@@ -424,6 +424,28 @@ const startApiServer = () => {
   });
 
   /**
+   * Endpoint to get RAM allocation for a server
+   */
+  app.get('/api/servers/:id/ram', (req, res) => {
+    const { id } = req.params;
+    const server = servers.find(s => s.id === id);
+    if (!server) {
+      return res.status(404).send('Server not found');
+    }
+
+    const variablesFilePath = path.join(server.directory, 'variables.txt');
+    if (!fs.existsSync(variablesFilePath)) {
+      return res.status(404).send('variables.txt not found');
+    }
+
+    const variablesContent = fs.readFileSync(variablesFilePath, 'utf8');
+    const ramMatch = variablesContent.match(/-Xmx(\d+)G/);
+    const ram = ramMatch ? parseInt(ramMatch[1], 10) : 4;
+
+    res.json({ ram });
+  });
+
+  /**
    * Endpoint to update RAM allocation for a server
    */
   app.put('/api/servers/:id/ram', (req, res) => {

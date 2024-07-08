@@ -27,6 +27,10 @@ export const ServerControl: React.FC = () => {
       setServerName(server.name);
       setStatus(server.status);
       setIcon(server.icon || defaultLogo);
+      
+      const ram = await window.api.getRamAllocation(serverId);
+      setRamAllocation(ram);
+
       // Set additional server details like RAM allocation and IP address here
     } catch (error: any) {
       console.error('Error fetching server details:', error);
