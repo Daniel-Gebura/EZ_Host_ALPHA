@@ -1,12 +1,14 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import logo from '../../assets/logo/EZ_Host_Logo1.png';
+import { CheckServerStatusButton } from '../common/CheckServerStatusButton';
 
 interface NavbarProps {
   toggleSidebar: () => void;
+  onCheckStatus: () => void;
 }
 
-export const Navbar: React.FC<NavbarProps> = ({ toggleSidebar }) => {
+export const Navbar: React.FC<NavbarProps> = ({ toggleSidebar, onCheckStatus }) => {
   return (
     <nav className="bg-base-300 py-4 px-6 shadow-md fixed w-full z-20">
       <div className="flex items-center justify-between">
@@ -25,11 +27,9 @@ export const Navbar: React.FC<NavbarProps> = ({ toggleSidebar }) => {
         </Link>
 
         <div className="flex-none">
-          <ul className="menu menu-horizontal px-1">
+          <ul className="btn btn-square btn-outline">
             <li>
-              <Link to="/Dummy">
-                DUMMY
-              </Link>
+              <CheckServerStatusButton onCheckStatus={onCheckStatus} />
             </li>
           </ul>
         </div>

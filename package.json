@@ -12,13 +12,15 @@
   "author": "Daniel Gebura",
   "license": "MIT",
   "devDependencies": {
-    "electron": "^31.0.1"
+    "electron": "^31.0.2"
   },
   "dependencies": {
+    "chokidar": "^3.6.0",
     "cors": "^2.8.5",
     "electronmon": "^2.0.3",
     "express": "^4.19.2",
     "fs": "^0.0.1-security",
+    "rcon-client": "^4.2.4",
     "react-router-dom": "^6.23.1"
   }
 }

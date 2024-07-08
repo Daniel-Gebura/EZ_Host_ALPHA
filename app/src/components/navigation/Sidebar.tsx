@@ -11,6 +11,7 @@ interface SidebarProps {
 interface Server {
   id: string;
   name: string;
+  icon: string; // Add icon property
 }
 
 export const Sidebar: React.FC<SidebarProps> = ({ isSidebarOpen, toggleSidebar }) => {
@@ -33,6 +34,22 @@ export const Sidebar: React.FC<SidebarProps> = ({ isSidebarOpen, toggleSidebar }
 
   useEffect(() => {
     fetchServers();
+
+    const handleServersJsonChanged = () => {
+      fetchServers();
+    };
+
+    window.ipcRenderer.on('servers-json-changed', handleServersJsonChanged);
+
+    // Polling mechanism as a fallback to ensure data is refreshed periodically
+    const interval = setInterval(() => {
+      fetchServers();
+    }, 2000); // Poll every 2 seconds
+
+    return () => {
+      window.ipcRenderer.removeAllListeners('servers-json-changed');
+      clearInterval(interval);
+    };
   }, []);
 
   return (
@@ -45,9 +62,10 @@ export const Sidebar: React.FC<SidebarProps> = ({ isSidebarOpen, toggleSidebar }
         <HomeButton />
       </div>
       {error && <div className="text-red-500">{error}</div>}
+      {servers.length === 0 && <div className="text-center text-gray-500">No servers added</div>}
       {servers.map((server) => (
         <div className="flex justify-center mb-4" key={server.id}>
-          <ServerButton id={server.id} name={server.name} />
+          <ServerButton id={server.id} name={server.name} icon={server.icon} /> {/* Pass icon to ServerButton */}
         </div>
       ))}
       <div className="flex justify-center mb-4">

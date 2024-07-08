@@ -8,9 +8,10 @@
  * @description Main process of the Electron application
  * @version 1.0
  */
-const { app, BrowserWindow } = require('electron'); // Electron modules for application
+const { app, BrowserWindow, dialog, ipcMain } = require('electron'); // Electron modules for application
 const url = require('url'); // Module for URL handling
 const path = require('path'); // Module for file path handling
+const chokidar = require('chokidar'); // Module for watching file changes
 const { startApiServer } = require('./server/api'); // Import the API server starter function
 
 let mainWindow;
@@ -25,9 +26,10 @@ function createMainWindow() {
     height: 600,
     webPreferences: {
       contextIsolation: true,
-      nodeIntegration: true,
+      nodeIntegration: false, // Disable nodeIntegration for security
       preload: path.join(__dirname, 'preload.js'), // Preload script for additional security
     },
+    autoHideMenuBar: true, // This line hides the menu bar
   });
 
   // DEBUGGING: Open DevTools
@@ -35,7 +37,7 @@ function createMainWindow() {
 
   // Define the start URL for the main window
   const startUrl = url.format({
-    pathname: path.join(__dirname, './app/build/index.html'),
+    pathname: path.join(__dirname, 'app/build/index.html'),
     protocol: 'file:',
     slashes: true, // Ensures proper URL formatting across platforms
   });
@@ -53,7 +55,40 @@ function createMainWindow() {
     console.log('Exited full-screen mode');
     mainWindow.webContents.send('full-screen-changed', false);
   });
+
+  // Initialize the watcher
+  const watcher = chokidar.watch(path.join(__dirname, 'server', 'servers.json'), {
+    persistent: true,
+  });
+
+  watcher.on('change', () => {
+    if (mainWindow) {
+      // Send a message to the renderer process to refresh
+      mainWindow.webContents.send('servers-json-changed');
+    }
+  });
 }
+
+/**
+ * Handle the choose-directory IPC call
+ */
+ipcMain.handle('choose-directory', async () => {
+  const result = await dialog.showOpenDialog(mainWindow, {
+    properties: ['openDirectory']
+  });
+  return result.filePaths[0];
+});
+
+/**
+ * Handle the choose-file IPC call
+ */
+ipcMain.handle('choose-file', async () => {
+  const result = await dialog.showOpenDialog(mainWindow, {
+    properties: ['openFile'],
+    filters: [{ name: 'Images', extensions: ['png', 'jpg', 'jpeg'] }]
+  });
+  return result.filePaths[0];
+});
 
 // START UP CALL: Application ready event
 app.whenReady().then(() => {

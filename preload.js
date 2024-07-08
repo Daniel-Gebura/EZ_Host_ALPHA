@@ -1,25 +1,16 @@
 /**
  * preload.js
- * 
+ *
  * Preload script for the Electron application.
  * This script is used to expose specific APIs to the renderer process
  * through the context bridge to enhance security.
- * 
+ *
  * @file preload.js
  * @description Preload script for Electron application
  * @version 1.0
  */
-const { contextBridge, ipcRenderer } = require('electron'); // Electron modules for context bridging and IPC
-const os = require('os'); // Node.js module for operating system information
 
-/**
- * Expose operating system information methods to the renderer process
- */
-contextBridge.exposeInMainWorld('electron', {
-  homeDir: () => os.homedir(), // Get the home directory of the current user
-  osVersion: () => os.version(), // Get the operating system version
-  arch: () => os.arch(), // Get the architecture of the operating system
-});
+const { contextBridge, ipcRenderer } = require('electron'); // Electron modules for context bridging and IPC
 
 /**
  * Expose IPC renderer methods to the renderer process
@@ -35,10 +26,47 @@ contextBridge.exposeInMainWorld('ipcRenderer', {
  * Expose API methods for interacting with the backend server
  */
 contextBridge.exposeInMainWorld('api', {
+
+  /**
+   * Get the current IPv4 address
+   * @returns {Promise<string>} The IPv4 address
+   */
+  getIpAddress: async () => {
+    const response = await fetch('http://localhost:5000/api/ip-address');
+    if (!response.ok) {
+      throw new Error('Failed to fetch IP address');
+    }
+    const { ipAddress } = await response.json();
+    return ipAddress;
+  },
+
+  /**
+   * Get the list of servers
+   * @returns {Promise<Array>} List of servers
+   */
   getServers: async () => {
     const response = await fetch('http://localhost:5000/api/servers');
     return response.json();
   },
+
+  /**
+   * Get a specific server by ID
+   * @param {string} id - Server ID
+   * @returns {Promise<Object>} The server details
+   */
+  getServer: async (id) => {
+    const response = await fetch(`http://localhost:5000/api/servers/${id}`);
+    if (!response.ok) {
+      throw new Error('Server not found');
+    }
+    return response.json();
+  },
+
+  /**
+   * Add a new server
+   * @param {Object} server - Server details
+   * @returns {Promise<Object>} The added server
+   */
   addServer: async (server) => {
     const response = await fetch('http://localhost:5000/api/servers', {
       method: 'POST',
@@ -49,9 +77,225 @@ contextBridge.exposeInMainWorld('api', {
     });
     return response.json();
   },
+
+  /**
+   * Update a server by ID
+   * @param {string} id - Server ID
+   * @param {Object} server - Server details
+   * @returns {Promise<Object>} The updated server
+   */
+  updateServer: async (id, server) => {
+    const response = await fetch(`http://localhost:5000/api/servers/${id}`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(server),
+    });
+    return response.json();
+  },
+
+  /**
+   * Check the status of all servers
+   * @returns {Promise<void>}
+   */
+  checkServerStatus: async () => {
+    const response = await fetch('http://localhost:5000/api/servers/check-status', {
+      method: 'POST',
+    });
+    return response.json();
+  },
+
+  /**
+   * Delete a server by ID
+   * @param {string} id - Server ID
+   * @returns {Promise<void>}
+   */
   deleteServer: async (id) => {
     await fetch(`http://localhost:5000/api/servers/${id}`, {
       method: 'DELETE',
     });
+  },
+
+  /**
+   * Init a server by ID
+   * @param {string} id - Server ID
+   * @returns {Promise<string>} Response from the server
+   */
+  initServer: async (id) => {
+    const response = await fetch(`http://localhost:5000/api/servers/${id}/initServer`, {
+      method: 'POST',
+    });
+    return response.text();
+  },
+
+  /**
+   * Start a server by ID
+   * @param {string} id - Server ID
+   * @returns {Promise<string>} Response from the server
+   */
+  startServer: async (id) => {
+    const response = await fetch(`http://localhost:5000/api/servers/${id}/start`, {
+      method: 'POST',
+    });
+    return response.text();
+  },
+
+  /**
+   * Save a server by ID
+   * @param {string} id - Server ID
+   * @returns {Promise<string>} Response from the server
+   */
+  saveServer: async (id) => {
+    const response = await fetch(`http://localhost:5000/api/servers/${id}/save`, {
+      method: 'POST',
+    });
+    return response.text();
+  },
+
+  /**
+   * Restart a server by ID
+   * @param {string} id - Server ID
+   * @returns {Promise<string>} Response from the server
+   */
+  restartServer: async (id) => {
+    const response = await fetch(`http://localhost:5000/api/servers/${id}/restart`, {
+      method: 'POST',
+    });
+    return response.text();
+  },
+
+  /**
+   * Stop a server by ID
+   * @param {string} id - Server ID
+   * @returns {Promise<string>} Response from the server
+   */
+  stopServer: async (id) => {
+    const response = await fetch(`http://localhost:5000/api/servers/${id}/stop`, {
+      method: 'POST',
+    });
+    return response.text();
+  },
+
+  /**
+   * Open a directory chooser dialog
+   * @returns {Promise<string>} The selected directory path
+   */
+  chooseDirectory: async () => {
+    const result = await ipcRenderer.invoke('choose-directory');
+    return result;
+  },
+
+  /**
+   * Open a file chooser dialog
+   * @returns {Promise<string>} The selected file path
+   */
+  chooseFile: async () => {
+    const result = await ipcRenderer.invoke('choose-file');
+    return result;
+  },
+
+  /**
+   * Get server properties by ID
+   * @param {string} id - Server ID
+   * @returns {Promise<Object>} The server properties
+   */
+  getServerProperties: async (id) => {
+    const response = await fetch(`http://localhost:5000/api/servers/${id}/properties`);
+    if (!response.ok) {
+      throw new Error('Server properties not found');
+    }
+    return response.json();
+  },
+
+  /**
+   * Save server properties by ID
+   * @param {string} id - Server ID
+   * @param {Object} properties - The updated properties
+   * @returns {Promise<void>}
+   */
+  saveServerProperties: async (id, properties) => {
+    await fetch(`http://localhost:5000/api/servers/${id}/properties`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(properties),
+    });
+  },
+
+  /**
+   * Get RAM allocation from variables.txt
+    * @param {string} id - Server ID
+    * @returns {Promise<number>} The RAM allocation in GB
+    */
+  getRamAllocation: async (id) => {
+    const response = await fetch(`http://localhost:5000/api/servers/${id}/ram`);
+    if (!response.ok) {
+      throw new Error('Failed to fetch RAM allocation');
+    }
+    const { ram } = await response.json();
+    return ram;
+  },
+
+  updateRamAllocation: async (id, ram) => {
+    const response = await fetch(`http://localhost:5000/api/servers/${id}/ram`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ ram }),
+    });
+    if (!response.ok) {
+      throw new Error('Failed to update RAM allocation');
+    }
+    return response.text();
+  },
+
+  /**
+   * Send an RCON command to the server
+   * @param {string} id - Server ID
+   * @param {string} command - The RCON command to send
+   * @returns {Promise<string>} The server response
+   */
+  sendRconCommand: async (id, command) => {
+    const response = await fetch(`http://localhost:5000/api/servers/${id}/rcon`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ command }),
+    });
+    return response.text();
+  },
+
+  /**
+   * Get the list of players on a server
+   * @param {string} id - Server ID
+   * @returns {Promise<string[]>} List of player names
+   */
+   getPlayers: async (id) => {
+    const response = await fetch(`http://localhost:5000/api/servers/${id}/players`);
+    if (!response.ok) {
+      throw new Error('Failed to fetch players list');
+    }
+    return response.json();
+  },
+
+  /**
+   * OP or un-OP a player
+   * @param {string} id - Server ID
+   * @param {string} playerName - Player name
+   * @param {boolean} op - true to OP, false to un-OP
+   * @returns {Promise<string>} Response from the server
+   */
+  setPlayerOp: async (id, playerName, op) => {
+    const response = await fetch(`http://localhost:5000/api/servers/${id}/player/${playerName}/op`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ op }),
+    });
+    if (!response.ok) {
+      throw new Error(`Failed to ${op ? 'OP' : 'un-OP'} player`);
+    }
+    return response.json();
   },
 });
