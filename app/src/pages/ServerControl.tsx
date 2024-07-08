@@ -31,6 +31,9 @@ export const ServerControl: React.FC = () => {
       const ram = await window.api.getRamAllocation(serverId);
       setRamAllocation(ram);
 
+      const ipAddress = await window.api.getIpAddress();
+      setIp(ipAddress);
+
       // Set additional server details like RAM allocation and IP address here
     } catch (error: any) {
       console.error('Error fetching server details:', error);

@@ -1,4 +1,5 @@
 const express = require('express');
+const os = require('os');
 const fs = require('fs');
 const path = require('path');
 const cors = require('cors');
@@ -13,6 +14,19 @@ const PORT = 5000;
 // Paths to the script templates
 const START_SCRIPT_TEMPLATE = path.join(__dirname, 'template_scripts/simple-start-template.ps1');
 const INIT_SCRIPT_TEMPLATE = path.join(__dirname, 'template_scripts/initServer-template.ps1');
+
+// Function to get the current IPv4 address
+const getIpAddress = () => {
+  const interfaces = os.networkInterfaces();
+  for (const iface of Object.values(interfaces)) {
+    for (const alias of iface) {
+      if (alias.family === 'IPv4' && !alias.internal) {
+        return alias.address;
+      }
+    }
+  }
+  return '127.0.0.1'; // Default IP address if none found
+};
 
 /**
  * Starts the API server
@@ -43,6 +57,14 @@ const startApiServer = () => {
 
   // Initial server load
   let servers = loadServers();
+
+  /**
+   * Endpoint to get the current IPv4 address
+   */
+  app.get('/api/ip-address', (req, res) => {
+  const ipAddress = getIpAddress();
+  res.json({ ipAddress });
+  });
 
   /**
    * Endpoint to get the list of servers

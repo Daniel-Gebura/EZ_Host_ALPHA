@@ -26,6 +26,20 @@ contextBridge.exposeInMainWorld('ipcRenderer', {
  * Expose API methods for interacting with the backend server
  */
 contextBridge.exposeInMainWorld('api', {
+
+  /**
+   * Get the current IPv4 address
+   * @returns {Promise<string>} The IPv4 address
+   */
+  getIpAddress: async () => {
+    const response = await fetch('http://localhost:5000/api/ip-address');
+    if (!response.ok) {
+      throw new Error('Failed to fetch IP address');
+    }
+    const { ipAddress } = await response.json();
+    return ipAddress;
+  },
+
   /**
    * Get the list of servers
    * @returns {Promise<Array>} List of servers

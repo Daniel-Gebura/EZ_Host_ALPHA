@@ -26,6 +26,12 @@ declare global {
 
     api: {
       /**
+       * Get the user's current IPv4 address
+       * @returns {Promise<string>} IPv4 Address
+       */
+      getIpAddress: () => Promise<string>;
+
+      /**
        * Get the list of servers
        * @returns {Promise<any>} List of servers
        */
