@@ -8,13 +8,14 @@
  * @description Main process of the Electron application
  * @version 1.0
  */
+
 const { app, BrowserWindow, dialog, ipcMain } = require('electron'); // Electron modules for application
 const url = require('url'); // Module for URL handling
 const path = require('path'); // Module for file path handling
 const chokidar = require('chokidar'); // Module for watching file changes
-const { startApiServer } = require('./server/api'); // Import the API server starter function
 
 let mainWindow;
+let watcher; // Declare watcher at the top level to ensure proper cleanup
 
 /**
  * Create the main application window.
@@ -29,11 +30,11 @@ function createMainWindow() {
       nodeIntegration: false, // Disable nodeIntegration for security
       preload: path.join(__dirname, 'preload.js'), // Preload script for additional security
     },
-    autoHideMenuBar: true, // This line hides the menu bar
+    autoHideMenuBar: true, // Hide the menu bar for a cleaner interface
   });
 
   // DEBUGGING: Open DevTools
-  //mainWindow.webContents.openDevTools();
+  // mainWindow.webContents.openDevTools();
 
   // Define the start URL for the main window
   const startUrl = url.format({
@@ -56,8 +57,8 @@ function createMainWindow() {
     mainWindow.webContents.send('full-screen-changed', false);
   });
 
-  // Initialize the watcher
-  const watcher = chokidar.watch(path.join(__dirname, 'server', 'servers.json'), {
+  // Initialize the watcher for the servers.json file
+  watcher = chokidar.watch(path.join(__dirname, 'server', 'servers.json'), {
     persistent: true,
   });
 
@@ -65,6 +66,14 @@ function createMainWindow() {
     if (mainWindow) {
       // Send a message to the renderer process to refresh
       mainWindow.webContents.send('servers-json-changed');
+    }
+  });
+
+  mainWindow.on('closed', () => {
+    // Dereference the window object and close the watcher
+    mainWindow = null;
+    if (watcher) {
+      watcher.close();
     }
   });
 }
@@ -90,20 +99,26 @@ ipcMain.handle('choose-file', async () => {
   return result.filePaths[0];
 });
 
-// START UP CALL: Application ready event
+/**
+ * START UP CALL: Application ready event
+ */
 app.whenReady().then(() => {
   createMainWindow(); // Create the main window when the app is ready
-  startApiServer(); // Start the API server
+  require('./server/api'); // Start the API server
 });
 
-// Handle application re-activation (macOS)
+/**
+ * Handle application re-activation (macOS)
+ */
 app.on('activate', () => {
   if (BrowserWindow.getAllWindows().length === 0) {
     createMainWindow();
   }
 });
 
-// Handle all windows being closed
+/**
+ * Handle all windows being closed
+ */
 app.on('window-all-closed', () => {
   if (process.platform !== 'darwin') {
     app.quit();

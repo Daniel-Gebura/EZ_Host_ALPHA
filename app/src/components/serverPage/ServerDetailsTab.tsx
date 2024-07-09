@@ -6,6 +6,16 @@ interface ServerDetailsTabProps {
   onRamChange: (newRam: number) => void;
 }
 
+/**
+ * ServerDetailsTab component
+ * Displays and allows modification of server details like IP address and RAM allocation.
+ * 
+ * @param {ServerDetailsTabProps} props - The props for the ServerDetailsTab component.
+ * @param {string} props.ip - The IP address of the server.
+ * @param {number} props.ramAllocation - The current RAM allocation for the server.
+ * @param {function} props.onRamChange - The function to call when the RAM allocation is changed.
+ * @returns {JSX.Element} The rendered ServerDetailsTab component.
+ */
 export const ServerDetailsTab: React.FC<ServerDetailsTabProps> = ({ ip, ramAllocation, onRamChange }) => {
   const [ram, setRam] = useState(ramAllocation);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -14,22 +24,34 @@ export const ServerDetailsTab: React.FC<ServerDetailsTabProps> = ({ ip, ramAlloc
     setRam(ramAllocation);
   }, [ramAllocation]);
 
+  /**
+   * Increment the RAM allocation, with a maximum limit of 16GB.
+   */
   const handleIncrement = () => {
     if (ram < 16) {
       setRam(ram + 1);
     }
   };
 
+  /**
+   * Decrement the RAM allocation, with a minimum limit of 4GB.
+   */
   const handleDecrement = () => {
     if (ram > 4) {
       setRam(ram - 1);
     }
   };
 
+  /**
+   * Open the confirmation modal when the save button is clicked.
+   */
   const handleSave = () => {
     setIsModalOpen(true);
   };
 
+  /**
+   * Confirm the RAM allocation change and close the modal.
+   */
   const handleConfirmSave = () => {
     onRamChange(ram);
     setIsModalOpen(false);

@@ -8,12 +8,13 @@ interface TextInput1Props {
 
 /**
  * TextInput1 component
- * A reusable text input component for entering text
+ * A reusable text input component for entering text.
  * 
- * @param {string} value - The value of the input
- * @param {function} onChange - The function to call when the value changes
- * @param {string} [placeholder] - The placeholder text for the input
- * @returns {JSX.Element}
+ * @param {TextInput1Props} props - The props for the TextInput1 component.
+ * @param {string} props.value - The value of the input.
+ * @param {function} props.onChange - The function to call when the value changes.
+ * @param {string} [props.placeholder] - The placeholder text for the input.
+ * @returns {JSX.Element} The rendered TextInput1 component.
  */
 export const TextInput1: React.FC<TextInput1Props> = ({ value, onChange, placeholder }) => {
   return (

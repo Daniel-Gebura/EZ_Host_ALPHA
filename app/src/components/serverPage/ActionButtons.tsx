@@ -5,6 +5,15 @@ interface ActionButtonsProps {
   status: 'Offline' | 'Starting...' | 'Online' | 'Stopping...' | 'Restarting...';
 }
 
+/**
+ * ActionButtons component
+ * Renders buttons for various server actions (start, save, stop).
+ * 
+ * @param {ActionButtonsProps} props - The props for the ActionButtons component.
+ * @param {function} props.onAction - The function to call when an action button is clicked.
+ * @param {'Offline' | 'Starting...' | 'Online' | 'Stopping...' | 'Restarting...'} props.status - The current server status.
+ * @returns {JSX.Element} The rendered ActionButtons component.
+ */
 export const ActionButtons: React.FC<ActionButtonsProps> = ({ onAction, status }) => {
   return (
     <div className="flex flex-col md:flex-row md:space-x-4 justify-center w-full md:w-auto">

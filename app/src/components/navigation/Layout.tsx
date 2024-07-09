@@ -7,13 +7,26 @@ interface LayoutProps {
   children?: ReactNode;
 }
 
+/**
+ * Layout component that defines the common structure of the application.
+ * It includes a Navbar, Sidebar, and renders child components using <Outlet />.
+ * 
+ * @param {LayoutProps} props - The props for the Layout component.
+ * @returns {JSX.Element} The rendered Layout component.
+ */
 export const Layout: React.FC<LayoutProps> = ({ children }) => {
   const [isSidebarOpen, setSidebarOpen] = useState(false);
 
+  /**
+   * Toggles the sidebar open and closed.
+   */
   const toggleSidebar = () => {
     setSidebarOpen(!isSidebarOpen);
   };
 
+  /**
+   * Handles the server status check by calling the backend API.
+   */
   const handleCheckStatus = async () => {
     try {
       const response = await window.api.checkServerStatus();

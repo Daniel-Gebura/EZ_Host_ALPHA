@@ -8,12 +8,27 @@ interface ServerStatusProps {
   onNameChange: (newName: string) => void;
 }
 
+/**
+ * ServerStatus component
+ * Displays the server status and allows changing the server name.
+ * 
+ * @param {ServerStatusProps} props - The props for the ServerStatus component.
+ * @param {string} props.name - The current server name.
+ * @param {'Offline' | 'Starting...' | 'Online' | 'Stopping...' | 'Restarting...'} props.status - The current server status.
+ * @param {function} props.onNameChange - The function to call when the server name changes.
+ * @returns {JSX.Element} The rendered ServerStatus component.
+ */
 export const ServerStatus: React.FC<ServerStatusProps> = ({ name, status, onNameChange }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [newName, setNewName] = useState(name);
   const [notification, setNotification] = useState<{ message: string, type: 'success' | 'error' } | null>(null);
   const { id } = useParams<{ id: string }>();
 
+  /**
+   * Get the color of the status dot based on the server status.
+   * 
+   * @returns {string} The CSS class for the status dot color.
+   */
   const getStatusDotColor = () => {
     switch (status) {
       case 'Offline':
@@ -33,12 +48,17 @@ export const ServerStatus: React.FC<ServerStatusProps> = ({ name, status, onName
 
   const isLoading = status === 'Starting...' || status === 'Stopping...' || status === 'Restarting...';
 
+  /**
+   * Handle changing the server name.
+   * 
+   * Validates the new name and updates the server name via the backend API.
+   */
   const handleNameChange = async () => {
     if (newName.length > 0 && newName.length <= 20) {
       try {
-        const server = await window.api.getServer(id!);
+        const server = await  window.api.getServer(id!);
         server.name = newName;
-        await window.api.updateServer(id!, server);
+        await  window.api.updateServer(id!, server);
         onNameChange(newName);
         setIsModalOpen(false);
         setNotification({ message: 'Server name updated successfully.', type: 'success' });

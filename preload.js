@@ -32,7 +32,7 @@ contextBridge.exposeInMainWorld('api', {
    * @returns {Promise<string>} The IPv4 address
    */
   getIpAddress: async () => {
-    const response = await fetch('http://localhost:5000/api/ip-address');
+    const response = await fetch('http://localhost:5000/api/servers/ip-address');
     if (!response.ok) {
       throw new Error('Failed to fetch IP address');
     }
@@ -224,9 +224,9 @@ contextBridge.exposeInMainWorld('api', {
 
   /**
    * Get RAM allocation from variables.txt
-    * @param {string} id - Server ID
-    * @returns {Promise<number>} The RAM allocation in GB
-    */
+   * @param {string} id - Server ID
+   * @returns {Promise<number>} The RAM allocation in GB
+   */
   getRamAllocation: async (id) => {
     const response = await fetch(`http://localhost:5000/api/servers/${id}/ram`);
     if (!response.ok) {
@@ -236,6 +236,12 @@ contextBridge.exposeInMainWorld('api', {
     return ram;
   },
 
+  /**
+   * Update RAM allocation for a server
+   * @param {string} id - Server ID
+   * @param {number} ram - RAM allocation in GB
+   * @returns {Promise<string>} Response from the server
+   */
   updateRamAllocation: async (id, ram) => {
     const response = await fetch(`http://localhost:5000/api/servers/${id}/ram`, {
       method: 'PUT',
@@ -270,7 +276,7 @@ contextBridge.exposeInMainWorld('api', {
    * @param {string} id - Server ID
    * @returns {Promise<string[]>} List of player names
    */
-   getPlayers: async (id) => {
+  getPlayers: async (id) => {
     const response = await fetch(`http://localhost:5000/api/servers/${id}/players`);
     if (!response.ok) {
       throw new Error('Failed to fetch players list');
