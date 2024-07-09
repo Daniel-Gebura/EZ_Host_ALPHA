@@ -13,7 +13,6 @@ const { app, BrowserWindow, dialog, ipcMain } = require('electron'); // Electron
 const url = require('url'); // Module for URL handling
 const path = require('path'); // Module for file path handling
 const chokidar = require('chokidar'); // Module for watching file changes
-const { startApiServer } = require('./server/api'); // Import the API server starter function
 
 let mainWindow;
 let watcher; // Declare watcher at the top level to ensure proper cleanup
@@ -105,7 +104,7 @@ ipcMain.handle('choose-file', async () => {
  */
 app.whenReady().then(() => {
   createMainWindow(); // Create the main window when the app is ready
-  startApiServer(); // Start the API server
+  require('./server/api'); // Start the API server
 });
 
 /**
