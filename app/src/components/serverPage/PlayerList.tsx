@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import { api } from '../../api';
 
 interface PlayerListProps {
   serverId: string;
@@ -25,7 +24,7 @@ export const PlayerList: React.FC<PlayerListProps> = ({ serverId, status }) => {
   useEffect(() => {
     const fetchPlayers = async () => {
       try {
-        const playersList = await api.getPlayers(serverId);
+        const playersList = await window.api.getPlayers(serverId);
         setPlayers(playersList);
       } catch (error) {
         console.error('Error fetching players list:', error);
@@ -54,7 +53,7 @@ export const PlayerList: React.FC<PlayerListProps> = ({ serverId, status }) => {
    */
   const handleSetOp = async (playerName: string, op: boolean) => {
     try {
-      await api.setPlayerOp(serverId, playerName, op);
+      await window.api.setPlayerOp(serverId, playerName, op);
       setSelectedPlayer(null);
     } catch (error) {
       console.error(`Error setting player OP status:`, error);

@@ -7,7 +7,6 @@ import { ServerPropertiesTab } from '../components/serverPage/ServerPropertiesTa
 import { ServerDetailsTab } from '../components/serverPage/ServerDetailsTab';
 import { Notification } from '../components/common/Notification';
 import defaultLogo from '../assets/logo/EZ_Host_Logo1.png';
-import { api } from '../api';
 
 export const ServerControl: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -28,15 +27,15 @@ export const ServerControl: React.FC = () => {
    */
   const fetchServerDetails = async (serverId: string) => {
     try {
-      const server = await api.getServer(serverId);
+      const server = await  window.api.getServer(serverId);
       setServerName(server.name);
       setStatus(server.status);
       setIcon(server.icon || defaultLogo);
       
-      const ram = await api.getRamAllocation(serverId);
+      const ram = await  window.api.getRamAllocation(serverId);
       setRamAllocation(ram);
 
-      const ipAddress = await api.getIpAddress();
+      const ipAddress = await  window.api.getIpAddress();
       setIp(ipAddress);
 
     } catch (error: any) {
@@ -78,7 +77,7 @@ export const ServerControl: React.FC = () => {
     try {
       // Check if any server is online
       if (action === 'start') {
-        const servers = await api.getServers();
+        const servers = await  window.api.getServers();
         const onlineServer = servers.find((server: any) => server.status === 'Online');
         if (onlineServer) {
           setIsModalOpen(true);
@@ -89,16 +88,13 @@ export const ServerControl: React.FC = () => {
       let response;
       switch (action) {
         case 'start':
-          response = await api.startServer(currentServerId);
+          response = await  window.api.startServer(currentServerId);
           break;
         case 'save':
-          response = await api.saveServer(currentServerId);
-          break;
-        case 'restart':
-          response = await api.restartServer(currentServerId);
+          response = await  window.api.saveServer(currentServerId);
           break;
         case 'stop':
-          response = await api.stopServer(currentServerId);
+          response = await  window.api.stopServer(currentServerId);
           break;
         default:
           response = 'Invalid action';
@@ -117,7 +113,7 @@ export const ServerControl: React.FC = () => {
   const removeServer = async () => {
     if (currentServerId) {
       try {
-        await api.deleteServer(currentServerId);
+        await  window.api.deleteServer(currentServerId);
         navigate('/');
         setNotification({ message: 'Server deleted successfully.', type: 'success' });
       } catch (error: any) {
@@ -133,14 +129,14 @@ export const ServerControl: React.FC = () => {
    * Handle changing the server icon.
    */
   const handleChangeIcon = async () => {
-    const selectedIcon = await api.chooseFile();
+    const selectedIcon = await  window.api.chooseFile();
     if (selectedIcon && currentServerId) {
       setIcon(selectedIcon);
 
       try {
-        const server = await api.getServer(currentServerId);
+        const server = await  window.api.getServer(currentServerId);
         server.icon = selectedIcon;
-        await api.updateServer(currentServerId, server);
+        await  window.api.updateServer(currentServerId, server);
       } catch (error: any) {
         console.error('Error updating server icon:', error);
         setNotification({ message: 'Failed to update server icon.', type: 'error' });
@@ -159,7 +155,7 @@ export const ServerControl: React.FC = () => {
     }
 
     try {
-      await api.updateRamAllocation(currentServerId, newRam);
+      await  window.api.updateRamAllocation(currentServerId, newRam);
       setRamAllocation(newRam);
       setNotification({ message: 'RAM allocation updated successfully. Please restart the server for changes to take effect.', type: 'success' });
     } catch (error: any) {

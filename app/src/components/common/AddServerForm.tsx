@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import { TextInput1 } from './TextInput1';
 import { ChooseFile1 } from './ChooseFile1';
 import { Checkbox } from './Checkbox';
-import { api } from '../../api';
 import defaultLogo from '../../assets/logo/EZ_Host_Logo1.png';
 
 interface AddServerFormProps {
@@ -42,9 +41,9 @@ export const AddServerForm: React.FC<AddServerFormProps> = ({ onServerAdded }) =
       rconPassword: rconPassword,
     };
     try {
-      const addedServer = await api.addServer(newServer);
+      const addedServer = await window.api.addServer(newServer);
       // Initialize the server
-      await api.initServer(addedServer.id);
+      await window.api.initServer(addedServer.id);
       setServerName('');
       setDirectory('');
       setServerIcon(defaultLogo);

@@ -1,132 +1,125 @@
-/**
- * serverRoutes.js
- *
- * Defines routes for server management operations such as creating, updating, deleting servers, and managing server properties.
- *
- * @file serverRoutes.js
- * @description Routes for server management operations
- * @version 1.0
- */
-
 const express = require('express');
 const path = require('path');
 const fs = require('fs');
-const { runPowerShellScript } = require('../utils/serverUtils');
-const { loadServers, saveServers } = require('../utils/fileUtils');
+const { runPowerShellScript, sendRconCommand, getPlayersList } = require('../utils/apiUtilFunctions');
+const { readPropertiesFile, writePropertiesFile, loadServers, saveServers } = require('../utils/fileUtilFunctions');
+const { getIpAddress } = require('../utils/networkUtilFunctions');
+const { Rcon } = require('rcon-client');
 
 const router = express.Router();
-let servers = loadServers();
+const DATA_FILE = path.join(__dirname, '../servers.json');
 
-const START_SCRIPT_TEMPLATE = path.join(__dirname, '../template_scripts/simple-start-template.ps1');
-const INIT_SCRIPT_TEMPLATE = path.join(__dirname, '../template_scripts/initServer-template.ps1');
+// Initial server load
+let servers = loadServers(DATA_FILE);
 
-// Endpoint to get all servers
-router.get('/', (req, res) => {
-  res.json(servers);
+/**
+ * Endpoint to get the current IPv4 address
+ */
+router.get('/ip-address', (req, res) => {
+  const ipAddress = getIpAddress();
+  res.json({ ipAddress });
 });
 
-// Endpoint to create a new server
-router.post('/', async (req, res) => {
-  const { name, directory, rconPassword } = req.body;
+/**
+ * Endpoint to get the list of servers
+ */
+router.get('/', (req, res) => {
+  res.send(servers);
+});
+
+/**
+ * Endpoint to create a new server
+ */
+router.post('/', (req, res) => {
+  const { name, type, directory, icon, rconPassword } = req.body;
   const id = Date.now().toString();
-  const newServer = { id, name, directory, rconPassword, status: 'Offline' };
+  const newServer = { id, name, type, directory, icon, rconPassword, status: 'Offline' };
 
   servers.push(newServer);
-  saveServers(servers);
+  saveServers(servers, DATA_FILE);
 
-  // Create EZHost directory if it doesn't exist
   const ezHostDirectory = path.join(directory, 'EZHost');
   if (!fs.existsSync(ezHostDirectory)) {
     fs.mkdirSync(ezHostDirectory);
   }
 
-  // Copy the initServer-template.ps1 script to the EZHost directory
-  const initScriptContent = fs.readFileSync(INIT_SCRIPT_TEMPLATE, 'utf8');
-  fs.writeFileSync(path.join(ezHostDirectory, 'initServer.ps1'), initScriptContent);
-  fs.chmodSync(path.join(ezHostDirectory, 'initServer.ps1'), '755'); // Make script executable
+  const INIT_SCRIPT_TEMPLATE = path.join(__dirname, '../template_scripts/initServer-template.ps1');
+  const START_SCRIPT_TEMPLATE = path.join(__dirname, '../template_scripts/simple-start-template.ps1');
 
-  // Copy the start-template.ps1 script to the EZHost directory
-  const startScriptContent = fs.readFileSync(START_SCRIPT_TEMPLATE, 'utf8');
-  fs.writeFileSync(path.join(ezHostDirectory, 'start.ps1'), startScriptContent);
-  fs.chmodSync(path.join(ezHostDirectory, 'start.ps1'), '755'); // Make script executable
+  fs.writeFileSync(path.join(ezHostDirectory, 'initServer.ps1'), fs.readFileSync(INIT_SCRIPT_TEMPLATE, 'utf8'));
+  fs.chmodSync(path.join(ezHostDirectory, 'initServer.ps1'), '755');
 
-  // Update server.properties with the RCON settings
+  fs.writeFileSync(path.join(ezHostDirectory, 'start.ps1'), fs.readFileSync(START_SCRIPT_TEMPLATE, 'utf8'));
+  fs.chmodSync(path.join(ezHostDirectory, 'start.ps1'), '755');
+
   const serverPropertiesPath = path.join(directory, 'server.properties');
-  let serverPropertiesContent = '';
-  if (fs.existsSync(serverPropertiesPath)) {
-    serverPropertiesContent = fs.readFileSync(serverPropertiesPath, 'utf8');
-    serverPropertiesContent = serverPropertiesContent.replace(/^enable-rcon=.*$/m, 'enable-rcon=true');
-    serverPropertiesContent = serverPropertiesContent.replace(/^rcon.port=.*$/m, 'rcon.port=25575');
-    serverPropertiesContent = serverPropertiesContent.replace(/^rcon.password=.*$/m, `rcon.password=${rconPassword}`);
-  } else {
-    serverPropertiesContent = `enable-rcon=true\nrcon.port=25575\nrcon.password=${rconPassword}\n`;
-  }
+  let serverPropertiesContent = fs.existsSync(serverPropertiesPath) ? fs.readFileSync(serverPropertiesPath, 'utf8') : '';
+  serverPropertiesContent = serverPropertiesContent.replace(/^enable-rcon=.*$/m, 'enable-rcon=true')
+                                                    .replace(/^rcon.port=.*$/m, 'rcon.port=25575')
+                                                    .replace(/^rcon.password=.*$/m, `rcon.password=${rconPassword}`);
   fs.writeFileSync(serverPropertiesPath, serverPropertiesContent);
 
-  res.status(201).json(newServer);
+  res.status(201).send(newServer);
 });
 
-// Endpoint to get a server by ID
+/**
+ * Endpoint to get a server by ID
+ */
 router.get('/:id', (req, res) => {
   const { id } = req.params;
   const server = servers.find(s => s.id === id);
-  if (!server) {
-    return res.status(404).send('Server not found');
+  if (server) {
+    res.send(server);
+  } else {
+    res.status(404).send('Server not found');
   }
-  res.json(server);
 });
 
-// Endpoint to update a server by ID
+/**
+ * Endpoint to update a server by ID
+ */
 router.put('/:id', (req, res) => {
   const { id } = req.params;
-  const { name, directory, rconPassword } = req.body;
+  const { name, type, directory, icon } = req.body;
   const serverIndex = servers.findIndex(s => s.id === id);
-  if (serverIndex === -1) {
-    return res.status(404).send('Server not found');
+  if (serverIndex !== -1) {
+    servers[serverIndex] = { ...servers[serverIndex], name, type, directory, icon };
+    saveServers(servers, DATA_FILE);
+    res.send(servers[serverIndex]);
+  } else {
+    res.status(404).send('Server not found');
   }
-
-  servers[serverIndex] = { ...servers[serverIndex], name, directory, rconPassword };
-  saveServers(servers);
-  res.json(servers[serverIndex]);
 });
 
-// Endpoint to delete a server by ID
+/**
+ * Endpoint to delete a server by ID
+ */
 router.delete('/:id', (req, res) => {
   const { id } = req.params;
   const server = servers.find(s => s.id === id);
-  if (!server) {
-    return res.status(404).send('Server not found');
-  }
-
-  // Remove the EZHost directory and all its contents
-  const ezHostDirectory = path.join(server.directory, 'EZHost');
-  if (fs.existsSync(ezHostDirectory)) {
-    fs.rmSync(ezHostDirectory, { recursive: true, force: true });
+  if (server) {
+    const ezHostDirectory = path.join(server.directory, 'EZHost');
+    if (fs.existsSync(ezHostDirectory)) {
+      fs.rmSync(ezHostDirectory, { recursive: true, force: true });
+    }
   }
 
   servers = servers.filter(server => server.id !== id);
-  saveServers(servers);
+  saveServers(servers, DATA_FILE);
   res.status(204).send();
 });
 
-// Endpoint to check the status of all servers
+/**
+ * Endpoint to check the status of all servers
+ */
 router.post('/check-status', async (req, res) => {
   const updatedServers = await Promise.all(servers.map(async server => {
     try {
-      const rcon = await Rcon.connect({
-        host: 'localhost',
-        port: 25575,
-        password: server.rconPassword,
-      });
-
+      const rcon = await Rcon.connect({ host: 'localhost', port: 25575, password: server.rconPassword });
       const response = await rcon.send('list');
       await rcon.end();
 
-      if (response.includes('players online')) {
-        server.status = 'Online';
-      } else {
-        server.status = 'Offline';
-      }
+      server.status = response.includes('players online') ? 'Online' : 'Offline';
     } catch (error) {
       console.error(`Error checking status for server ${server.name}:`, error);
       server.status = 'Offline';
@@ -135,8 +128,172 @@ router.post('/check-status', async (req, res) => {
     return server;
   }));
 
-  saveServers(updatedServers);
+  saveServers(updatedServers, DATA_FILE);
   res.json({ message: 'Server statuses updated successfully', servers: updatedServers });
+});
+
+/**
+ * Endpoint to initialize a server
+ */
+router.post('/:id/initServer', (req, res) => {
+  runPowerShellScript(req.params.id, 'initServer.ps1', res, servers, DATA_FILE);
+});
+
+/**
+ * Endpoint to start a server
+ */
+router.post('/:id/start', (req, res) => {
+  runPowerShellScript(req.params.id, 'start.ps1', res, servers, DATA_FILE);
+});
+
+/**
+ * Endpoint to save a server
+ */
+router.post('/:id/save', (req, res) => {
+  sendRconCommand(req.params.id, 'save-all', res, servers, DATA_FILE);
+});
+
+/**
+ * Endpoint to stop a server
+ */
+router.post('/:id/stop', (req, res) => {
+  sendRconCommand(req.params.id, 'stop', res, servers, DATA_FILE);
+});
+
+/**
+ * Endpoint to get server properties by ID
+ */
+router.get('/:id/properties', (req, res) => {
+  const { id } = req.params;
+  const server = servers.find(s => s.id === id);
+  if (!server) {
+    return res.status(404).send('Server not found');
+  }
+
+  const serverPropertiesPath = path.join(server.directory, 'server.properties');
+  if (!fs.existsSync(serverPropertiesPath)) {
+    return res.status(404).send('server.properties not found');
+  }
+
+  const properties = readPropertiesFile(serverPropertiesPath);
+  res.json(properties);
+});
+
+/**
+ * Endpoint to update server properties by ID
+ */
+router.put('/:id/properties', (req, res) => {
+  const { id } = req.params;
+  const server = servers.find(s => s.id === id);
+  if (!server) {
+    return res.status(404).send('Server not found');
+  }
+
+  const serverPropertiesPath = path.join(server.directory, 'server.properties');
+  const newProperties = req.body;
+
+  let serverProperties = {};
+  if (fs.existsSync(serverPropertiesPath)) {
+    serverProperties = readPropertiesFile(serverPropertiesPath);
+  }
+
+  const updatedProperties = { ...serverProperties, ...newProperties };
+
+  writePropertiesFile(serverPropertiesPath, updatedProperties);
+
+  res.status(200).send('Properties updated');
+});
+
+/**
+ * Endpoint to get RAM allocation for a server
+ */
+router.get('/:id/ram', (req, res) => {
+  const { id } = req.params;
+  const server = servers.find(s => s.id === id);
+  if (!server) {
+    return res.status(404).send('Server not found');
+  }
+
+  const variablesFilePath = path.join(server.directory, 'variables.txt');
+  if (!fs.existsSync(variablesFilePath)) {
+    return res.status(404).send('variables.txt not found');
+  }
+
+  const variablesContent = fs.readFileSync(variablesFilePath, 'utf8');
+  const ramMatch = variablesContent.match(/-Xmx(\d+)G/);
+  const ram = ramMatch ? parseInt(ramMatch[1], 10) : 4;
+
+  res.json({ ram });
+});
+
+/**
+ * Endpoint to update RAM allocation for a server
+ */
+router.put('/:id/ram', (req, res) => {
+  const { id } = req.params;
+  const { ram } = req.body;
+  const server = servers.find(s => s.id === id);
+  if (!server) {
+    return res.status(404).send('Server not found');
+  }
+
+  const variablesFilePath = path.join(server.directory, 'variables.txt');
+  if (!fs.existsSync(variablesFilePath)) {
+    return res.status(404).send('variables.txt not found');
+  }
+
+  let variablesContent = fs.readFileSync(variablesFilePath, 'utf8');
+  variablesContent = variablesContent.replace(/-Xmx\d+G/, `-Xmx${ram}G`);
+
+  fs.writeFileSync(variablesFilePath, variablesContent, 'utf8');
+  res.status(200).send('RAM allocation updated');
+});
+
+/**
+ * Endpoint to send an RCON command to the server
+ */
+router.post('/:id/rcon', async (req, res) => {
+    const { id } = req.params;
+    const { command } = req.body;
+    await sendRconCommand(id, command, res);
+  });
+
+/**
+ * Endpoint to get the list of players
+ */
+router.get('/:id/players', async (req, res) => {
+  const { id } = req.params;
+  const server = servers.find(s => s.id === id);
+  if (!server) {
+    return res.status(404).send('Server not found');
+  }
+
+  const players = await getPlayersList(server.rconPassword);
+  res.json(players);
+});
+
+/**
+ * Endpoint to OP/Un-OP a player
+ */
+router.post('/:id/player/:playerName/op', async (req, res) => {
+  const { id, playerName } = req.params;
+  const { op } = req.body;
+  const server = servers.find(s => s.id === id);
+  if (!server) {
+    return res.status(404).send('Server not found');
+  }
+
+  const command = op ? `op ${playerName}` : `deop ${playerName}`;
+  try {
+    const rcon = await Rcon.connect({ host: 'localhost', port: 25575, password: server.rconPassword });
+    const response = await rcon.send(command);
+    await rcon.end();
+
+    res.json({ message: `Player ${op ? 'OPed' : 'un-OPed'} successfully`, response });
+  } catch (error) {
+    console.error(`Error executing ${command}:`, error);
+    res.status(500).send(`Error executing ${command}: ${error.message}`);
+  }
 });
 
 module.exports = router;

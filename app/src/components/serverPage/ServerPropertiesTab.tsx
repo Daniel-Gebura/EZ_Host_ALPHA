@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { Notification } from '../common/Notification';
-import { api } from '../../api';
 
 interface ServerPropertiesTabProps {
   serverId: string;
@@ -35,7 +34,7 @@ export const ServerPropertiesTab: React.FC<ServerPropertiesTabProps> = ({ server
    */
   const fetchProperties = async () => {
     try {
-      const result = await api.getServerProperties(serverId);
+      const result = await  window.api.getServerProperties(serverId);
       setProperties(result);
     } catch (error) {
       console.error('Error fetching server properties:', error);
@@ -47,7 +46,7 @@ export const ServerPropertiesTab: React.FC<ServerPropertiesTabProps> = ({ server
    */
   const saveProperties = async () => {
     try {
-      await api.saveServerProperties(serverId, properties);
+      await  window.api.saveServerProperties(serverId, properties);
       setNotification({ message: 'Server properties saved successfully.', type: 'success' });
     } catch (error) {
       console.error('Error saving server properties:', error);

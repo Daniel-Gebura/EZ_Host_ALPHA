@@ -16,46 +16,23 @@ const { contextBridge, ipcRenderer } = require('electron'); // Electron modules 
  * Expose IPC renderer methods to the renderer process
  */
 contextBridge.exposeInMainWorld('ipcRenderer', {
-  /**
-   * Send an IPC message to the main process
-   * @param {string} channel - The IPC channel
-   * @param {any} data - The data to send
-   */
-  send: (channel, data) => ipcRenderer.send(channel, data),
-
-  /**
-   * Listen for an IPC message from the main process
-   * @param {string} channel - The IPC channel
-   * @param {function} func - The callback function to handle the message
-   */
+  send: (channel, data) => ipcRenderer.send(channel, data), // Send IPC message to main process
   on: (channel, func) =>
-    ipcRenderer.on(channel, (event, ...args) => func(...args)),
-
-  /**
-   * Remove all listeners for a specific channel
-   * @param {string} channel - The IPC channel
-   */
-  removeAllListeners: (channel) => ipcRenderer.removeAllListeners(channel),
-
-  /**
-   * Invoke an IPC method and return a promise
-   * @param {string} channel - The IPC channel
-   * @param {...any} args - The arguments to pass to the IPC method
-   * @returns {Promise<any>} - A promise that resolves with the result of the IPC method
-   */
-  invoke: (channel, ...args) => ipcRenderer.invoke(channel, ...args)
+    ipcRenderer.on(channel, (event, ...args) => func(...args)), // Listen for IPC message from main process
+  removeAllListeners: (channel) => ipcRenderer.removeAllListeners(channel), // Remove all listeners for a specific channel
 });
 
 /**
  * Expose API methods for interacting with the backend server
  */
 contextBridge.exposeInMainWorld('api', {
+
   /**
    * Get the current IPv4 address
    * @returns {Promise<string>} The IPv4 address
    */
   getIpAddress: async () => {
-    const response = await fetch('http://localhost:5000/api/ip-address');
+    const response = await fetch('http://localhost:5000/api/servers/ip-address');
     if (!response.ok) {
       throw new Error('Failed to fetch IP address');
     }
@@ -262,7 +239,7 @@ contextBridge.exposeInMainWorld('api', {
   /**
    * Update RAM allocation for a server
    * @param {string} id - Server ID
-   * @param {number} ram - The RAM allocation in GB
+   * @param {number} ram - RAM allocation in GB
    * @returns {Promise<string>} Response from the server
    */
   updateRamAllocation: async (id, ram) => {

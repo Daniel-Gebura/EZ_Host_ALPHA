@@ -1,5 +1,4 @@
 import React from 'react';
-import { api } from '../../api'; // Import the centralized API module
 
 interface ChooseFile1Props {
   value: string;
@@ -24,7 +23,7 @@ export const ChooseFile1: React.FC<ChooseFile1Props> = ({ value, onChange, place
    */
   const handleChooseFile = async () => {
     try {
-      const directoryPath = await api.chooseDirectory(); // Use the centralized API module
+      const directoryPath = await window.api.chooseDirectory(); // Use the centralized API module
       if (directoryPath) {
         onChange(directoryPath);
       }

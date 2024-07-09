@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { Notification } from '../common/Notification';
-import { api } from '../../api';
 
 interface ServerStatusProps {
   name: string;
@@ -57,9 +56,9 @@ export const ServerStatus: React.FC<ServerStatusProps> = ({ name, status, onName
   const handleNameChange = async () => {
     if (newName.length > 0 && newName.length <= 20) {
       try {
-        const server = await api.getServer(id!);
+        const server = await  window.api.getServer(id!);
         server.name = newName;
-        await api.updateServer(id!, server);
+        await  window.api.updateServer(id!, server);
         onNameChange(newName);
         setIsModalOpen(false);
         setNotification({ message: 'Server name updated successfully.', type: 'success' });

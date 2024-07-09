@@ -1,30 +1,17 @@
-/**
- * api.js
- *
- * Entry point for the backend API server. Sets up express server and uses server and RCON routes.
- *
- * @file api.js
- * @description Entry point for backend API server
- * @version 1.0
- */
-
 const express = require('express');
 const cors = require('cors');
-const serverRoutes = require('./routes/serverRoutes');
-const rconRoutes = require('./routes/rconRoutes');
+const { startApiServer } = require('./routes');
 
-const app = express();
 const PORT = 5000;
 
+const app = express();
 app.use(cors());
 app.use(express.json());
 
-// Use the server and RCON routes
-app.use('/api/servers', serverRoutes);
-app.use('/api/rcon', rconRoutes);
+startApiServer(app);
 
 app.listen(PORT, () => {
-  console.log(`Server is running on http://localhost:${PORT}`);
+  console.log(`API Server is running on http://localhost:${PORT}`);
 });
 
 module.exports = app;
