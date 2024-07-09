@@ -22,41 +22,51 @@ declare global {
        * @param {string} channel - The channel to remove listeners from.
        */
       removeAllListeners: (channel: string) => void;
+
+      /**
+       * Invoke an IPC method and return a promise.
+       * @param {string} channel - The channel to invoke the method on.
+       * @param {...any} args - The arguments to pass to the IPC method.
+       * @returns {Promise<any>} - A promise that resolves with the result of the IPC method.
+       */
+      invoke: (channel: string, ...args: any[]) => Promise<any>;
     };
 
     api: {
       /**
-       * Get the user's current IPv4 address
+       * Get the user's current IPv4 address.
        * @returns {Promise<string>} IPv4 Address
        */
       getIpAddress: () => Promise<string>;
 
       /**
-       * Get the list of servers
+       * Get the list of servers.
        * @returns {Promise<any>} List of servers
        */
       getServers: () => Promise<any>;
 
       /**
-       * Get a specific server
+       * Get a specific server.
        * @param {string} id - Server ID
        * @returns {Promise<any>} The requested server
        */
       getServer: (id: string) => Promise<any>;
 
       /**
-       * Add a new server
+       * Add a new server.
        * @param {any} server - Server details
        * @returns {Promise<any>} The added server
        */
       addServer: (server: {
         name: string;
+        type: string;
         directory: string;
+        icon?: string;
         rconPassword: string;
       }) => Promise<any>;
 
       /**
-       * Update a server by ID
+       * Update a server by ID.
        * @param {string} id - Server ID
        * @param {any} server - Server details
        * @returns {Promise<any>} The updated server
@@ -64,93 +74,117 @@ declare global {
       updateServer: (id: string, server: any) => Promise<any>;
 
       /**
-       * Check the status of all servers
+       * Check the status of all servers.
        * @returns {Promise<void>} The server response
        */
       checkServerStatus: () => Promise<void>;
 
       /**
-       * Delete a server by ID
+       * Delete a server by ID.
        * @param {string} id - Server ID
        * @returns {Promise<void>}
        */
       deleteServer: (id: string) => Promise<void>;
 
       /**
-       * Init a server by ID
+       * Init a server by ID.
        * @param {string} id - Server ID
        * @returns {Promise<string>} Response from the server
        */
       initServer: (id: string) => Promise<string>;
 
       /**
-       * Start a server by ID
+       * Start a server by ID.
        * @param {string} id - Server ID
        * @returns {Promise<string>} Response from the server
        */
       startServer: (id: string) => Promise<string>;
 
       /**
-       * Save a server by ID
+       * Save a server by ID.
        * @param {string} id - Server ID
        * @returns {Promise<string>} Response from the server
        */
       saveServer: (id: string) => Promise<string>;
 
       /**
-       * Restart a server by ID
+       * Restart a server by ID.
        * @param {string} id - Server ID
        * @returns {Promise<string>} Response from the server
        */
       restartServer: (id: string) => Promise<string>;
 
       /**
-       * Stop a server by ID
+       * Stop a server by ID.
        * @param {string} id - Server ID
        * @returns {Promise<string>} Response from the server
        */
       stopServer: (id: string) => Promise<string>;
 
       /**
-       * Choose a directory
+       * Choose a directory.
        * @returns {Promise<string>} The selected directory
        */
       chooseDirectory: () => Promise<string>;
 
       /**
-       * Choose a file
+       * Choose a file.
        * @returns {Promise<string>} The selected file
        */
       chooseFile: () => Promise<string>;
-      
+
       /**
-       * Retrieve fields from server.properties
+       * Get server properties by ID.
        * @param {string} id - Server ID
-       * @returns {Promise<any>} The updated properties
+       * @returns {Promise<any>} The server properties
        */
       getServerProperties: (id: string) => Promise<any>;
 
       /**
-       * Update fields in server.properties
+       * Save server properties by ID.
        * @param {string} id - Server ID
        * @param {any} properties - The updated properties
-       * @returns {Promise<any>} The updated properties
+       * @returns {Promise<void>}
        */
       saveServerProperties: (id: string, properties: any) => Promise<void>;
 
+      /**
+       * Get RAM allocation from variables.txt.
+       * @param {string} id - Server ID
+       * @returns {Promise<number>} The RAM allocation in GB
+       */
       getRamAllocation: (id: string) => Promise<number>;
 
+      /**
+       * Update RAM allocation for a server.
+       * @param {string} id - Server ID
+       * @param {number} ram - The RAM allocation in GB
+       * @returns {Promise<string>} Response from the server
+       */
       updateRamAllocation: (id: string, ram: number) => Promise<string>;
 
       /**
-       * Update fields in server.properties
+       * Send an RCON command to the server.
        * @param {string} id - Server ID
-       * @param {string} command - The rcon command to send
+       * @param {string} command - The RCON command to send
        * @returns {Promise<string>} The server response
        */
       sendRconCommand: (id: string, command: string) => Promise<string>;
 
+      /**
+       * Get the list of players on a server.
+       * @param {string} id - Server ID
+       * @returns {Promise<string[]>} List of player names
+       */
       getPlayers: (id: string) => Promise<string[]>;
+
+      /**
+       * OP or un-OP a player.
+       * @param {string} id - Server ID
+       * @param {string} playerName - Player name
+       * @param {boolean} op - true to OP, false to un-OP
+       * @returns {Promise<string>} Response from the server
+       */
       setPlayerOp: (id: string, playerName: string, op: boolean) => Promise<string>;
     };
   }

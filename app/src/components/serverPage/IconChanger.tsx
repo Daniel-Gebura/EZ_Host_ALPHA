@@ -5,6 +5,15 @@ interface IconChangerProps {
   onChangeIcon: () => void;
 }
 
+/**
+ * IconChanger component
+ * A button that allows changing the server icon.
+ * 
+ * @param {IconChangerProps} props - The props for the IconChanger component.
+ * @param {string} props.icon - The current server icon.
+ * @param {function} props.onChangeIcon - The function to call when changing the icon.
+ * @returns {JSX.Element} The rendered IconChanger component.
+ */
 export const IconChanger: React.FC<IconChangerProps> = ({ icon, onChangeIcon }) => {
   return (
     <div className="tooltip" data-tip="Change Icon">

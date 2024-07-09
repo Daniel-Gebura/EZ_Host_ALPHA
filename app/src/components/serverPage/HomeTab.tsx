@@ -9,6 +9,17 @@ interface HomeTabProps {
   serverId: string;
 }
 
+/**
+ * HomeTab component
+ * Displays server controls and the player list.
+ * 
+ * @param {HomeTabProps} props - The props for the HomeTab component.
+ * @param {'Offline' | 'Starting...' | 'Online' | 'Stopping...' | 'Restarting...'} props.status - The current server status.
+ * @param {function} props.handleAction - The function to call for server actions (start, stop, save, restart).
+ * @param {function} props.removeServer - The function to call to remove the server.
+ * @param {string} props.serverId - The ID of the server.
+ * @returns {JSX.Element} The rendered HomeTab component.
+ */
 export const HomeTab: React.FC<HomeTabProps> = ({ status, handleAction, removeServer, serverId }) => {
   return (
     <div>
@@ -20,11 +31,10 @@ export const HomeTab: React.FC<HomeTabProps> = ({ status, handleAction, removeSe
         <PlayerList serverId={serverId} status={status} />
       </div>
       <div className="text-center mt-4">
-          <button className="btn btn-danger" onClick={removeServer} disabled={status !== 'Offline'}>
-            Remove Server
-          </button>
+        <button className="btn btn-danger" onClick={removeServer} disabled={status !== 'Offline'}>
+          Remove Server
+        </button>
       </div>
     </div>
-    
   );
 };

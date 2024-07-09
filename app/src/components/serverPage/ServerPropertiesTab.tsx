@@ -1,11 +1,21 @@
 import React, { useState, useEffect } from 'react';
 import { Notification } from '../common/Notification';
+import { api } from '../../api';
 
 interface ServerPropertiesTabProps {
   serverId: string;
   serverStatus: 'Offline' | 'Starting...' | 'Online' | 'Stopping...' | 'Restarting...';
 }
 
+/**
+ * ServerPropertiesTab component
+ * Displays and allows editing of server properties.
+ * 
+ * @param {ServerPropertiesTabProps} props - The props for the ServerPropertiesTab component.
+ * @param {string} props.serverId - The ID of the server.
+ * @param {'Offline' | 'Starting...' | 'Online' | 'Stopping...' | 'Restarting...'} props.serverStatus - The current server status.
+ * @returns {JSX.Element} The rendered ServerPropertiesTab component.
+ */
 export const ServerPropertiesTab: React.FC<ServerPropertiesTabProps> = ({ serverId, serverStatus }) => {
   const [properties, setProperties] = useState({
     'allow-flight': 'false',
@@ -20,18 +30,24 @@ export const ServerPropertiesTab: React.FC<ServerPropertiesTabProps> = ({ server
   });
   const [notification, setNotification] = useState<{ message: string, type: 'success' | 'error' } | null>(null);
 
+  /**
+   * Fetch the server properties from the backend API.
+   */
   const fetchProperties = async () => {
     try {
-      const result = await window.api.getServerProperties(serverId);
+      const result = await api.getServerProperties(serverId);
       setProperties(result);
     } catch (error) {
       console.error('Error fetching server properties:', error);
     }
   };
 
+  /**
+   * Save the updated server properties to the backend API.
+   */
   const saveProperties = async () => {
     try {
-      await window.api.saveServerProperties(serverId, properties);
+      await api.saveServerProperties(serverId, properties);
       setNotification({ message: 'Server properties saved successfully.', type: 'success' });
     } catch (error) {
       console.error('Error saving server properties:', error);
@@ -43,6 +59,11 @@ export const ServerPropertiesTab: React.FC<ServerPropertiesTabProps> = ({ server
     fetchProperties();
   }, [serverId]);
 
+  /**
+   * Handle changes to the server properties form inputs.
+   * 
+   * @param {React.ChangeEvent<HTMLSelectElement>} e - The change event for the select input.
+   */
   const handleChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const { name, value } = e.target;
     setProperties((prev) => ({

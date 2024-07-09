@@ -8,10 +8,17 @@ interface NavbarProps {
   onCheckStatus: () => void;
 }
 
+/**
+ * Navbar component that contains navigation elements and actions.
+ * 
+ * @param {NavbarProps} props - The props for the Navbar component.
+ * @returns {JSX.Element} The rendered Navbar component.
+ */
 export const Navbar: React.FC<NavbarProps> = ({ toggleSidebar, onCheckStatus }) => {
   return (
     <nav className="bg-base-300 py-4 px-6 shadow-md fixed w-full z-20">
       <div className="flex items-center justify-between">
+        {/* Sidebar Toggle Button */}
         <button 
           className="btn btn-square btn-outline"
           onClick={toggleSidebar}
@@ -21,11 +28,13 @@ export const Navbar: React.FC<NavbarProps> = ({ toggleSidebar, onCheckStatus }) 
           </svg>
         </button>
 
+        {/* Logo and Home Link */}
         <Link to="/" className="flex items-center mx-auto">
           <span className="text-2xl font-bold mr-2">EZ HOST</span>
           <img src={logo} alt="EZ HOST Logo" className="h-10 w-10" />
         </Link>
 
+        {/* Check Server Status Button */}
         <div className="flex-none">
           <ul className="btn btn-square btn-outline">
             <li>

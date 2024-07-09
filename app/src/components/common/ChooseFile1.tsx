@@ -1,4 +1,5 @@
 import React from 'react';
+import { api } from '../../api'; // Import the centralized API module
 
 interface ChooseFile1Props {
   value: string;
@@ -8,18 +9,28 @@ interface ChooseFile1Props {
 
 /**
  * ChooseFile1 component
- * A reusable directory input component for selecting a folder
+ * A reusable directory input component for selecting a folder.
  * 
- * @param {string} value - The value of the input
- * @param {function} onChange - The function to call when the value changes
- * @param {string} [placeholder] - The placeholder text for the input
+ * @param {ChooseFile1Props} props - The props for the ChooseFile1 component.
+ * @param {string} props.value - The value of the input.
+ * @param {function} props.onChange - The function to call when the value changes.
+ * @param {string} [props.placeholder] - The placeholder text for the input.
  * @returns {JSX.Element}
  */
 export const ChooseFile1: React.FC<ChooseFile1Props> = ({ value, onChange, placeholder }) => {
+  /**
+   * Handle the directory selection by calling the backend API.
+   * If an error occurs, log it to the console.
+   */
   const handleChooseFile = async () => {
-    const directoryPath = await window.api.chooseDirectory();
-    if (directoryPath) {
-      onChange(directoryPath);
+    try {
+      const directoryPath = await api.chooseDirectory(); // Use the centralized API module
+      if (directoryPath) {
+        onChange(directoryPath);
+      }
+    } catch (error) {
+      console.error('Error choosing directory:', error);
+      // Optionally, you can set an error state and display an error message to the user here
     }
   };
 

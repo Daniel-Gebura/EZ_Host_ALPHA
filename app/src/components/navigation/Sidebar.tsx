@@ -11,13 +11,22 @@ interface SidebarProps {
 interface Server {
   id: string;
   name: string;
-  icon: string; // Add icon property
+  icon: string;
 }
 
+/**
+ * Sidebar component for displaying server list and navigation buttons.
+ * 
+ * @param {SidebarProps} props - The props for the Sidebar component.
+ * @returns {JSX.Element} The rendered Sidebar component.
+ */
 export const Sidebar: React.FC<SidebarProps> = ({ isSidebarOpen, toggleSidebar }) => {
   const [servers, setServers] = useState<Server[]>([]);
   const [error, setError] = useState<string | null>(null);
 
+  /**
+   * Fetch the list of servers from the backend.
+   */
   const fetchServers = async () => {
     try {
       const serverList = await window.api.getServers();
@@ -65,7 +74,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isSidebarOpen, toggleSidebar }
       {servers.length === 0 && <div className="text-center text-gray-500">No servers added</div>}
       {servers.map((server) => (
         <div className="flex justify-center mb-4" key={server.id}>
-          <ServerButton id={server.id} name={server.name} icon={server.icon} /> {/* Pass icon to ServerButton */}
+          <ServerButton id={server.id} name={server.name} icon={server.icon} />
         </div>
       ))}
       <div className="flex justify-center mb-4">

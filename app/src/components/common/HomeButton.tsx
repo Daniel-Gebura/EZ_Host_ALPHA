@@ -1,6 +1,12 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 
+/**
+ * HomeButton component
+ * A button that navigates to the home page.
+ * 
+ * @returns {JSX.Element}
+ */
 export const HomeButton: React.FC = () => {
   return (
     <Link to="/">
