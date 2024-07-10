@@ -1,10 +1,10 @@
 /**
- * index.js
+ * main.js
  * 
  * Entry point for the Electron application.
  * This script handles the backend lifecycle events of the application.
  * 
- * @file index.js
+ * @file main.js
  * @description Main process of the Electron application
  * @version 1.0
  */
