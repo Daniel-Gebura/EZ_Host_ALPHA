@@ -1,6 +1,6 @@
 const express = require('express');
 const cors = require('cors');
-const { startApiServer } = require('./routes');
+const { startApiServer } = require('./routes/routes');
 
 const PORT = 5000;
 

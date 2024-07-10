@@ -2,17 +2,49 @@
   "name": "ez_host_alpha",
   "version": "1.0.0",
   "description": "Welcome to the EZ Host project! This project aims to provide a desktop app interface for users to sign in and control the functionality of a gaming server running on your local machine. The server management is facilitated through a command line application, which is then controlled by the user-friendly desktop application.",
-  "main": "main.js",
+  "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "electron .",
-    "dev:watch": "npx electronmon --trace-warnings ."
+    "dev:watch": "npx electronmon --trace-warnings .",
+    "build": "electron-builder",
+    "package": "electron-packager . EZHost --platform=win32 --arch=x64 --out=dist --overwrite"
+  },
+  "build": {
+    "appId": "com.danielgebura.ezhostalpha",
+    "directories": {
+      "output": "dist",
+      "buildResources": "build"
+    },
+    "files": [
+      "app/**/*",
+      "index.js",
+      "preload.js",
+      "resources/**/*",
+      "server/**/*",
+      "package.json"
+    ],
+    "extraResources": [
+      "template_scripts/**/*"
+    ],
+    "win": {
+      "target": "nsis"
+    },
+    "mac": {
+      "target": "dmg"
+    },
+    "linux": {
+      "target": "AppImage"
+    },
+    "electronVersion": "31.0.2"
   },
   "keywords": [],
   "author": "Daniel Gebura",
   "license": "MIT",
   "devDependencies": {
-    "electron": "^31.0.2"
+    "electron": "^31.0.2",
+    "electron-builder": "^24.13.3",
+    "electron-packager": "^15.3.0"
   },
   "dependencies": {
     "chokidar": "^3.6.0",
