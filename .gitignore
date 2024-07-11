@@ -15,13 +15,7 @@ Thumbs.db
 # Build output
 dist/
 app/build/
-createInstaller.js
 
 # Editor directories and files
 .vscode/
 *.swp
-.prettierrc
-.editorconfig
-
-# Application-specific files
-servers.json

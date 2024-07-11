@@ -29,7 +29,7 @@ async function createInstaller() {
       description: 'Manage and control local minecraft servers with ease',
       noMsi: true,
       setupExe: 'EZHostInstaller.exe', // Name for the installer executable
-      //setupIcon: path.join(rootPath, 'app', 'public', 'favicon.ico') // Path to your app icon
+      setupIcon: path.join(rootPath, 'app', 'public', 'favicon.ico') // Path to your app icon
     });
     console.log('Installer created successfully!');
   } catch (e) {
