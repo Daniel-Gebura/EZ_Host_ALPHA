@@ -22,6 +22,7 @@ declare global {
       restartServer: (id: string) => Promise<string>;
       stopServer: (id: string) => Promise<string>;
       chooseDirectory: () => Promise<string>;
+      checkFileExistence: (dir: string, filename: string) => Promise<boolean>;
       chooseFile: () => Promise<string>;
       getServerProperties: (id: string) => Promise<any>;
       saveServerProperties: (id: string, properties: any) => Promise<void>;

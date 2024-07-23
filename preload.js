@@ -185,6 +185,15 @@ contextBridge.exposeInMainWorld('api', {
     const result = await ipcRenderer.invoke('choose-directory');
     return result;
   },
+  
+  /**
+   * Check if a specified file exists in a given path
+   * @param {string} dir - The directory path
+   * @param {string} filename - The file name
+   * @returns {Promise<boolean>} - True if the file exists, false otherwise
+   */
+  checkFileExistence: (dir, filename) => 
+    ipcRenderer.invoke('check-file-existence', dir, filename),
 
   /**
    * Open a file chooser dialog
