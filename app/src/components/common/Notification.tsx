@@ -29,8 +29,10 @@ export const Notification: React.FC<NotificationProps> = ({ message, type, durat
   if (!isVisible) return null;
 
   return (
-    <div className={`fixed top-4 right-4 p-4 rounded shadow-lg ${type === 'success' ? 'bg-green-500' : 'bg-red-500'} text-white`}>
-      {message}
+    <div role="alert" className={`fixed top-4 right-4 alert ${type === 'success' ? 'alert-success' : 'alert-error'} shadow-lg`}>
+      <div>
+        <span>{message}</span>
+      </div>
     </div>
   );
 };

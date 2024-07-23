@@ -4,6 +4,7 @@ const fs = require('fs');
 const { runPowerShellScript, sendRconCommand, getPlayersList } = require('../utils/apiUtilFunctions');
 const { readPropertiesFile, writePropertiesFile, loadServers, saveServers } = require('../utils/fileUtilFunctions');
 const { getIpAddress } = require('../utils/networkUtilFunctions');
+const { fileExists } = require('../utils/validateUtilFunctions');
 const { Rcon } = require('rcon-client');
 
 const router = express.Router();
@@ -142,8 +143,27 @@ router.post('/:id/initServer', (req, res) => {
 /**
  * Endpoint to start a server
  */
-router.post('/:id/start', (req, res) => {
-  runPowerShellScript(req.params.id, 'start.ps1', res, servers, DATA_FILE);
+router.post('/:id/start', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const server = servers.find(s => s.id === id);
+
+    if (!server) {
+      return res.status(404).send('Server not found');
+    }
+
+    const fileExistsResult = await fileExists(server.directory, 'variables.txt');
+
+    if (!fileExistsResult) {
+      console.error('variables.txt file is missing. Cannot start server.');
+      return res.status(400).json({ message: 'variables.txt file is missing. Cannot start server.' });
+    }
+
+    runPowerShellScript(id, 'start.ps1', res, servers, DATA_FILE);
+  } catch (error) {
+    console.error(`Error starting server: ${error.message}`);
+    res.status(500).send('Internal Server Error');
+  }
 });
 
 /**

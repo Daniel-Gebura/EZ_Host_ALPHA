@@ -75,9 +75,8 @@ export const ServerControl: React.FC = () => {
     }
 
     try {
-      // Check if any server is online
       if (action === 'start') {
-        const servers = await  window.api.getServers();
+        const servers = await window.api.getServers();
         const onlineServer = servers.find((server: any) => server.status === 'Online');
         if (onlineServer) {
           setIsModalOpen(true);
@@ -88,13 +87,13 @@ export const ServerControl: React.FC = () => {
       let response;
       switch (action) {
         case 'start':
-          response = await  window.api.startServer(currentServerId);
+          response = await window.api.startServer(currentServerId);
           break;
         case 'save':
-          response = await  window.api.saveServer(currentServerId);
+          response = await window.api.saveServer(currentServerId);
           break;
         case 'stop':
-          response = await  window.api.stopServer(currentServerId);
+          response = await window.api.stopServer(currentServerId);
           break;
         default:
           response = 'Invalid action';
@@ -103,7 +102,8 @@ export const ServerControl: React.FC = () => {
       await fetchServerDetails(currentServerId);
     } catch (error: any) {
       console.error(`Error performing action '${action}':`, error);
-      setNotification({ message: `Failed to ${action} server: ${error.message}`, type: 'error' });
+      const errorMessage = error.response?.data?.message || `Failed to ${action} server: ${error.message}`;
+      setNotification({ message: errorMessage, type: 'error' });
     }
   };
 
