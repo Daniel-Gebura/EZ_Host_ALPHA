@@ -27,7 +27,6 @@ export const ServerPropertiesTab: React.FC<ServerPropertiesTabProps> = ({ server
     'spawn-monsters': 'true',
     'spawn-npcs': 'true',
   });
-  const [notification, setNotification] = useState<{ message: string, type: 'success' | 'error' } | null>(null);
 
   /**
    * Fetch the server properties from the backend API.
@@ -47,10 +46,8 @@ export const ServerPropertiesTab: React.FC<ServerPropertiesTabProps> = ({ server
   const saveProperties = async () => {
     try {
       await  window.api.saveServerProperties(serverId, properties);
-      setNotification({ message: 'Server properties saved successfully.', type: 'success' });
     } catch (error) {
       console.error('Error saving server properties:', error);
-      setNotification({ message: 'Failed to save server properties.', type: 'error' });
     }
   };
 
@@ -73,7 +70,6 @@ export const ServerPropertiesTab: React.FC<ServerPropertiesTabProps> = ({ server
 
   return (
     <div className="bg-base-300 shadow-lg rounded-lg p-6 mb-4">
-      {notification && <Notification message={notification.message} type={notification.type} />}
       <h2 className="text-2xl font-bold mb-4">Server Properties</h2>
       <div className="grid grid-cols-1 gap-4">
         <div>

@@ -15,7 +15,7 @@ export const ServerControl: React.FC = () => {
   const [status, setStatus] = useState<'Offline' | 'Starting...' | 'Online' | 'Stopping...' | 'Restarting...'>('Offline');
   const [icon, setIcon] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<'home' | 'properties' | 'details'>('home');
-  const [notification, setNotification] = useState<{ message: string, type: 'success' | 'error', key: number } | null>(null);
+  const [notification, setNotification] = useState<{ message: string, type: 'success' | 'error' | 'warning', key: number } | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [ramAllocation, setRamAllocation] = useState(4);
   const [ip, setIp] = useState('127.0.0.1');
@@ -115,10 +115,8 @@ export const ServerControl: React.FC = () => {
       try {
         await window.api.deleteServer(currentServerId);
         navigate('/');
-        setNotification({ message: 'Server deleted successfully.', type: 'success', key: Date.now() });
       } catch (error: any) {
         console.error('Error deleting server:', error);
-        setNotification({ message: `Failed to delete server: ${error.message}`, type: 'error', key: Date.now() });
       }
     } else {
       console.error('Server ID is undefined');
@@ -139,7 +137,6 @@ export const ServerControl: React.FC = () => {
         await window.api.updateServer(currentServerId, server);
       } catch (error: any) {
         console.error('Error updating server icon:', error);
-        setNotification({ message: 'Failed to update server icon.', type: 'error', key: Date.now() });
       }
     }
   };
@@ -157,10 +154,8 @@ export const ServerControl: React.FC = () => {
     try {
       await window.api.updateRamAllocation(currentServerId, newRam);
       setRamAllocation(newRam);
-      setNotification({ message: 'RAM allocation updated successfully. Please restart the server for changes to take effect.', type: 'success', key: Date.now() });
     } catch (error: any) {
       console.error('Error updating RAM allocation:', error);
-      setNotification({ message: 'Failed to update RAM allocation.', type: 'error', key: Date.now() });
     }
   };
 
