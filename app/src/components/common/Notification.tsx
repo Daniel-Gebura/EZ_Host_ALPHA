@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 
 interface NotificationProps {
   message: string;
-  type: 'success' | 'error';
+  type: 'success' | 'warning' | 'alert-error';
   duration?: number;
 }
 
@@ -18,6 +18,8 @@ interface NotificationProps {
  */
 export const Notification: React.FC<NotificationProps> = ({ message, type, duration = 3000 }) => {
   const [isVisible, setIsVisible] = useState(true);
+  const [parsedMessage, setParsedMessage] = useState('');
+  const [parsedType, setParsedType] = useState<'success' | 'warning' | 'alert-error'>(type);
 
   useEffect(() => {
     setIsVisible(true);
@@ -25,13 +27,23 @@ export const Notification: React.FC<NotificationProps> = ({ message, type, durat
       setIsVisible(false);
     }, duration);
 
+    // Parse the JSON message to extract the desired part
+    try {
+      const parsed = JSON.parse(message);
+      setParsedMessage(parsed.message || message);
+      setParsedType(parsed.type || type);
+    } catch (error) {
+      setParsedMessage(message);
+      setParsedType(type);
+    }
+
     return () => clearTimeout(timer);
   }, [message, type, duration]);
 
   if (!isVisible) return null;
 
   return (
-    <div role="alert" className="alert alert-warning">
+    <div role="alert" className={`alert ${parsedType}`}>
       <svg
         xmlns="http://www.w3.org/2000/svg"
         className="h-6 w-6 shrink-0 stroke-current"
@@ -43,7 +55,7 @@ export const Notification: React.FC<NotificationProps> = ({ message, type, durat
           strokeWidth="2"
           d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
       </svg>
-      <span>Warning: Invalid email address!</span>
+      <span>{parsedMessage}</span>
     </div>
   );
 };

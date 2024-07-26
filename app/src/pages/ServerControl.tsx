@@ -155,18 +155,18 @@ export const ServerControl: React.FC = () => {
     }
 
     try {
-      await window.api.updateRamAllocation(currentServerId, newRam);
+      await  window.api.updateRamAllocation(currentServerId, newRam);
       setRamAllocation(newRam);
-      setNotification({ message: 'RAM allocation updated successfully. Please restart the server for changes to take effect.', type: 'success', key: Date.now() });
+      setNotification({ message: 'RAM allocation updated successfully. Please restart the server for changes to take effect.', type: 'success' });
     } catch (error: any) {
       console.error('Error updating RAM allocation:', error);
-      setNotification({ message: 'Failed to update RAM allocation.', type: 'error', key: Date.now() });
+      setNotification({ message: 'Failed to update RAM allocation.', type: 'error' });
     }
   };
 
   return (
     <div className="min-h-screen bg-base-100 p-4 lg:pl-32 lg:pr-32">
-      {notification && <Notification key={notification.key} message={notification.message} type={notification.type} />}
+      {notification && <Notification message={notification.message} type={notification.type} />}
       <div className="bg-base-300 shadow-lg rounded-lg p-6 mb-4">
         <div className="flex flex-col md:flex-row items-center mb-4">
           <IconChanger icon={icon || defaultLogo} onChangeIcon={handleChangeIcon} />
