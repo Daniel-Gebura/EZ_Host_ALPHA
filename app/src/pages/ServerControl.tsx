@@ -73,7 +73,7 @@ export const ServerControl: React.FC = () => {
       console.error('Server ID is undefined');
       return;
     }
-
+  
     try {
       if (action === 'start') {
         const servers = await window.api.getServers();
@@ -83,7 +83,7 @@ export const ServerControl: React.FC = () => {
           return;
         }
       }
-
+  
       let response;
       switch (action) {
         case 'start':
@@ -96,9 +96,17 @@ export const ServerControl: React.FC = () => {
           response = await window.api.stopServer(currentServerId);
           break;
         default:
-          response = 'Invalid action';
+          response = { status: 400, data: { message: 'Invalid action' } };
       }
-      setNotification({ message: response, type: 'success', key: Date.now() });
+  
+      if (response.status >= 200 && response.status < 300) {
+        setNotification({ message: response.data.message, type: 'success', key: Date.now() });
+      } else if (response.status >= 400 && response.status < 500) {
+        setNotification({ message: response.data.message, type: 'error', key: Date.now() });
+      } else if (response.status >= 500) {
+        setNotification({ message: 'Server error. Please try again later.', type: 'error', key: Date.now() });
+      }
+  
       await fetchServerDetails(currentServerId);
     } catch (error: any) {
       console.error(`Error performing action '${action}':`, error);

@@ -156,7 +156,7 @@ router.post('/:id/start', async (req, res) => {
 
     if (!fileExistsResult) {
       console.error('variables.txt file is missing. Cannot start server.');
-      return res.status(400).json({ message: 'variables.txt file is missing. Cannot start server.' });
+      return res.status(404).json({ message: 'variables.txt file is missing. Cannot start server.' });
     }
 
     runPowerShellScript(id, 'start.ps1', res, servers, DATA_FILE);
