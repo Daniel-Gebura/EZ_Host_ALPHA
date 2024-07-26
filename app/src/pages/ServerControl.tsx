@@ -15,7 +15,7 @@ export const ServerControl: React.FC = () => {
   const [status, setStatus] = useState<'Offline' | 'Starting...' | 'Online' | 'Stopping...' | 'Restarting...'>('Offline');
   const [icon, setIcon] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<'home' | 'properties' | 'details'>('home');
-  const [notification, setNotification] = useState<{ message: string, type: 'success' | 'error' } | null>(null);
+  const [notification, setNotification] = useState<{ message: string, type: 'success' | 'error', key: number } | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [ramAllocation, setRamAllocation] = useState(4);
   const [ip, setIp] = useState('127.0.0.1');
@@ -98,12 +98,12 @@ export const ServerControl: React.FC = () => {
         default:
           response = 'Invalid action';
       }
-      setNotification({ message: response, type: 'success' });
+      setNotification({ message: response, type: 'success', key: Date.now() });
       await fetchServerDetails(currentServerId);
     } catch (error: any) {
       console.error(`Error performing action '${action}':`, error);
       const errorMessage = error.response?.data?.message || `Failed to ${action} server: ${error.message}`;
-      setNotification({ message: errorMessage, type: 'error' });
+      setNotification({ message: errorMessage, type: 'error', key: Date.now() });
     }
   };
 
@@ -113,12 +113,12 @@ export const ServerControl: React.FC = () => {
   const removeServer = async () => {
     if (currentServerId) {
       try {
-        await  window.api.deleteServer(currentServerId);
+        await window.api.deleteServer(currentServerId);
         navigate('/');
-        setNotification({ message: 'Server deleted successfully.', type: 'success' });
+        setNotification({ message: 'Server deleted successfully.', type: 'success', key: Date.now() });
       } catch (error: any) {
         console.error('Error deleting server:', error);
-        setNotification({ message: `Failed to delete server: ${error.message}`, type: 'error' });
+        setNotification({ message: `Failed to delete server: ${error.message}`, type: 'error', key: Date.now() });
       }
     } else {
       console.error('Server ID is undefined');
@@ -129,17 +129,17 @@ export const ServerControl: React.FC = () => {
    * Handle changing the server icon.
    */
   const handleChangeIcon = async () => {
-    const selectedIcon = await  window.api.chooseFile();
+    const selectedIcon = await window.api.chooseFile();
     if (selectedIcon && currentServerId) {
       setIcon(selectedIcon);
 
       try {
-        const server = await  window.api.getServer(currentServerId);
+        const server = await window.api.getServer(currentServerId);
         server.icon = selectedIcon;
-        await  window.api.updateServer(currentServerId, server);
+        await window.api.updateServer(currentServerId, server);
       } catch (error: any) {
         console.error('Error updating server icon:', error);
-        setNotification({ message: 'Failed to update server icon.', type: 'error' });
+        setNotification({ message: 'Failed to update server icon.', type: 'error', key: Date.now() });
       }
     }
   };
@@ -155,18 +155,18 @@ export const ServerControl: React.FC = () => {
     }
 
     try {
-      await  window.api.updateRamAllocation(currentServerId, newRam);
+      await window.api.updateRamAllocation(currentServerId, newRam);
       setRamAllocation(newRam);
-      setNotification({ message: 'RAM allocation updated successfully. Please restart the server for changes to take effect.', type: 'success' });
+      setNotification({ message: 'RAM allocation updated successfully. Please restart the server for changes to take effect.', type: 'success', key: Date.now() });
     } catch (error: any) {
       console.error('Error updating RAM allocation:', error);
-      setNotification({ message: 'Failed to update RAM allocation.', type: 'error' });
+      setNotification({ message: 'Failed to update RAM allocation.', type: 'error', key: Date.now() });
     }
   };
 
   return (
     <div className="min-h-screen bg-base-100 p-4 lg:pl-32 lg:pr-32">
-      {notification && <Notification message={notification.message} type={notification.type} />}
+      {notification && <Notification key={notification.key} message={notification.message} type={notification.type} />}
       <div className="bg-base-300 shadow-lg rounded-lg p-6 mb-4">
         <div className="flex flex-col md:flex-row items-center mb-4">
           <IconChanger icon={icon || defaultLogo} onChangeIcon={handleChangeIcon} />
