@@ -1,6 +1,13 @@
 export {};
 
 declare global {
+  type ApiResponse = {
+    status: number;
+    data: {
+      message: string;
+    };
+  };
+
   interface Window {
     ipcRenderer: {
       send: (channel: string, data?: any) => void;
@@ -17,11 +24,11 @@ declare global {
       checkServerStatus: () => Promise<void>;
       deleteServer: (id: string) => Promise<void>;
       initServer: (id: string) => Promise<string>;
-      startServer: (id: string) => Promise<string>;
-      saveServer: (id: string) => Promise<string>;
-      restartServer: (id: string) => Promise<string>;
-      stopServer: (id: string) => Promise<string>;
+      startServer: (id: string) => Promise<ApiResponse>;
+      saveServer: (id: string) => Promise<ApiResponse>;
+      stopServer: (id: string) => Promise<ApiResponse>;
       chooseDirectory: () => Promise<string>;
+      checkFileExistence: (dir: string, filename: string) => Promise<boolean>;
       chooseFile: () => Promise<string>;
       getServerProperties: (id: string) => Promise<any>;
       saveServerProperties: (id: string, properties: any) => Promise<void>;

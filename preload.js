@@ -132,14 +132,19 @@ contextBridge.exposeInMainWorld('api', {
   /**
    * Start a server by ID
    * @param {string} id - Server ID
-   * @returns {Promise<string>} Response from the server
+   * @returns {Promise<{ status: number, data: { message: string } }>} Response from the server
    */
   startServer: async (id) => {
     const response = await fetch(`http://localhost:5000/api/servers/${id}/start`, {
       method: 'POST',
     });
-    return response.text();
+    
+    const status = response.status;
+    const data = await response.json();
+
+    return { status, data };
   },
+
 
   /**
    * Save a server by ID
@@ -150,19 +155,10 @@ contextBridge.exposeInMainWorld('api', {
     const response = await fetch(`http://localhost:5000/api/servers/${id}/save`, {
       method: 'POST',
     });
-    return response.text();
-  },
+    const status = response.status;
+    const data = await response.json();
 
-  /**
-   * Restart a server by ID
-   * @param {string} id - Server ID
-   * @returns {Promise<string>} Response from the server
-   */
-  restartServer: async (id) => {
-    const response = await fetch(`http://localhost:5000/api/servers/${id}/restart`, {
-      method: 'POST',
-    });
-    return response.text();
+    return { status, data };
   },
 
   /**
@@ -174,7 +170,10 @@ contextBridge.exposeInMainWorld('api', {
     const response = await fetch(`http://localhost:5000/api/servers/${id}/stop`, {
       method: 'POST',
     });
-    return response.text();
+    const status = response.status;
+    const data = await response.json();
+
+    return { status, data };
   },
 
   /**
@@ -185,6 +184,15 @@ contextBridge.exposeInMainWorld('api', {
     const result = await ipcRenderer.invoke('choose-directory');
     return result;
   },
+  
+  /**
+   * Check if a specified file exists in a given path
+   * @param {string} dir - The directory path
+   * @param {string} filename - The file name
+   * @returns {Promise<boolean>} - True if the file exists, false otherwise
+   */
+  checkFileExistence: (dir, filename) => 
+    ipcRenderer.invoke('check-file-existence', dir, filename),
 
   /**
    * Open a file chooser dialog

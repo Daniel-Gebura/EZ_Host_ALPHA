@@ -21,7 +21,6 @@ interface ServerStatusProps {
 export const ServerStatus: React.FC<ServerStatusProps> = ({ name, status, onNameChange }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [newName, setNewName] = useState(name);
-  const [notification, setNotification] = useState<{ message: string, type: 'success' | 'error' } | null>(null);
   const { id } = useParams<{ id: string }>();
 
   /**
@@ -61,19 +60,14 @@ export const ServerStatus: React.FC<ServerStatusProps> = ({ name, status, onName
         await  window.api.updateServer(id!, server);
         onNameChange(newName);
         setIsModalOpen(false);
-        setNotification({ message: 'Server name updated successfully.', type: 'success' });
       } catch (error) {
         console.error('Error updating server name:', error);
-        setNotification({ message: 'Error updating server name.', type: 'error' });
       }
-    } else {
-      setNotification({ message: 'Server name must be between 1 and 20 characters.', type: 'error' });
     }
   };
 
   return (
     <div>
-      {notification && <Notification message={notification.message} type={notification.type} />}
       <h1 className="text-3xl font-bold cursor-pointer" onClick={() => setIsModalOpen(true)}>
         {name}
       </h1>

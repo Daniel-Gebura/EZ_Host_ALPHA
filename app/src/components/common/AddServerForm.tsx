@@ -11,7 +11,7 @@ interface AddServerFormProps {
 /**
  * AddServerForm component
  * Form for adding a new server.
- * 
+ *
  * @param {AddServerFormProps} props - The props for the AddServerForm component.
  * @returns {JSX.Element}
  */
@@ -34,16 +34,23 @@ export const AddServerForm: React.FC<AddServerFormProps> = ({ onServerAdded }) =
     }
 
     setIsLoading(true);
-    const newServer = {
-      name: serverName,
-      directory: directory,
-      icon: serverIcon,
-      rconPassword: rconPassword,
-    };
     try {
+      const variablesFileExists = await window.api.checkFileExistence(directory, 'variables.txt');
+      if (!variablesFileExists) {
+        setError('The chosen directory does not contain necessary files. Please select a valid server directory.');
+        setIsLoading(false);
+        return;
+      }
+
+      const newServer = {
+        name: serverName,
+        directory: directory,
+        icon: serverIcon,
+        rconPassword: rconPassword,
+      };
       const addedServer = await window.api.addServer(newServer);
-      // Initialize the server
       await window.api.initServer(addedServer.id);
+
       setServerName('');
       setDirectory('');
       setServerIcon(defaultLogo);
@@ -103,8 +110,11 @@ export const AddServerForm: React.FC<AddServerFormProps> = ({ onServerAdded }) =
           onChange={() => setAgreeEula(!agreeEula)}
         />
       </div>
-
-      <button className="btn btn-primary w-full" onClick={addServer} disabled={!agreeEula || isLoading}>
+      <button
+        className="btn btn-primary w-full"
+        onClick={addServer}
+        disabled={!agreeEula || isLoading}
+      >
         {isLoading ? (
           <span className="loading loading-spinner"></span>
         ) : (
