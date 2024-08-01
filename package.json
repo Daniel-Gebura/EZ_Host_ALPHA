@@ -7,7 +7,7 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "electron .",
     "dev:watch": "npx electronmon --trace-warnings .",
-    "create-installer": "node createInstaller.js"
+    "create-installer": "node scripts/createInstaller.js"
   },
   "keywords": [],
   "author": "Daniel Gebura",

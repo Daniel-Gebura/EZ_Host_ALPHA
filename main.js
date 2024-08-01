@@ -1,9 +1,9 @@
 /**
  * main.js
- * 
+ *
  * Entry point for the Electron application.
  * This script handles the backend lifecycle events of the application.
- * 
+ *
  * @file main.js
  * @description Main process of the Electron application
  * @version 1.0
@@ -13,7 +13,7 @@ const { app, BrowserWindow, dialog, ipcMain } = require('electron'); // Electron
 const url = require('url'); // Module for URL handling
 const path = require('path'); // Module for file path handling
 const chokidar = require('chokidar'); // Module for watching file changes
-const { fileExists } = require('./server/utils/validateUtilFunctions');
+const { fileExists } = require('./backend/utils/validateUtilFunctions');
 
 let mainWindow;
 let watcher; // Declare watcher at the top level to ensure proper cleanup
@@ -84,7 +84,7 @@ function createMainWindow() {
  */
 ipcMain.handle('choose-directory', async () => {
   const result = await dialog.showOpenDialog(mainWindow, {
-    properties: ['openDirectory']
+    properties: ['openDirectory'],
   });
   return result.filePaths[0];
 });
@@ -102,7 +102,7 @@ ipcMain.handle('check-file-existence', async (event, dir, filename) => {
 ipcMain.handle('choose-file', async () => {
   const result = await dialog.showOpenDialog(mainWindow, {
     properties: ['openFile'],
-    filters: [{ name: 'Images', extensions: ['png', 'jpg', 'jpeg'] }]
+    filters: [{ name: 'Images', extensions: ['png', 'jpg', 'jpeg'] }],
   });
   return result.filePaths[0];
 });
@@ -112,7 +112,7 @@ ipcMain.handle('choose-file', async () => {
  */
 app.whenReady().then(() => {
   createMainWindow(); // Create the main window when the app is ready
-  require('./server/api'); // Start the API server
+  require('./backend/api'); // Start the API server
 });
 
 /**
