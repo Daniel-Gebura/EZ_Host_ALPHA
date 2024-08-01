@@ -44,8 +44,8 @@ router.post('/', (req, res) => {
     fs.mkdirSync(ezHostDirectory);
   }
 
-  const INIT_SCRIPT_TEMPLATE = path.join(__dirname, '../template_scripts/initServer-template.ps1');
-  const START_SCRIPT_TEMPLATE = path.join(__dirname, '../template_scripts/simple-start-template.ps1');
+  const INIT_SCRIPT_TEMPLATE = path.join(__dirname, '../template_scripts/initServerTemplate.ps1');
+  const START_SCRIPT_TEMPLATE = path.join(__dirname, '../template_scripts/simpleStartTemplate.ps1');
 
   fs.writeFileSync(path.join(ezHostDirectory, 'initServer.ps1'), fs.readFileSync(INIT_SCRIPT_TEMPLATE, 'utf8'));
   fs.chmodSync(path.join(ezHostDirectory, 'initServer.ps1'), '755');
