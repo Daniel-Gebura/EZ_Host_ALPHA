@@ -16,7 +16,7 @@ Thumbs.db
 # Build output
 dist/
 backend/myServers.json
-app/build/
+frontend/build/
 scripts/
 
 # Editor directories and files

@@ -39,7 +39,7 @@ function createMainWindow() {
 
   // Define the start URL for the main window
   const startUrl = url.format({
-    pathname: path.join(__dirname, 'app/build/index.html'),
+    pathname: path.join(__dirname, 'frontend/build/index.html'),
     protocol: 'file:',
     slashes: true, // Ensures proper URL formatting across platforms
   });
@@ -59,7 +59,7 @@ function createMainWindow() {
   });
 
   // Initialize the watcher for the servers.json file
-  watcher = chokidar.watch(path.join(__dirname, 'server', 'myServers.json'), {
+  watcher = chokidar.watch(path.join(__dirname, 'backend', 'myServers.json'), {
     persistent: true,
   });
 
