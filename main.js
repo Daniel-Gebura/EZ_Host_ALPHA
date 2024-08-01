@@ -59,7 +59,7 @@ function createMainWindow() {
   });
 
   // Initialize the watcher for the servers.json file
-  watcher = chokidar.watch(path.join(__dirname, 'server', 'servers.json'), {
+  watcher = chokidar.watch(path.join(__dirname, 'server', 'myServers.json'), {
     persistent: true,
   });
 

@@ -8,7 +8,7 @@ const { fileExists } = require('../utils/validateUtilFunctions');
 const { Rcon } = require('rcon-client');
 
 const router = express.Router();
-const DATA_FILE = path.join(__dirname, '../servers.json');
+const DATA_FILE = path.join(__dirname, '../myServers.json');
 
 // Initial server load
 let servers = loadServers(DATA_FILE);
