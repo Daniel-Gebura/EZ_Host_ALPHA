@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
-import { TextInput1 } from './TextInput1';
-import { ChooseFile1 } from './ChooseFile1';
+import { TextInput1 } from '../../common/TextInput1';
+import { ChooseFile1 } from '../../common/ChooseFile1';
 import { Checkbox } from './Checkbox';
-import defaultLogo from '../../assets/logo/EZ_Host_Logo1.png';
+import defaultLogo from '../../../assets/logo/EZ_Host_Logo1.png';
 
 interface AddServerFormProps {
   onServerAdded: (serverId: string) => void;

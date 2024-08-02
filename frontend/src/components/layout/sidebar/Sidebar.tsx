@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { AddButton } from '../common/AddButton';
-import { HomeButton } from '../common/HomeButton';
-import { ServerButton } from '../common/ServerButton';
+import { AddButton } from './AddButton';
+import { HomeButton } from '../../common/HomeButton';
+import { ServerButton } from './ServerButton';
 
 interface SidebarProps {
   isSidebarOpen: boolean;

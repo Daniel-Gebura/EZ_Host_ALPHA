@@ -1,7 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import logo from '../../assets/logo/EZ_Host_Logo1.png';
-import { CheckServerStatusButton } from '../common/CheckServerStatusButton';
+import logo from '../../../assets/logo/EZ_Host_Logo1.png';
+import { CheckServerStatusButton } from './CheckServerStatusButton';
 
 interface NavbarProps {
   toggleSidebar: () => void;
