@@ -1,5 +1,5 @@
 import React from 'react';
-import logo from '../assets/logo/EZ_Host_Logo1.png';
+import logo from '../../assets/logo/EZ_Host_Logo1.png';
 
 /**
  * Central component representing the home page of the application.

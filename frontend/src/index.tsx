@@ -3,10 +3,10 @@ import ReactDOM from 'react-dom/client';
 import './index.css';
 import reportWebVitals from './reportWebVitals';
 import { HashRouter, Route, Routes } from 'react-router-dom';
-import { Layout } from './components/navigation/Layout';
-import { Central } from './pages/Central';
-import { Dummy } from './pages/Dummy';
-import { ServerControl } from './pages/ServerControl';
+import { Layout } from './components/layout/Layout';
+import { Central } from './components/pages/Central';
+import { Dummy } from './components/pages/Dummy';
+import { ServerControl } from './components/pages/serverControl/ServerControlPage';
 
 const root = ReactDOM.createRoot(
   document.getElementById('root') as HTMLElement

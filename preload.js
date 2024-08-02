@@ -145,7 +145,6 @@ contextBridge.exposeInMainWorld('api', {
     return { status, data };
   },
 
-
   /**
    * Save a server by ID
    * @param {string} id - Server ID

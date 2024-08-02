@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { Notification } from '../common/Notification';
+import { Notification } from '../../common/Notification';
 
 interface ServerStatusProps {
   name: string;

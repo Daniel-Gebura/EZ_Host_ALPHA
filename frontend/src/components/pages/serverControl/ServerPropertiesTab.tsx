@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Notification } from '../common/Notification';
+import { Notification } from '../../common/Notification';
 
 interface ServerPropertiesTabProps {
   serverId: string;

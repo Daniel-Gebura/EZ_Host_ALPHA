@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { IconChanger } from '../components/serverPage/IconChanger';
-import { ServerStatus } from '../components/serverPage/ServerStatus';
-import { HomeTab } from '../components/serverPage/HomeTab';
-import { ServerPropertiesTab } from '../components/serverPage/ServerPropertiesTab';
-import { ServerDetailsTab } from '../components/serverPage/ServerDetailsTab';
-import { Notification } from '../components/common/Notification';
-import defaultLogo from '../assets/logo/EZ_Host_Logo1.png';
+import { IconChanger } from './IconChanger';
+import { ServerStatus } from './ServerStatus';
+import { HomeTab } from './HomeTab';
+import { ServerPropertiesTab } from './ServerPropertiesTab';
+import { ServerDetailsTab } from './ServerDetailsTab';
+import { Notification } from '../../common/Notification';
+import defaultLogo from '../../../assets/logo/EZ_Host_Logo1.png';
 
 export const ServerControl: React.FC = () => {
   const { id } = useParams<{ id: string }>();
