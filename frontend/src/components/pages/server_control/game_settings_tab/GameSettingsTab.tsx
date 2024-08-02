@@ -1,21 +1,21 @@
 import React, { useState, useEffect } from 'react';
-import { Notification } from '../../common/Notification';
+import { Notification } from '../../../common/Notification';
 
-interface ServerPropertiesTabProps {
+interface GameSettingsTabProps {
   serverId: string;
   serverStatus: 'Offline' | 'Starting...' | 'Online' | 'Stopping...' | 'Restarting...';
 }
 
 /**
- * ServerPropertiesTab component
+ * GameSettingsTab component
  * Displays and allows editing of server properties.
  * 
- * @param {ServerPropertiesTabProps} props - The props for the ServerPropertiesTab component.
+ * @param {GameSettingsTabProps} props - The props for the GameSettingsTab component.
  * @param {string} props.serverId - The ID of the server.
  * @param {'Offline' | 'Starting...' | 'Online' | 'Stopping...' | 'Restarting...'} props.serverStatus - The current server status.
- * @returns {JSX.Element} The rendered ServerPropertiesTab component.
+ * @returns {JSX.Element} The rendered GameSettingsTabProps component.
  */
-export const ServerPropertiesTab: React.FC<ServerPropertiesTabProps> = ({ serverId, serverStatus }) => {
+export const GameSettingsTab: React.FC<GameSettingsTabProps> = ({ serverId, serverStatus }) => {
   const [properties, setProperties] = useState({
     'allow-flight': 'false',
     'allow-nether': 'true',

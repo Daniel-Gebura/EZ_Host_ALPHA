@@ -1,14 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { IconChanger } from './IconChanger';
+import { IconChanger } from './ServerIconChanger';
 import { ServerStatus } from './ServerStatus';
-import { HomeTab } from './HomeTab';
-import { ServerPropertiesTab } from './ServerPropertiesTab';
-import { ServerDetailsTab } from './ServerDetailsTab';
+import { HomeTab } from './home_tab/HomeTab';
+import { GameSettingsTab } from './game_settings_tab/GameSettingsTab';
+import { ServerSettingsTab } from './server_settings_tab/ServerSettingsTab';
 import { Notification } from '../../common/Notification';
 import defaultLogo from '../../../assets/logo/EZ_Host_Logo1.png';
 
-export const ServerControl: React.FC = () => {
+export const ServerControlPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const [serverName, setServerName] = useState('');
@@ -200,8 +200,8 @@ export const ServerControl: React.FC = () => {
       </div>
 
       {activeTab === 'home' && <HomeTab status={status} handleAction={handleAction} removeServer={removeServer} serverId={currentServerId!} />}
-      {activeTab === 'properties' && <ServerPropertiesTab serverId={currentServerId!} serverStatus={status} />}
-      {activeTab === 'details' && <ServerDetailsTab ip={ip} ramAllocation={ramAllocation} onRamChange={handleRamChange} />}
+      {activeTab === 'properties' && <GameSettingsTab serverId={currentServerId!} serverStatus={status} />}
+      {activeTab === 'details' && <ServerSettingsTab ip={ip} ramAllocation={ramAllocation} onRamChange={handleRamChange} />}
       
       {isModalOpen && (
         <div className="modal modal-open">

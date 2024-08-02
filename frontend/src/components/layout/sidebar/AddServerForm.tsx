@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { TextInput1 } from '../../common/TextInput1';
-import { ChooseFile1 } from '../../common/ChooseFile1';
-import { Checkbox } from './Checkbox';
+import { ChooseDirectory } from '../../common/ChooseDirectory';
+import { Checkbox } from '../../common/Checkbox';
 import defaultLogo from '../../../assets/logo/EZ_Host_Logo1.png';
 
 interface AddServerFormProps {
@@ -85,7 +85,7 @@ export const AddServerForm: React.FC<AddServerFormProps> = ({ onServerAdded }) =
         <label className="label">
           <span className="label-text">Server Directory</span>
         </label>
-        <ChooseFile1
+        <ChooseDirectory
           value={directory}
           onChange={setDirectory}
           placeholder="Server Directory"

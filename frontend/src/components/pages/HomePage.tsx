@@ -6,7 +6,7 @@ import logo from '../../assets/logo/EZ_Host_Logo1.png';
  * 
  * @returns {JSX.Element} The rendered Central component.
  */
-export const Central: React.FC = () => {
+export const HomePage: React.FC = () => {
   return (
     <div className="p-6 bg-base-200 rounded-lg shadow-lg text-center">
       <div>

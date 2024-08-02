@@ -1,22 +1,22 @@
 import React, { useState, useEffect } from 'react';
 
-interface ServerDetailsTabProps {
+interface ServerSettingsTabProps {
   ip: string;
   ramAllocation: number;
   onRamChange: (newRam: number) => void;
 }
 
 /**
- * ServerDetailsTab component
+ * ServerSettingsTab component
  * Displays and allows modification of server details like IP address and RAM allocation.
  * 
- * @param {ServerDetailsTabProps} props - The props for the ServerDetailsTab component.
+ * @param {ServerSettingsTabProps} props - The props for the ServerSettingsTab component.
  * @param {string} props.ip - The IP address of the server.
  * @param {number} props.ramAllocation - The current RAM allocation for the server.
  * @param {function} props.onRamChange - The function to call when the RAM allocation is changed.
- * @returns {JSX.Element} The rendered ServerDetailsTab component.
+ * @returns {JSX.Element} The rendered ServerSettingsTab component.
  */
-export const ServerDetailsTab: React.FC<ServerDetailsTabProps> = ({ ip, ramAllocation, onRamChange }) => {
+export const ServerSettingsTab: React.FC<ServerSettingsTabProps> = ({ ip, ramAllocation, onRamChange }) => {
   const [ram, setRam] = useState(ramAllocation);
   const [isModalOpen, setIsModalOpen] = useState(false);
 

@@ -1,5 +1,5 @@
 import React from 'react';
-import { ActionButtons } from './ActionButtons';
+import { ServerActionButtons } from './ServerActionButtons';
 import { PlayerList } from './PlayerList';
 
 interface HomeTabProps {
@@ -26,7 +26,7 @@ export const HomeTab: React.FC<HomeTabProps> = ({ status, handleAction, removeSe
       <div className="bg-base-300 shadow-lg rounded-lg p-6 mb-4 text-center">
         <h2 className="text-2xl font-bold mb-4">Server Controls</h2>
         <div className="flex justify-center">
-          <ActionButtons onAction={handleAction} status={status} />
+          <ServerActionButtons onAction={handleAction} status={status} />
         </div>
         <PlayerList serverId={serverId} status={status} />
       </div>

@@ -16,7 +16,7 @@ interface ChooseFile1Props {
  * @param {string} [props.placeholder] - The placeholder text for the input.
  * @returns {JSX.Element}
  */
-export const ChooseFile1: React.FC<ChooseFile1Props> = ({ value, onChange, placeholder }) => {
+export const ChooseDirectory: React.FC<ChooseFile1Props> = ({ value, onChange, placeholder }) => {
   /**
    * Handle the directory selection by calling the backend API.
    * If an error occurs, log it to the console.

@@ -5,7 +5,7 @@ import React from 'react';
  * 
  * @returns {JSX.Element} The rendered Dummy component.
  */
-export const Dummy: React.FC = () => {
+export const DummyPage: React.FC = () => {
   return (
     <div className="p-6 bg-base-200 rounded-lg shadow-lg text-center">
       <div>

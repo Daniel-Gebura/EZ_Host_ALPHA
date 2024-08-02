@@ -8,7 +8,7 @@ import { AddServerForm } from './AddServerForm';
  * 
  * @returns {JSX.Element}
  */
-export const AddButton: React.FC = () => {
+export const AddServerButton: React.FC = () => {
   const navigate = useNavigate();
 
   /**

@@ -4,9 +4,8 @@ import './index.css';
 import reportWebVitals from './reportWebVitals';
 import { HashRouter, Route, Routes } from 'react-router-dom';
 import { Layout } from './components/layout/Layout';
-import { Central } from './components/pages/Central';
-import { Dummy } from './components/pages/Dummy';
-import { ServerControl } from './components/pages/serverControl/ServerControlPage';
+import { HomePage } from './components/pages/HomePage';
+import { ServerControlPage } from './components/pages/server_control/ServerControlPage';
 
 const root = ReactDOM.createRoot(
   document.getElementById('root') as HTMLElement
@@ -16,9 +15,8 @@ root.render(
     <HashRouter>
       <Routes>
         <Route path="/" element={<Layout />}>
-          <Route index element={<Central />} /> {/* This defines the home page */}
-          <Route path="/Dummy" element={<Dummy />} />
-          <Route path="/server/:id" element={<ServerControl />} />
+          <Route index element={<HomePage />} /> {/* This defines the home page */}
+          <Route path="/server/:id" element={<ServerControlPage />} />
         </Route>
       </Routes>
     </HashRouter>

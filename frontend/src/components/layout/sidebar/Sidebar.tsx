@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { AddButton } from './AddButton';
+import { AddServerButton } from './AddServerButton';
 import { HomeButton } from '../../common/HomeButton';
 import { ServerButton } from './ServerButton';
 
@@ -78,7 +78,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isSidebarOpen, toggleSidebar }
         </div>
       ))}
       <div className="flex justify-center mb-4">
-        <AddButton />
+        <AddServerButton />
       </div>
     </div>
   );
