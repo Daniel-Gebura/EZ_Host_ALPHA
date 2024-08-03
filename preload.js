@@ -135,29 +135,53 @@ contextBridge.exposeInMainWorld('api', {
    * @returns {Promise<{ status: number, data: { message: string } }>} Response from the server
    */
   startServer: async (id) => {
-    const response = await fetch(`http://localhost:5000/api/servers/${id}/start`, {
-      method: 'POST',
-    });
-    
-    const status = response.status;
-    const data = await response.json();
-
-    return { status, data };
+    try {
+      const response = await fetch(`http://localhost:5000/api/servers/${id}/start`, {
+        method: 'POST',
+      });
+  
+      const status = response.status;
+      const data = await response.json();
+  
+      if (status >= 200 && status < 300) {
+        return { status: 'success', message: data.message, data: data.data };
+      } else {
+        return { status: 'error', message: data.message, error: data.error };
+      }
+    } catch (error) {
+      console.error('Error starting server:', error);
+      return {
+        status: 'error',
+        message: 'Failed to start server. Please try again later.',
+        error: error.message,
+      };
+    }
   },
 
   /**
    * Save a server by ID
    * @param {string} id - Server ID
-   * @returns {Promise<string>} Response from the server
+   * @returns {Promise<object>} Response from the server
    */
   saveServer: async (id) => {
-    const response = await fetch(`http://localhost:5000/api/servers/${id}/save`, {
-      method: 'POST',
-    });
-    const status = response.status;
-    const data = await response.json();
+    try {
+      const response = await fetch(`http://localhost:5000/api/servers/${id}/save`, {
+        method: 'POST',
+      });
 
-    return { status, data };
+      const { status } = response;
+      const data = await response.json();
+
+      // Check for HTTP status and handle accordingly
+      if (status >= 200 && status < 300) {
+        return { status: 'success', message: data.message, data: data.output };
+      } else {
+        return { status: 'error', message: data.message, error: data.error || 'Unknown error occurred' };
+      }
+    } catch (error) {
+      console.error('Error saving server:', error);
+      return { status: 'error', message: 'Failed to connect to server', error: error.message };
+    }
   },
 
   /**
@@ -166,13 +190,24 @@ contextBridge.exposeInMainWorld('api', {
    * @returns {Promise<string>} Response from the server
    */
   stopServer: async (id) => {
-    const response = await fetch(`http://localhost:5000/api/servers/${id}/stop`, {
-      method: 'POST',
-    });
-    const status = response.status;
-    const data = await response.json();
+    try {
+      const response = await fetch(`http://localhost:5000/api/servers/${id}/stop`, {
+        method: 'POST',
+      });
 
-    return { status, data };
+      const { status } = response;
+      const data = await response.json();
+
+      // Check for HTTP status and handle accordingly
+      if (status >= 200 && status < 300) {
+        return { status: 'success', message: data.message, data: data.output };
+      } else {
+        return { status: 'error', message: data.message, error: data.error || 'Unknown error occurred' };
+      }
+    } catch (error) {
+      console.error('Error stopping server:', error);
+      return { status: 'error', message: 'Failed to connect to server', error: error.message };
+    }
   },
 
   /**

@@ -148,23 +148,38 @@ router.post('/:id/start', async (req, res) => {
     const { id } = req.params;
     const server = servers.find(s => s.id === id);
 
+    // Check if the server exists
     if (!server) {
-      return res.status(404).send('Server not found');
+      return res.status(404).json({
+        status: 'error',
+        message: 'Server not found',
+        error: 'The specified server ID does not exist in the system.',
+      });
     }
 
+    // Check if the necessary file exists
     const fileExistsResult = await fileExists(server.directory, 'variables.txt');
-
     if (!fileExistsResult) {
       console.error('variables.txt file is missing. Cannot start server.');
-      return res.status(404).json({ message: 'variables.txt file is missing. Cannot start server.' });
+      return res.status(404).json({
+        status: 'error',
+        message: 'variables.txt file is missing. Cannot start server.',
+        error: 'Required configuration file variables.txt is missing.',
+      });
     }
 
+    // Run PowerShell script to start the server
     runPowerShellScript(id, 'start.ps1', res, servers, DATA_FILE);
   } catch (error) {
     console.error(`Error starting server: ${error.message}`);
-    res.status(500).send('Internal Server Error');
+    res.status(500).json({
+      status: 'error',
+      message: 'Internal Server Error',
+      error: `Failed to start server: ${error.message}`,
+    });
   }
 });
+
 
 /**
  * Endpoint to save a server

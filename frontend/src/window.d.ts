@@ -1,11 +1,13 @@
 export {};
 
 declare global {
-  type ApiResponse = {
-    status: number;
-    data: {
-      message: string;
-    };
+  // Standardized API response type
+  type ApiResponse<T = any> = {
+    status: 'success' | 'error';
+    message: string;
+    data?: T;
+    error?: string;
+    timestamp?: string;
   };
 
   interface Window {

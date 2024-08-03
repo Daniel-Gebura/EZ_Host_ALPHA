@@ -84,7 +84,8 @@ export const ServerControlPage: React.FC = () => {
         }
       }
   
-      let response;
+      // Execute the desired action
+      let response: ApiResponse;
       switch (action) {
         case 'start':
           response = await window.api.startServer(currentServerId);
@@ -96,15 +97,25 @@ export const ServerControlPage: React.FC = () => {
           response = await window.api.stopServer(currentServerId);
           break;
         default:
-          response = { status: 400, data: { message: 'Invalid action' } };
+          response = { status: 'error', message: 'Invalid action', error: 'Action not recognized' };
       }
   
-      if (response.status >= 200 && response.status < 300) {
-        setNotification({ message: response.data.message, type: 'success', key: Date.now() });
-      } else if (response.status >= 400 && response.status < 500) {
-        setNotification({ message: response.data.message, type: 'error', key: Date.now() });
-      } else if (response.status >= 500) {
-        setNotification({ message: 'Server error. Please try again later.', type: 'error', key: Date.now() });
+      // Handle the api response
+      if (response.status === 'success') {
+        // Suppress a succesful start notification
+        if (action !== 'start') {
+          setNotification({
+            message: response.message,
+            type: 'success',
+            key: Date.now(),
+          });
+        }
+      } else {
+        setNotification({
+          message: response.message || response.error || 'An unexpected error occurred.',
+          type: 'error',
+          key: Date.now(),
+        });
       }
   
       await fetchServerDetails(currentServerId);
