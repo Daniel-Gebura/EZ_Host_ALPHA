@@ -24,22 +24,10 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
     setSidebarOpen(!isSidebarOpen);
   };
 
-  /**
-   * Handles the server status check by calling the backend API.
-   */
-  const handleCheckStatus = async () => {
-    try {
-      const response = await window.api.checkServerStatus();
-      console.log('Server statuses updated successfully.', response);
-    } catch (error: any) {
-      console.error('Error checking server status:', error);
-    }
-  };
-
   return (
     <div className="flex flex-col h-screen">
       {/* Navbar */}
-      <Navbar toggleSidebar={toggleSidebar} onCheckStatus={handleCheckStatus} />
+      <Navbar toggleSidebar={toggleSidebar} />
 
       {/* Main Content */}
       <div className="flex flex-1 mt-16 relative">

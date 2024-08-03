@@ -5,7 +5,6 @@ import { CheckServerStatusButton } from './CheckServerStatusButton';
 
 interface NavbarProps {
   toggleSidebar: () => void;
-  onCheckStatus: () => void;
 }
 
 /**
@@ -14,7 +13,7 @@ interface NavbarProps {
  * @param {NavbarProps} props - The props for the Navbar component.
  * @returns {JSX.Element} The rendered Navbar component.
  */
-export const Navbar: React.FC<NavbarProps> = ({ toggleSidebar, onCheckStatus }) => {
+export const Navbar: React.FC<NavbarProps> = ({ toggleSidebar }) => {
   return (
     <nav className="bg-base-300 py-4 px-6 shadow-md fixed w-full z-20">
       <div className="flex items-center justify-between">
@@ -38,7 +37,7 @@ export const Navbar: React.FC<NavbarProps> = ({ toggleSidebar, onCheckStatus }) 
         <div className="flex-none">
           <ul className="btn btn-square btn-outline">
             <li>
-              <CheckServerStatusButton onCheckStatus={onCheckStatus} />
+              <CheckServerStatusButton />
             </li>
           </ul>
         </div>
