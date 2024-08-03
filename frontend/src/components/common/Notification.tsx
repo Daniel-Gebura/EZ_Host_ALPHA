@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 
 interface NotificationProps {
   message: string;
-  type: 'success' | 'error' | 'warning';
+  type?: 'success' | 'error' | 'warning' | 'info';
   duration?: number;
 }
 
@@ -31,6 +31,14 @@ const alertIcons = {
       d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"
     />
   ),
+  info: (
+    <path
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      strokeWidth="2"
+      d="M13 16h-1v-4h-1m1 4h.01M12 16h.01M13 16V12h-1V8h1"
+    />
+  ),
 };
 
 /**
@@ -39,13 +47,12 @@ const alertIcons = {
  * 
  * @param {NotificationProps} props - The props for the Notification component.
  * @param {string} props.message - The notification message.
- * @param {string} props.type - The type of notification ('success', 'error', or 'warning').
+ * @param {string} [props.type='info'] - The type of notification ('success', 'error', 'warning', 'info').
  * @param {number} [props.duration=3000] - The duration (in milliseconds) for which the notification is visible.
  * @returns {JSX.Element | null} The rendered Notification component or null if not visible.
  */
-export const Notification: React.FC<NotificationProps> = ({ message, type, duration = 3000 }) => {
+export const Notification: React.FC<NotificationProps> = ({ message, type = 'info', duration = 3000,}) => {
   const [isVisible, setIsVisible] = useState(true);
-  const [parsedMessage, setParsedMessage] = useState('');
 
   useEffect(() => {
     setIsVisible(true);
@@ -53,33 +60,46 @@ export const Notification: React.FC<NotificationProps> = ({ message, type, durat
       setIsVisible(false);
     }, duration);
 
-    // Parse the JSON message to extract the desired part
-    try {
-      const parsed = JSON.parse(message);
-      setParsedMessage(parsed.message || message);
-    } catch (error) {
-      setParsedMessage(message);
-    }
-
     return () => clearTimeout(timer);
-  }, [message, type, duration]);
+  }, [message, duration]);
 
   if (!isVisible) return null;
 
-  const alertClass = type === 'error' ? 'alert-error'
-    : type === 'warning' ? 'alert-warning'
-    : 'alert-success';
+  // Determine the alert class of the notification
+  const alertClass = {
+    success: 'alert-success',
+    warning: 'alert-warning',
+    error: 'alert-error',
+    info: 'alert-info', // Default 'info' class
+  }[type];
 
-  return (
-    <div role="alert" className={`alert ${alertClass}`}>
-      <svg
-        xmlns="http://www.w3.org/2000/svg"
-        className="h-6 w-6 shrink-0 stroke-current"
-        fill="none"
-        viewBox="0 0 24 24">
-        {alertIcons[type]}
-      </svg>
-      <span>{parsedMessage}</span>
-    </div>
-  );
-};
+    // Parse the JSON message to extract the desired part
+    const parsedMessage = (() => {
+      try {
+        const parsed = JSON.parse(message);
+        return parsed.message || message;
+      } catch (error) {
+        console.error('Error parsing message:', error);
+        return message;
+      }
+    })();
+
+    return (
+      <div
+        role="alert"
+        aria-live="assertive"
+        aria-atomic="true"
+        className={`alert ${alertClass} flex items-center`} // Flexbox for alignment
+      >
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          className="h-6 w-6 shrink-0 stroke-current mr-2" // Margin for spacing
+          fill="none"
+          viewBox="0 0 24 24"
+        >
+          {alertIcons[type]}
+        </svg>
+        <span>{parsedMessage}</span>
+      </div>
+    );
+  };

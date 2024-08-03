@@ -1,35 +1,38 @@
-import React from 'react';
+import React, { useState } from 'react';
 
-interface ChooseFile1Props {
+interface ChooseDirectoryProps {
   value: string;
   onChange: (value: string) => void;
   placeholder?: string;
 }
 
 /**
- * ChooseFile1 component
+ * ChooseDirectory component
  * A reusable directory input component for selecting a folder.
  * 
- * @param {ChooseFile1Props} props - The props for the ChooseFile1 component.
+ * @param {ChooseDirectoryProps} props - The props for the ChooseDirectory component.
  * @param {string} props.value - The value of the input.
  * @param {function} props.onChange - The function to call when the value changes.
  * @param {string} [props.placeholder] - The placeholder text for the input.
  * @returns {JSX.Element}
  */
-export const ChooseDirectory: React.FC<ChooseFile1Props> = ({ value, onChange, placeholder }) => {
+export const ChooseDirectory: React.FC<ChooseDirectoryProps> = ({ value, onChange, placeholder }) => {
+  const [error, setError] = useState<string | null>(null); // State for error handling
+
   /**
    * Handle the directory selection by calling the backend API.
-   * If an error occurs, log it to the console.
+   * If an error occurs, set the error state to display it in the UI.
    */
-  const handleChooseFile = async () => {
+  const handleChooseDirectory = async () => {
     try {
-      const directoryPath = await window.api.chooseDirectory(); // Use the centralized API module
+      const directoryPath = await window.api.chooseDirectory();
       if (directoryPath) {
         onChange(directoryPath);
+        setError(null); // Clear error state on success
       }
     } catch (error) {
       console.error('Error choosing directory:', error);
-      // Optionally, you can set an error state and display an error message to the user here
+      setError('Failed to choose directory. Please try again.');
     }
   };
 
@@ -42,7 +45,10 @@ export const ChooseDirectory: React.FC<ChooseFile1Props> = ({ value, onChange, p
         className="input input-bordered w-full"
         placeholder={placeholder}
       />
-      <button className="btn btn-neutral mt-2" onClick={handleChooseFile}>Choose Directory</button>
+      <button className="btn btn-neutral mt-2" onClick={handleChooseDirectory}>
+        Choose Directory
+      </button>
+      {error && <p className="text-red-500 mt-2">{error}</p>} {/* Display error message */}
     </div>
   );
 };
