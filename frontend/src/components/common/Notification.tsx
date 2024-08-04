@@ -73,33 +73,40 @@ export const Notification: React.FC<NotificationProps> = ({ message, type = 'inf
     info: 'alert-info', // Default 'info' class
   }[type];
 
-    // Parse the JSON message to extract the desired part
-    const parsedMessage = (() => {
-      try {
-        const parsed = JSON.parse(message);
-        return parsed.message || message;
-      } catch (error) {
-        console.error('Error parsing message:', error);
-        return message;
-      }
-    })();
+  // Parse the JSON message to extract the desired part
+  const parsedMessage = (() => {
+    try {
+      const parsed = JSON.parse(message);
+      return parsed.message || message;
+    } catch (error) {
+      console.error('Error parsing message:', error);
+      return message;
+    }
+  })();
 
-    return (
-      <div
-        role="alert"
-        aria-live="assertive"
-        aria-atomic="true"
-        className={`alert ${alertClass} flex items-center`} // Flexbox for alignment
+  return (
+    <div
+      role="alert"
+      aria-live="assertive"
+      aria-atomic="true"
+      className={`alert ${alertClass} flex items-center fixed z-40 transition-opacity duration-300 ease-in-out transform ${
+        isVisible ? 'opacity-100' : 'opacity-0'
+      }`}
+      style={{
+        top: '0%', // Center vertically
+        left: '50%', // Center horizontally
+        transform: 'translate(-50%, 0%)', // Offset to truly center
+      }}
+    >
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        className="h-6 w-6 shrink-0 stroke-current mr-2"
+        fill="none"
+        viewBox="0 0 24 24"
       >
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          className="h-6 w-6 shrink-0 stroke-current mr-2" // Margin for spacing
-          fill="none"
-          viewBox="0 0 24 24"
-        >
-          {alertIcons[type]}
-        </svg>
-        <span>{parsedMessage}</span>
-      </div>
-    );
-  };
+        {alertIcons[type]}
+      </svg>
+      <span>{parsedMessage}</span>
+    </div>
+  );
+};
