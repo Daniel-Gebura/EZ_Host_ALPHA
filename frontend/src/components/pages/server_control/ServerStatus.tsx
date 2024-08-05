@@ -20,6 +20,7 @@ interface ServerStatusProps {
  */
 export const ServerStatus: React.FC<ServerStatusProps> = ({ name, status, onNameChange }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [notification, setNotification] = useState<{ message: string, type: 'success' | 'error' | 'warning', key: number } | null>(null);
   const [newName, setNewName] = useState(name);
   const { id } = useParams<{ id: string }>();
 
@@ -56,10 +57,21 @@ export const ServerStatus: React.FC<ServerStatusProps> = ({ name, status, onName
     if (newName.length > 0 && newName.length <= 20) {
       try {
         const server = await  window.api.getServer(id!);
-        server.name = newName;
-        await  window.api.updateServer(id!, server);
-        onNameChange(newName);
-        setIsModalOpen(false);
+        const response = await  window.api.getServer(id!);
+        if (response.status === 'success') {
+          const server = response.data
+          server.name = newName;
+          await  window.api.updateServer(id!, server);
+          onNameChange(newName);
+          setIsModalOpen(false);
+        }
+        else {
+          setNotification({
+            message: response.message || response.error || 'An unexpected error occurred.',
+            type: 'error',
+            key: Date.now(),
+          });
+        }
       } catch (error) {
         console.error('Error updating server name:', error);
       }
@@ -68,6 +80,7 @@ export const ServerStatus: React.FC<ServerStatusProps> = ({ name, status, onName
 
   return (
     <div>
+      {notification && <Notification key={notification.key} message={notification.message} type={notification.type} />}
       <h1 className="text-3xl font-bold cursor-pointer" onClick={() => setIsModalOpen(true)}>
         {name}
       </h1>

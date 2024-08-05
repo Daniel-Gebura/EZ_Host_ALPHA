@@ -26,6 +26,13 @@ contextBridge.exposeInMainWorld('ipcRenderer', {
  * Expose API methods for interacting with the backend server
  */
 contextBridge.exposeInMainWorld('api', {
+  /**
+   * @typedef {Object} ApiResponse
+   * @property {'success' | 'error'} status - The status of the response
+   * @property {string} message - A message detailing the result
+   * @property {any} [data] - Optional data payload
+   * @property {string} [error] - Optional error message
+   */
 
   /**
    * Get the current IPv4 address
@@ -52,14 +59,40 @@ contextBridge.exposeInMainWorld('api', {
   /**
    * Get a specific server by ID
    * @param {string} id - Server ID
-   * @returns {Promise<Object>} The server details
+   * @returns {Promise<Object>} The server details wrapped in a structured response
    */
   getServer: async (id) => {
-    const response = await fetch(`http://localhost:5000/api/servers/${id}`);
-    if (!response.ok) {
-      throw new Error('Server not found');
+    try {
+      const response = await fetch(`http://localhost:5000/api/servers/${id}`);
+
+      // Parse the JSON response
+      const data = await response.json();
+
+      // Handle the HTTP response codes and return a structured object
+      if (response.ok) {
+        // Success response
+        return {
+          status: 'success',
+          message: data.message,
+          data: data.data,
+        };
+      } else {
+        // Error response
+        return {
+          status: 'error',
+          message: data.message || 'Failed to retrieve server.',
+          error: data.error || 'An error occurred while fetching the server.',
+        };
+      }
+    } catch (error) {
+      // Handle any network or unexpected errors
+      console.error('Error fetching server:', error);
+      return {
+        status: 'error',
+        message: 'Failed to connect to the server.',
+        error: error.message,
+      };
     }
-    return response.json();
   },
 
   /**

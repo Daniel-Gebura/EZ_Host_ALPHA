@@ -27,10 +27,20 @@ export const ServerControlPage: React.FC = () => {
    */
   const fetchServerDetails = async (serverId: string) => {
     try {
-      const server = await  window.api.getServer(serverId);
-      setServerName(server.name);
-      setStatus(server.status);
-      setIcon(server.icon || defaultLogo);
+      const response = await  window.api.getServer(serverId);
+      if (response.status === 'success') {
+        const server = response.data
+        setServerName(server.name);
+        setStatus(server.status);
+        setIcon(server.icon || defaultLogo);
+      }
+      else {
+        setNotification({
+          message: response.message || response.error || 'An unexpected error occurred.',
+          type: 'error',
+          key: Date.now(),
+        });
+      }
       
       const ram = await  window.api.getRamAllocation(serverId);
       setRamAllocation(ram);
@@ -151,9 +161,19 @@ export const ServerControlPage: React.FC = () => {
       setIcon(selectedIcon);
 
       try {
-        const server = await window.api.getServer(currentServerId);
-        server.icon = selectedIcon;
-        await window.api.updateServer(currentServerId, server);
+        const response = await  window.api.getServer(currentServerId);
+        if (response.status === 'success') {
+          const server = response.data
+          server.icon = selectedIcon;
+          await window.api.updateServer(currentServerId, server);
+        }
+        else {
+          setNotification({
+            message: response.message || response.error || 'An unexpected error occurred.',
+            type: 'error',
+            key: Date.now(),
+          });
+        }
       } catch (error: any) {
         console.error('Error updating server icon:', error);
       }

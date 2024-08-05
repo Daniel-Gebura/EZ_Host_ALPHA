@@ -7,7 +7,6 @@ declare global {
     message: string;
     data?: T;
     error?: string;
-    timestamp?: string;
   };
 
   interface Window {
@@ -20,7 +19,7 @@ declare global {
     api: {
       getIpAddress: () => Promise<string>;
       getServers: () => Promise<any>;
-      getServer: (id: string) => Promise<any>;
+      getServer: (id: string) => Promise<ApiResponse>;
       addServer: (server: { name: string; directory: string; rconPassword: string; }) => Promise<any>;
       updateServer: (id: string, server: any) => Promise<any>;
       checkServerStatus: () => Promise<void>;
