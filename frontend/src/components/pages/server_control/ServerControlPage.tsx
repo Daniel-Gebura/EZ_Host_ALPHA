@@ -33,8 +33,7 @@ export const ServerControlPage: React.FC = () => {
         setServerName(server.name);
         setStatus(server.status);
         setIcon(server.icon || defaultLogo);
-      }
-      else {
+      } else {
         setNotification({
           message: response.message || response.error || 'An unexpected error occurred.',
           type: 'error',
@@ -45,9 +44,17 @@ export const ServerControlPage: React.FC = () => {
       const ram = await  window.api.getRamAllocation(serverId);
       setRamAllocation(ram);
 
-      const ipAddress = await  window.api.getIpAddress();
-      setIp(ipAddress);
-
+      const ipRequest = await window.api.getIpAddress();
+      if (ipRequest.status === 'success') {
+        const ipAddress = ipRequest.data
+        setIp(ipAddress);
+      } else {
+        setNotification({
+          message: ipRequest.message || ipRequest.error || 'An unexpected error occurred.',
+          type: 'error',
+          key: Date.now(),
+        });
+      }
     } catch (error: any) {
       console.error('Error fetching server details:', error);
     }

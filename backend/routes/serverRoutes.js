@@ -18,7 +18,19 @@ let servers = loadServers(DATA_FILE);
  */
 router.get('/ip-address', (req, res) => {
   const ipAddress = getIpAddress();
-  res.json({ ipAddress });
+  if (ipAddress) {
+    res.status(200).json({
+      status: 'success',
+      message: 'IPv4 address retrieved successfully.',
+      data: ipAddress,
+    });
+  } else {
+    res.status(404).json({
+      status: 'error',
+      message: 'IPv4 address not found.',
+      error: 'The internal local IPv4 address could not be found',
+    });
+  }
 });
 
 /**

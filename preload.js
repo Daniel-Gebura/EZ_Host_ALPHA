@@ -39,12 +39,37 @@ contextBridge.exposeInMainWorld('api', {
    * @returns {Promise<string>} The IPv4 address
    */
   getIpAddress: async () => {
-    const response = await fetch('http://localhost:5000/api/servers/ip-address');
-    if (!response.ok) {
-      throw new Error('Failed to fetch IP address');
+    try {
+      const response = await fetch('http://localhost:5000/api/servers/ip-address');
+
+      // Parse the JSON response
+      const data = await response.json();
+
+      // Handle the HTTP response codes and return a structured object
+      if (response.ok) {
+        // Success response
+        return {
+          status: 'success',
+          message: data.message,
+          data: data.data,
+        };
+      } else {
+        // Error response
+        return {
+          status: 'error',
+          message: data.message || 'Failed to retrieve IPv4 address.',
+          error: data.error || 'An error occurred while fetching the internal local IPv4 address.',
+        };
+      }
+    } catch (error) {
+      // Handle any network or unexpected errors
+      console.error('Error fetching IPv4 address:', error);
+      return {
+        status: 'error',
+        message: 'Failed to connect to the server.',
+        error: error.message,
+      };
     }
-    const { ipAddress } = await response.json();
-    return ipAddress;
   },
 
   /**
@@ -173,10 +198,9 @@ contextBridge.exposeInMainWorld('api', {
         method: 'POST',
       });
   
-      const status = response.status;
       const data = await response.json();
   
-      if (status >= 200 && status < 300) {
+      if (response.ok) {
         return { status: 'success', message: data.message, data: data.data };
       } else {
         return { status: 'error', message: data.message, error: data.error };
@@ -202,11 +226,10 @@ contextBridge.exposeInMainWorld('api', {
         method: 'POST',
       });
 
-      const { status } = response;
       const data = await response.json();
 
       // Check for HTTP status and handle accordingly
-      if (status >= 200 && status < 300) {
+      if (response.ok) {
         return { status: 'success', message: data.message, data: data.output };
       } else {
         return { status: 'error', message: data.message, error: data.error || 'Unknown error occurred' };
@@ -228,11 +251,10 @@ contextBridge.exposeInMainWorld('api', {
         method: 'POST',
       });
 
-      const { status } = response;
       const data = await response.json();
 
       // Check for HTTP status and handle accordingly
-      if (status >= 200 && status < 300) {
+      if (response.ok) {
         return { status: 'success', message: data.message, data: data.output };
       } else {
         return { status: 'error', message: data.message, error: data.error || 'Unknown error occurred' };
