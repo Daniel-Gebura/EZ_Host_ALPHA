@@ -93,11 +93,14 @@ export const ServerControlPage: React.FC = () => {
   
     try {
       if (action === 'start') {
-        const servers = await window.api.getServers();
-        const onlineServer = servers.find((server: any) => server.status === 'Online');
-        if (onlineServer) {
-          setIsModalOpen(true);
-          return;
+        const response = await window.api.getServers();
+        if (response.status === 'success') {
+          const serverList = response.data
+          const onlineServer = serverList.find((server: any) => server.status === 'Online');
+          if (onlineServer) {
+            setIsModalOpen(true);
+            return;
+          }
         }
       }
   

@@ -18,7 +18,7 @@ declare global {
 
     api: {
       getIpAddress: () => Promise<ApiResponse>;
-      getServers: () => Promise<any>;
+      getServers: () => Promise<ApiResponse>;
       getServer: (id: string) => Promise<ApiResponse>;
       addServer: (server: { name: string; directory: string; rconPassword: string; }) => Promise<any>;
       updateServer: (id: string, server: any) => Promise<any>;

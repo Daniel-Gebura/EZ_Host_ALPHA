@@ -28,16 +28,10 @@ export const Sidebar: React.FC<SidebarProps> = ({ isSidebarOpen, toggleSidebar }
    * Fetch the list of servers from the backend.
    */
   const fetchServers = async () => {
-    try {
-      const serverList = await window.api.getServers();
-      if (Array.isArray(serverList)) {
-        setServers(serverList);
-      } else {
-        throw new Error('Server data is not an array');
-      }
-    } catch (err) {
-      setError('Failed to fetch servers');
-      console.error(err);
+    const response = await window.api.getServers();
+    if (response.status === 'success') {
+      const serverList = response.data
+      setServers(serverList);
     }
   };
 

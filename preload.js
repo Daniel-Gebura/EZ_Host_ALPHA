@@ -77,8 +77,37 @@ contextBridge.exposeInMainWorld('api', {
    * @returns {Promise<Array>} List of servers
    */
   getServers: async () => {
-    const response = await fetch('http://localhost:5000/api/servers');
-    return response.json();
+    try {
+      const response = await fetch('http://localhost:5000/api/servers');
+
+      // Parse the JSON response
+      const data = await response.json();
+
+      // Handle the HTTP response codes and return a structured object
+      if (response.ok) {
+        // Success response
+        return {
+          status: 'success',
+          message: data.message,
+          data: data.data,
+        };
+      } else {
+        // Error response
+        return {
+          status: 'error',
+          message: data.message || 'Failed to retrieve server list.',
+          error: data.error || 'An error occurred while fetching the server list.',
+        };
+      }
+    } catch (error) {
+      // Handle any network or unexpected errors
+      console.error('Error fetching list of servers', error);
+      return {
+        status: 'error',
+        message: 'Failed to connect to the server.',
+        error: error.message,
+      };
+    }
   },
 
   /**

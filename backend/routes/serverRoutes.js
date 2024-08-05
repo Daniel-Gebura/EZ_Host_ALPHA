@@ -37,7 +37,19 @@ router.get('/ip-address', (req, res) => {
  * Endpoint to get the list of servers
  */
 router.get('/', (req, res) => {
-  res.send(servers);
+  if (Array.isArray(servers)) {
+    res.status(200).json({
+      status: 'success',
+      message: 'Servers retrieved successfully.',
+      data: servers,
+    });
+  } else {
+    res.status(404).json({
+      status: 'error',
+      message: 'Server list is not an array',
+      error: 'myServers,json must be a single array',
+    });
+  }
 });
 
 /**
