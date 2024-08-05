@@ -170,22 +170,18 @@ export const ServerControlPage: React.FC = () => {
     if (selectedIcon && currentServerId) {
       setIcon(selectedIcon);
 
-      try {
-        const response = await  window.api.getServer(currentServerId);
-        if (response.status === 'success') {
-          const server = response.data
-          server.icon = selectedIcon;
-          await window.api.updateServer(currentServerId, server);
-        }
-        else {
-          setNotification({
-            message: response.message || response.error || 'An unexpected error occurred.',
-            type: 'error',
-            key: Date.now(),
-          });
-        }
-      } catch (error: any) {
-        console.error('Error updating server icon:', error);
+      const response = await  window.api.getServer(currentServerId);
+      if (response.status === 'success') {
+        const server = response.data
+        server.icon = selectedIcon;
+        await window.api.updateServer(currentServerId, server);
+      }
+      else {
+        setNotification({
+          message: response.message || response.error || 'An unexpected error occurred.',
+          type: 'error',
+          key: Date.now(),
+        });
       }
     }
   };

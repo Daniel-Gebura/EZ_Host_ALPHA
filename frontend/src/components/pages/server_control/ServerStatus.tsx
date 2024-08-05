@@ -55,25 +55,20 @@ export const ServerStatus: React.FC<ServerStatusProps> = ({ name, status, onName
    */
   const handleNameChange = async () => {
     if (newName.length > 0 && newName.length <= 20) {
-      try {
-        const server = await  window.api.getServer(id!);
-        const response = await  window.api.getServer(id!);
-        if (response.status === 'success') {
-          const server = response.data
-          server.name = newName;
-          await  window.api.updateServer(id!, server);
-          onNameChange(newName);
-          setIsModalOpen(false);
-        }
-        else {
-          setNotification({
-            message: response.message || response.error || 'An unexpected error occurred.',
-            type: 'error',
-            key: Date.now(),
-          });
-        }
-      } catch (error) {
-        console.error('Error updating server name:', error);
+      const response = await  window.api.getServer(id!);
+      if (response.status === 'success') {
+        const server = response.data
+        server.name = newName;
+        await  window.api.updateServer(id!, server);
+        onNameChange(newName);
+        setIsModalOpen(false);
+      }
+      else {
+        setNotification({
+          message: response.message || response.error || 'An unexpected error occurred.',
+          type: 'error',
+          key: Date.now(),
+        });
       }
     }
   };

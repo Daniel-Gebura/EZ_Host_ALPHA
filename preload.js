@@ -172,14 +172,43 @@ contextBridge.exposeInMainWorld('api', {
    * @returns {Promise<Object>} The updated server
    */
   updateServer: async (id, server) => {
-    const response = await fetch(`http://localhost:5000/api/servers/${id}`, {
-      method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(server),
-    });
-    return response.json();
+    try {
+      const response = await fetch(`http://localhost:5000/api/servers/${id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(server),
+      });
+
+      // Parse the JSON response
+      const data = await response.json();
+
+      // Handle the HTTP response codes and return a structured object
+      if (response.ok) {
+        // Success response
+        return {
+          status: 'success',
+          message: data.message,
+          data: data.data,
+        };
+      } else {
+        // Error response
+        return {
+          status: 'error',
+          message: data.message || 'Failed to retrieve server.',
+          error: data.error || 'An error occurred while fetching the server.',
+        };
+      }
+    } catch (error) {
+      // Handle any network or unexpected errors
+      console.error('Error fetching server:', error);
+      return {
+        status: 'error',
+        message: 'Failed to connect to the server.',
+        error: error.message,
+      };
+    }
   },
 
   /**

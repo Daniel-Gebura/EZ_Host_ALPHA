@@ -119,9 +119,17 @@ router.put('/:id', (req, res) => {
   if (serverIndex !== -1) {
     servers[serverIndex] = { ...servers[serverIndex], name, type, directory, icon };
     saveServers(servers, DATA_FILE);
-    res.send(servers[serverIndex]);
+    res.status(200).json({
+      status: 'success',
+      message: 'Server updated successfully.',
+      data: servers[serverIndex],
+    });
   } else {
-    res.status(404).send('Server not found');
+    res.status(404).json({
+      status: 'error',
+      message: 'Server not found.',
+      error: 'The specified server ID does not exist.',
+    });
   }
 });
 
