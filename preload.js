@@ -216,10 +216,39 @@ contextBridge.exposeInMainWorld('api', {
    * @returns {Promise<void>}
    */
   checkServerStatus: async () => {
-    const response = await fetch('http://localhost:5000/api/servers/check-status', {
-      method: 'POST',
-    });
-    return response.json();
+    try {
+      const response = await fetch('http://localhost:5000/api/servers/check-status', {
+        method: 'POST',
+      });
+
+      // Parse the JSON response
+      const data = await response.json();
+
+      // Handle the HTTP response codes and return a structured object
+      if (response.ok) {
+        // Success response
+        return {
+          status: 'success',
+          message: data.message,
+          data: data.data,
+        };
+      } else {
+        // Error response
+        return {
+          status: 'error',
+          message: data.message || 'Failed to update server statuses.',
+          error: data.error || 'An error occurred while updating the server statuses.',
+        };
+      }
+    } catch (error) {
+      // Handle any network or unexpected errors
+      console.error('Error fetching server:', error);
+      return {
+        status: 'error',
+        message: 'Failed to connect to the server.',
+        error: error.message,
+      };
+    }
   },
 
   /**

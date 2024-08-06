@@ -1,5 +1,6 @@
 import React from 'react';
 import { useServerStatus } from '../../../hooks/useServerStatus';
+import { Notification } from '../../common/Notification';
 
 /**
  * CheckServerStatusButton component
@@ -8,10 +9,11 @@ import { useServerStatus } from '../../../hooks/useServerStatus';
  * @returns {JSX.Element}
  */
 export const CheckServerStatusButton: React.FC = () => {
-  const { checkServerStatus } = useServerStatus(); // Use the custom hook
+  const { notification, checkServerStatus } = useServerStatus();
 
   return (
     <div className="tooltip tooltip-left" data-tip="Refresh Server Status">
+      {notification && <Notification key={notification.key} message={notification.message} type={notification.type} />}
       <button className="btn btn-square btn-outline" onClick={checkServerStatus}>
         <svg
           xmlns="http://www.w3.org/2000/svg"

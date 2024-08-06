@@ -155,23 +155,40 @@ router.delete('/:id', (req, res) => {
  * Endpoint to check the status of all servers
  */
 router.post('/check-status', async (req, res) => {
-  const updatedServers = await Promise.all(servers.map(async server => {
-    try {
-      const rcon = await Rcon.connect({ host: 'localhost', port: 25575, password: server.rconPassword });
-      const response = await rcon.send('list');
-      await rcon.end();
+  try {
+    // Concurrently check the status of all servers listed in myServers.json
+    const updatedServers = await Promise.all(servers.map(async (server) => {
+      try {
+        // Check server status by attempting to connnect to its corresponding rcon client
+        const rcon = await Rcon.connect({ host: 'localhost', port: 25575, password: server.rconPassword });
+        const response = await rcon.send('list');
+        await rcon.end();
+        server.status = response.includes('players online') ? 'Online' : 'Offline';
+      } catch (err) {
+        console.error(`Error checking server ${server.id}:`, err);
+        server.status = 'Offline';
+      }
+      // Add this updated server status to the list
+      return server;
+    }));
 
-      server.status = response.includes('players online') ? 'Online' : 'Offline';
-    } catch (error) {
-      console.error(`Error checking status for server ${server.name}:`, error);
-      server.status = 'Offline';
-    }
+    // Save the updated server statuses
+    saveServers(updatedServers, DATA_FILE);
 
-    return server;
-  }));
-
-  saveServers(updatedServers, DATA_FILE);
-  res.json({ message: 'Server statuses updated successfully', servers: updatedServers });
+    // Return a formatted hhttp code and message
+    res.status(200).json({
+      status: 'success',
+      message: 'Server statuses updated successfully',
+      data: updatedServers,
+    });
+  } catch (error) {
+    console.error('Error updating server statuses:', error);
+    res.status(500).json({
+      status: 'error',
+      message: 'Failed to update server statuses.',
+      error: error.message,
+    });
+  }
 });
 
 /**

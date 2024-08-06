@@ -1,4 +1,5 @@
 import { useState, useCallback } from 'react';
+import { Notification } from '../components/common/Notification';
 
 /**
  * Custom hook for checking server status.
@@ -6,33 +7,27 @@ import { useState, useCallback } from 'react';
  * @returns An object containing the server status and a function to check the server status.
  */
 export const useServerStatus = () => {
-  const [serverStatus, setServerStatus] = useState<string | null>(null);
-  const [error, setError] = useState<string | null>(null);
-  const [loading, setLoading] = useState<boolean>(false);
+  const [notification, setNotification] = useState<{ message: string, type: 'success' | 'error' | 'warning', key: number } | null>(null);
 
   /**
    * Handles the server status check by calling the backend API.
    */
   const checkServerStatus = useCallback(async () => {
-    setLoading(true);
-    setError(null);
 
-    try {
-      await window.api.checkServerStatus(); // The API call, which returns void
-      setServerStatus('Updated'); // This is a placeholder, use as needed
-      console.log('Server statuses updated successfully.');
-    } catch (error: any) {
-      console.error('Error checking server status:', error);
-      setError('Failed to update server status.');
-    } finally {
-      setLoading(false);
+    // Use api call to update the status 
+    const response = await window.api.checkServerStatus();
+    if (response.status === 'error') {
+      const server = response.data
+      setNotification({
+        message: response.message || response.error || 'An unexpected error occurred.',
+        type: 'error',
+        key: Date.now(),
+      });
     }
-  }, []); // Dependencies are empty because there's no specific dependency
+  }, []);
 
   return {
-    serverStatus,
+    notification,
     checkServerStatus,
-    error,
-    loading,
   };
 };
