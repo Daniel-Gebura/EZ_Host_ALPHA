@@ -257,9 +257,38 @@ contextBridge.exposeInMainWorld('api', {
    * @returns {Promise<void>}
    */
   deleteServer: async (id) => {
-    await fetch(`http://localhost:5000/api/servers/${id}`, {
-      method: 'DELETE',
-    });
+    try {
+      const response = await fetch(`http://localhost:5000/api/servers/${id}`, {
+        method: 'DELETE',
+      });
+  
+      // Parse the JSON response
+      const data = await response.json();
+
+      // Handle the HTTP response codes and return a structured object
+      if (response.ok) {
+        // Success response
+        return {
+          status: 'success',
+          message: data.message,
+        };
+      } else {
+        // Error response
+        return {
+          status: 'error',
+          message: data.message || 'Failed to delete server.',
+          error: data.error || 'An error occurred while deleteing the server.',
+        };
+      }
+    } catch (error) { 
+      // Handle any network or unexpected errors
+      console.error('Error fetching server:', error);
+      return {
+        status: 'error',
+        message: 'Failed to connect to the server.',
+        error: error.message,
+      };
+    }
   },
 
   /**

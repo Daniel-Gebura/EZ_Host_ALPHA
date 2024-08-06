@@ -151,12 +151,8 @@ export const ServerControlPage: React.FC = () => {
    */
   const removeServer = async () => {
     if (currentServerId) {
-      try {
-        await window.api.deleteServer(currentServerId);
-        navigate('/');
-      } catch (error: any) {
-        console.error('Error deleting server:', error);
-      }
+      await window.api.deleteServer(currentServerId);
+      navigate('/');
     } else {
       console.error('Server ID is undefined');
     }

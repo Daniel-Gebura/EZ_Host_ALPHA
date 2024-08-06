@@ -148,7 +148,10 @@ router.delete('/:id', (req, res) => {
 
   servers = servers.filter(server => server.id !== id);
   saveServers(servers, DATA_FILE);
-  res.status(204).send();
+  res.status(200).json({
+    status: 'success',
+    message: 'Server deleted successfully.',
+  });
 });
 
 /**

@@ -23,7 +23,7 @@ declare global {
       addServer: (server: { name: string; directory: string; rconPassword: string; }) => Promise<any>;
       updateServer: (id: string, server: any) => Promise<ApiResponse>;
       checkServerStatus: () => Promise<ApiResponse>;
-      deleteServer: (id: string) => Promise<void>;
+      deleteServer: (id: string) => Promise<ApiResponse>;
       initServer: (id: string) => Promise<string>;
       startServer: (id: string) => Promise<ApiResponse>;
       saveServer: (id: string) => Promise<ApiResponse>;
