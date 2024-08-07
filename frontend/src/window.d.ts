@@ -31,7 +31,7 @@ declare global {
       startServer: (id: string) => Promise<ApiResponse>;
       saveServer: (id: string) => Promise<ApiResponse>;
       stopServer: (id: string) => Promise<ApiResponse>;
-      getServerProperties: (id: string) => Promise<any>;
+      getServerProperties: (id: string) => Promise<ApiResponse>;
       saveServerProperties: (id: string, properties: any) => Promise<void>;
       getRamAllocation: (id: string) => Promise<number>;
       updateRamAllocation: (id: string, ram: number) => Promise<string>;

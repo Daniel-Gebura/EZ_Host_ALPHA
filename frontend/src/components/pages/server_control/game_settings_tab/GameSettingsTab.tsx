@@ -16,6 +16,7 @@ interface GameSettingsTabProps {
  * @returns {JSX.Element} The rendered GameSettingsTabProps component.
  */
 export const GameSettingsTab: React.FC<GameSettingsTabProps> = ({ serverId, serverStatus }) => {
+  const [notification, setNotification] = useState<{ message: string, type: 'success' | 'error' | 'warning', key: number } | null>(null);
   const [properties, setProperties] = useState({
     'allow-flight': 'false',
     'allow-nether': 'true',
@@ -32,11 +33,17 @@ export const GameSettingsTab: React.FC<GameSettingsTabProps> = ({ serverId, serv
    * Fetch the server properties from the backend API.
    */
   const fetchProperties = async () => {
-    try {
-      const result = await  window.api.getServerProperties(serverId);
+    const response = await  window.api.getServerProperties(serverId);
+    if (response.status === 'success') {
+      const result = response.data
       setProperties(result);
-    } catch (error) {
-      console.error('Error fetching server properties:', error);
+    }
+    else {
+      setNotification({
+        message: response.message || response.error || 'An unexpected error occurred.',
+        type: 'error',
+        key: Date.now(),
+      });
     }
   };
 
@@ -70,6 +77,7 @@ export const GameSettingsTab: React.FC<GameSettingsTabProps> = ({ serverId, serv
 
   return (
     <div className="bg-base-300 shadow-lg rounded-lg p-6 mb-4">
+      {notification && <Notification key={notification.key} message={notification.message} type={notification.type} />}
       <h2 className="text-2xl font-bold mb-4">Server Properties</h2>
       <div className="grid grid-cols-1 gap-4">
         <div>

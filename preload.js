@@ -67,7 +67,9 @@ contextBridge.exposeInMainWorld('api', {
    */
   getIpAddress: async () => {
     try {
-      const response = await fetch('http://localhost:5000/api/servers/ip-address');
+      const response = await fetch(
+        'http://localhost:5000/api/servers/ip-address'
+      );
 
       // Parse the JSON response
       const data = await response.json();
@@ -190,6 +192,7 @@ contextBridge.exposeInMainWorld('api', {
         },
         body: JSON.stringify(server),
       });
+
       // Parse the JSON response
       const data = await response.json();
 
@@ -218,7 +221,6 @@ contextBridge.exposeInMainWorld('api', {
         error: error.message,
       };
     }
-
   },
 
   /**
@@ -274,7 +276,7 @@ contextBridge.exposeInMainWorld('api', {
   checkServerStatus: async () => {
     try {
       const response = await fetch('http://localhost:5000/api/servers/check-status', {
-        method: 'POST',
+          method: 'POST',
       });
 
       // Parse the JSON response
@@ -317,7 +319,7 @@ contextBridge.exposeInMainWorld('api', {
       const response = await fetch(`http://localhost:5000/api/servers/${id}`, {
         method: 'DELETE',
       });
-  
+
       // Parse the JSON response
       const data = await response.json();
 
@@ -336,7 +338,7 @@ contextBridge.exposeInMainWorld('api', {
           error: data.error || 'An error occurred while deleteing the server.',
         };
       }
-    } catch (error) { 
+    } catch (error) {
       // Handle any network or unexpected errors
       console.error('Error fetching server:', error);
       return {
@@ -355,11 +357,12 @@ contextBridge.exposeInMainWorld('api', {
   initServer: async (id) => {
     try {
       const response = await fetch(`http://localhost:5000/api/servers/${id}/initServer`, {
-        method: 'POST',
+          method: 'POST',
       });
+
       // Parse the JSON response
       const data = await response.json();
-  
+
       // Handle the HTTP response codes and return a structured object
       if (response.ok) {
         // Success response
@@ -385,7 +388,6 @@ contextBridge.exposeInMainWorld('api', {
         error: error.message,
       };
     }
-    
   },
 
   /**
@@ -396,15 +398,24 @@ contextBridge.exposeInMainWorld('api', {
   startServer: async (id) => {
     try {
       const response = await fetch(`http://localhost:5000/api/servers/${id}/start`, {
-        method: 'POST',
+          method: 'POST',
       });
-  
+
+      // Parse the JSON response
       const data = await response.json();
-  
+
       if (response.ok) {
-        return { status: 'success', message: data.message, data: data.data };
+        return { 
+          status: 'success', 
+          message: data.message, 
+          data: data.data 
+        };
       } else {
-        return { status: 'error', message: data.message, error: data.error };
+        return { 
+          status: 'error', 
+          message: data.message, 
+          error: data.error 
+        };
       }
     } catch (error) {
       console.error('Error starting server:', error);
@@ -424,20 +435,33 @@ contextBridge.exposeInMainWorld('api', {
   saveServer: async (id) => {
     try {
       const response = await fetch(`http://localhost:5000/api/servers/${id}/save`, {
-        method: 'POST',
+          method: 'POST',
       });
 
+      // Parse the JSON response
       const data = await response.json();
 
       // Check for HTTP status and handle accordingly
       if (response.ok) {
-        return { status: 'success', message: data.message, data: data.output };
+        return { 
+          status: 'success', 
+          message: data.message, 
+          data: data.output 
+        };
       } else {
-        return { status: 'error', message: data.message, error: data.error || 'Unknown error occurred' };
+        return {
+          status: 'error',
+          message: data.message,
+          error: data.error || 'Unknown error occurred',
+        };
       }
     } catch (error) {
       console.error('Error saving server:', error);
-      return { status: 'error', message: 'Failed to connect to server', error: error.message };
+      return {
+        status: 'error',
+        message: 'Failed to connect to server',
+        error: error.message,
+      };
     }
   },
 
@@ -449,20 +473,33 @@ contextBridge.exposeInMainWorld('api', {
   stopServer: async (id) => {
     try {
       const response = await fetch(`http://localhost:5000/api/servers/${id}/stop`, {
-        method: 'POST',
+          method: 'POST',
       });
 
+      // Parse the JSON response
       const data = await response.json();
 
       // Check for HTTP status and handle accordingly
       if (response.ok) {
-        return { status: 'success', message: data.message, data: data.output };
+        return { 
+          status: 'success', 
+          message: data.message, 
+          data: data.output 
+        };
       } else {
-        return { status: 'error', message: data.message, error: data.error || 'Unknown error occurred' };
+        return {
+          status: 'error',
+          message: data.message,
+          error: data.error || 'Unknown error occurred',
+        };
       }
     } catch (error) {
       console.error('Error stopping server:', error);
-      return { status: 'error', message: 'Failed to connect to server', error: error.message };
+      return {
+        status: 'error',
+        message: 'Failed to connect to server',
+        error: error.message,
+      };
     }
   },
 
@@ -472,11 +509,37 @@ contextBridge.exposeInMainWorld('api', {
    * @returns {Promise<Object>} The server properties
    */
   getServerProperties: async (id) => {
-    const response = await fetch(`http://localhost:5000/api/servers/${id}/properties`);
-    if (!response.ok) {
-      throw new Error('Server properties not found');
+    try {
+      const response = await fetch(`http://localhost:5000/api/servers/${id}/properties`);
+
+      // Parse the JSON response
+      const data = await response.json();
+
+      // Handle the HTTP response codes and return a structured object
+      if (response.ok) {
+        // Success response
+        return {
+          status: 'success',
+          message: data.message,
+          data: data.data,
+        };
+      } else {
+        // Error response
+        return {
+          status: 'error',
+          message: data.message || 'Failed to retrieve server properties.',
+          error: data.error || 'An error occurred while fetching the server properties.',
+        };
+      }
+    } catch (error) {
+      // Handle any network or unexpected errors
+      console.error('Error fetching server properties:', error);
+      return {
+        status: 'error',
+        message: 'Failed to connect to the server.',
+        error: error.message,
+      };
     }
-    return response.json();
   },
 
   /**
@@ -514,13 +577,16 @@ contextBridge.exposeInMainWorld('api', {
    * @returns {Promise<string>} Response from the server
    */
   updateRamAllocation: async (id, ram) => {
-    const response = await fetch(`http://localhost:5000/api/servers/${id}/ram`, {
-      method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ ram }),
-    });
+    const response = await fetch(
+      `http://localhost:5000/api/servers/${id}/ram`,
+      {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ ram }),
+      }
+    );
     if (!response.ok) {
       throw new Error('Failed to update RAM allocation');
     }
@@ -534,11 +600,14 @@ contextBridge.exposeInMainWorld('api', {
    * @returns {Promise<string>} The server response
    */
   sendRconCommand: async (id, command) => {
-    const response = await fetch(`http://localhost:5000/api/servers/${id}/rcon`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ command }),
-    });
+    const response = await fetch(
+      `http://localhost:5000/api/servers/${id}/rcon`,
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ command }),
+      }
+    );
     return response.text();
   },
 
@@ -548,7 +617,9 @@ contextBridge.exposeInMainWorld('api', {
    * @returns {Promise<string[]>} List of player names
    */
   getPlayers: async (id) => {
-    const response = await fetch(`http://localhost:5000/api/servers/${id}/players`);
+    const response = await fetch(
+      `http://localhost:5000/api/servers/${id}/players`
+    );
     if (!response.ok) {
       throw new Error('Failed to fetch players list');
     }
@@ -563,13 +634,16 @@ contextBridge.exposeInMainWorld('api', {
    * @returns {Promise<string>} Response from the server
    */
   setPlayerOp: async (id, playerName, op) => {
-    const response = await fetch(`http://localhost:5000/api/servers/${id}/player/${playerName}/op`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ op }),
-    });
+    const response = await fetch(
+      `http://localhost:5000/api/servers/${id}/player/${playerName}/op`,
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ op }),
+      }
+    );
     if (!response.ok) {
       throw new Error(`Failed to ${op ? 'OP' : 'un-OP'} player`);
     }

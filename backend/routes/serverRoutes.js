@@ -325,16 +325,28 @@ router.get('/:id/properties', (req, res) => {
   const { id } = req.params;
   const server = servers.find(s => s.id === id);
   if (!server) {
-    return res.status(404).send('Server not found');
+    return res.status(404).json({
+      status: 'error',
+      message: 'Server not found.',
+      error: 'The specified server ID does not exist.',
+    });
   }
 
   const serverPropertiesPath = path.join(server.directory, 'server.properties');
   if (!fs.existsSync(serverPropertiesPath)) {
-    return res.status(404).send('server.properties not found');
+    return res.status(404).json({
+      status: 'error',
+      message: 'server.properties not found.',
+      error: 'The server.properties file does not exist in the specified directory',
+    });
   }
 
   const properties = readPropertiesFile(serverPropertiesPath);
-  res.json(properties);
+  res.status(200).json({
+    status: 'success',
+    message: 'Server properties retrieved successfully.',
+    data: properties,
+  });
 });
 
 /**
