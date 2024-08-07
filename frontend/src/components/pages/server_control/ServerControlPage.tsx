@@ -162,7 +162,7 @@ export const ServerControlPage: React.FC = () => {
    * Handle changing the server icon.
    */
   const handleChangeIcon = async () => {
-    const selectedIcon = await window.api.chooseFile();
+    const selectedIcon = await window.ipcRenderer.chooseFile();
     if (selectedIcon && currentServerId) {
       setIcon(selectedIcon);
 

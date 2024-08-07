@@ -20,6 +20,33 @@ contextBridge.exposeInMainWorld('ipcRenderer', {
   on: (channel, func) =>
     ipcRenderer.on(channel, (event, ...args) => func(...args)), // Listen for IPC message from main process
   removeAllListeners: (channel) => ipcRenderer.removeAllListeners(channel), // Remove all listeners for a specific channel
+  
+  /**
+   * Open a directory chooser dialog
+   * @returns {Promise<string>} The selected directory path
+   */
+  chooseDirectory: async () => {
+    const result = await ipcRenderer.invoke('choose-directory');
+    return result;
+  },
+  
+  /**
+   * Check if a specified file exists in a given path
+   * @param {string} dir - The directory path
+   * @param {string} filename - The file name
+   * @returns {Promise<boolean>} - True if the file exists, false otherwise
+   */
+  checkFileExistence: (dir, filename) => 
+    ipcRenderer.invoke('check-file-existence', dir, filename),
+
+  /**
+   * Open a file chooser dialog
+   * @returns {Promise<string>} The selected file path
+   */
+  chooseFile: async () => {
+    const result = await ipcRenderer.invoke('choose-file');
+    return result;
+  },
 });
 
 /**
@@ -379,33 +406,6 @@ contextBridge.exposeInMainWorld('api', {
       console.error('Error stopping server:', error);
       return { status: 'error', message: 'Failed to connect to server', error: error.message };
     }
-  },
-
-  /**
-   * Open a directory chooser dialog
-   * @returns {Promise<string>} The selected directory path
-   */
-  chooseDirectory: async () => {
-    const result = await ipcRenderer.invoke('choose-directory');
-    return result;
-  },
-  
-  /**
-   * Check if a specified file exists in a given path
-   * @param {string} dir - The directory path
-   * @param {string} filename - The file name
-   * @returns {Promise<boolean>} - True if the file exists, false otherwise
-   */
-  checkFileExistence: (dir, filename) => 
-    ipcRenderer.invoke('check-file-existence', dir, filename),
-
-  /**
-   * Open a file chooser dialog
-   * @returns {Promise<string>} The selected file path
-   */
-  chooseFile: async () => {
-    const result = await ipcRenderer.invoke('choose-file');
-    return result;
   },
 
   /**

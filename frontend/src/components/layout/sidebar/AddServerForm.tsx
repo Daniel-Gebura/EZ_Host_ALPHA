@@ -35,7 +35,7 @@ export const AddServerForm: React.FC<AddServerFormProps> = ({ onServerAdded }) =
 
     setIsLoading(true);
     try {
-      const variablesFileExists = await window.api.checkFileExistence(directory, 'variables.txt');
+      const variablesFileExists = await window.ipcRenderer.checkFileExistence(directory, 'variables.txt');
       if (!variablesFileExists) {
         setError('The chosen directory does not contain necessary files. Please select a valid server directory.');
         setIsLoading(false);

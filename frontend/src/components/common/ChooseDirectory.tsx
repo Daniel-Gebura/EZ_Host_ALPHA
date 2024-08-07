@@ -25,7 +25,7 @@ export const ChooseDirectory: React.FC<ChooseDirectoryProps> = ({ value, onChang
    */
   const handleChooseDirectory = async () => {
     try {
-      const directoryPath = await window.api.chooseDirectory();
+      const directoryPath = await window.ipcRenderer.chooseDirectory();
       if (directoryPath) {
         onChange(directoryPath);
         setError(null); // Clear error state on success
