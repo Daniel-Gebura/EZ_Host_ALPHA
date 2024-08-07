@@ -59,32 +59,90 @@ router.post('/', (req, res) => {
   const { name, type, directory, icon, rconPassword } = req.body;
   const id = Date.now().toString();
   const newServer = { id, name, type, directory, icon, rconPassword, status: 'Offline' };
+  const ezHostDirectory = path.join(directory, 'EZHost');
 
+  // Step 0: Check for duplicate directory and RCON password
+  const directoryInUse = servers.some(server => server.directory === directory);
+  const rconPasswordInUse = servers.some(server => server.rconPassword === rconPassword);
+
+  if (directoryInUse || rconPasswordInUse) {
+    const errors = [];
+    if (directoryInUse) errors.push('The specified directory is already associated with an existing server.');
+    if (rconPasswordInUse) errors.push('The specified RCON password is already in use by another server.');
+
+    return res.status(400).json({
+      status: 'error',
+      message: errors.join(' '),
+      error: 'Duplicate server configurations detected.',
+    });
+  }
+
+  // Step 1: Create EZHost Directory
+  try {
+    if (!fs.existsSync(ezHostDirectory)) {
+      fs.mkdirSync(ezHostDirectory);
+    }
+  } catch (error) {
+    return res.status(500).json({
+      status: 'error',
+      message: 'Failed to create EZHost directory.',
+      error: error.message,
+    });
+  }
+
+  // Step 2: Write Start Script
+  try {
+    const START_SCRIPT_TEMPLATE = path.join(__dirname, '../template_scripts/simpleStartTemplate.ps1');
+    fs.writeFileSync(path.join(ezHostDirectory, 'start.ps1'), fs.readFileSync(START_SCRIPT_TEMPLATE, 'utf8'));
+    fs.chmodSync(path.join(ezHostDirectory, 'start.ps1'), '755');
+  } catch (error) {
+    return res.status(500).json({
+      status: 'error',
+      message: 'Failed to create start.ps1 script.',
+      error: error.message,
+    });
+  }
+
+  // Step 3: Write Init Script
+  try {
+    const INIT_SCRIPT_TEMPLATE = path.join(__dirname, '../template_scripts/initServerTemplate.ps1');
+    fs.writeFileSync(path.join(ezHostDirectory, 'initServer.ps1'), fs.readFileSync(INIT_SCRIPT_TEMPLATE, 'utf8'));
+    fs.chmodSync(path.join(ezHostDirectory, 'initServer.ps1'), '755');
+  } catch (error) {
+    return res.status(500).json({
+      status: 'error',
+      message: 'Failed to create initServer.ps1 script.',
+      error: error.message,
+    });
+  }
+
+  // Step 4: Modify server.properties File
+  try {
+    const serverPropertiesPath = path.join(directory, 'server.properties');
+    let serverPropertiesContent = fs.existsSync(serverPropertiesPath) ? fs.readFileSync(serverPropertiesPath, 'utf8') : '';
+
+    serverPropertiesContent = serverPropertiesContent.replace(/^enable-rcon=.*$/m, 'enable-rcon=true')
+                                                      .replace(/^rcon.port=.*$/m, 'rcon.port=25575')
+                                                      .replace(/^rcon.password=.*$/m, `rcon.password=${rconPassword}`);
+
+    fs.writeFileSync(serverPropertiesPath, serverPropertiesContent);
+  } catch (error) {
+    return res.status(500).json({
+      status: 'error',
+      message: 'Failed to modify server.properties file.',
+      error: error.message,
+    });
+  }
+
+  // SUCCESSS
   servers.push(newServer);
   saveServers(servers, DATA_FILE);
 
-  const ezHostDirectory = path.join(directory, 'EZHost');
-  if (!fs.existsSync(ezHostDirectory)) {
-    fs.mkdirSync(ezHostDirectory);
-  }
-
-  const INIT_SCRIPT_TEMPLATE = path.join(__dirname, '../template_scripts/initServerTemplate.ps1');
-  const START_SCRIPT_TEMPLATE = path.join(__dirname, '../template_scripts/simpleStartTemplate.ps1');
-
-  fs.writeFileSync(path.join(ezHostDirectory, 'initServer.ps1'), fs.readFileSync(INIT_SCRIPT_TEMPLATE, 'utf8'));
-  fs.chmodSync(path.join(ezHostDirectory, 'initServer.ps1'), '755');
-
-  fs.writeFileSync(path.join(ezHostDirectory, 'start.ps1'), fs.readFileSync(START_SCRIPT_TEMPLATE, 'utf8'));
-  fs.chmodSync(path.join(ezHostDirectory, 'start.ps1'), '755');
-
-  const serverPropertiesPath = path.join(directory, 'server.properties');
-  let serverPropertiesContent = fs.existsSync(serverPropertiesPath) ? fs.readFileSync(serverPropertiesPath, 'utf8') : '';
-  serverPropertiesContent = serverPropertiesContent.replace(/^enable-rcon=.*$/m, 'enable-rcon=true')
-                                                    .replace(/^rcon.port=.*$/m, 'rcon.port=25575')
-                                                    .replace(/^rcon.password=.*$/m, `rcon.password=${rconPassword}`);
-  fs.writeFileSync(serverPropertiesPath, serverPropertiesContent);
-
-  res.status(201).send(newServer);
+  res.status(201).json({
+    status: 'success',
+    message: 'Server created successfully.',
+    data: newServer,
+  });
 });
 
 /**
@@ -198,7 +256,11 @@ router.post('/check-status', async (req, res) => {
  * Endpoint to initialize a server
  */
 router.post('/:id/initServer', (req, res) => {
-  runPowerShellScript(req.params.id, 'initServer.ps1', res, servers, DATA_FILE);
+  // Use util function to handle running PowerShell scripts
+  const response = runPowerShellScript(req.params.id, 'initServer.ps1', res, servers, DATA_FILE);
+
+  // Pass up the HTTP response from the util function
+  return response
 });
 
 /**

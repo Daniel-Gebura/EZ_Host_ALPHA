@@ -20,7 +20,7 @@ contextBridge.exposeInMainWorld('ipcRenderer', {
   on: (channel, func) =>
     ipcRenderer.on(channel, (event, ...args) => func(...args)), // Listen for IPC message from main process
   removeAllListeners: (channel) => ipcRenderer.removeAllListeners(channel), // Remove all listeners for a specific channel
-  
+
   /**
    * Open a directory chooser dialog
    * @returns {Promise<string>} The selected directory path
@@ -182,14 +182,43 @@ contextBridge.exposeInMainWorld('api', {
    * @returns {Promise<Object>} The added server
    */
   addServer: async (server) => {
-    const response = await fetch('http://localhost:5000/api/servers', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(server),
-    });
-    return response.json();
+    try {
+      const response = await fetch('http://localhost:5000/api/servers', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(server),
+      });
+      // Parse the JSON response
+      const data = await response.json();
+
+      // Handle the HTTP response codes and return a structured object
+      if (response.ok) {
+        // Success response
+        return {
+          status: 'success',
+          message: data.message,
+          data: data.data,
+        };
+      } else {
+        // Error response
+        return {
+          status: 'error',
+          message: data.message || 'Failed to create server.',
+          error: data.error || 'An error occurred while creating the server.',
+        };
+      }
+    } catch (error) {
+      // Handle any network or unexpected errors
+      console.error('Error creating server:', error);
+      return {
+        status: 'error',
+        message: 'Failed to connect to the server.',
+        error: error.message,
+      };
+    }
+
   },
 
   /**
@@ -324,10 +353,39 @@ contextBridge.exposeInMainWorld('api', {
    * @returns {Promise<string>} Response from the server
    */
   initServer: async (id) => {
-    const response = await fetch(`http://localhost:5000/api/servers/${id}/initServer`, {
-      method: 'POST',
-    });
-    return response.text();
+    try {
+      const response = await fetch(`http://localhost:5000/api/servers/${id}/initServer`, {
+        method: 'POST',
+      });
+      // Parse the JSON response
+      const data = await response.json();
+  
+      // Handle the HTTP response codes and return a structured object
+      if (response.ok) {
+        // Success response
+        return {
+          status: 'success',
+          message: data.message,
+          data: data.data,
+        };
+      } else {
+        // Error response
+        return {
+          status: 'error',
+          message: data.message || 'Failed to initialize server.',
+          error: data.error || 'An error occurred while initializing the server.',
+        };
+      }
+    } catch (error) {
+      // Handle any network or unexpected errors
+      console.error('Error initializing server:', error);
+      return {
+        status: 'error',
+        message: 'Failed to connect to the server.',
+        error: error.message,
+      };
+    }
+    
   },
 
   /**

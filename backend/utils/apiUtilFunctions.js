@@ -73,7 +73,7 @@ const runPowerShellScript = (serverId, scriptName, res, servers, dataFilePath) =
       console.log(`Script stdout: ${stdout}`);
 
       // Assuming that the script was successful if there's no error
-      res.json({
+      res.status(200).json({
         status: 'success',
         message: `Script ${scriptName} executed successfully`,
         data: stdout,

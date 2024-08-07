@@ -28,42 +28,51 @@ export const AddServerForm: React.FC<AddServerFormProps> = ({ onServerAdded }) =
    * Adds a new server by calling the backend API
    */
   const addServer = async () => {
+    // Check that all required fields have been filled out correctly
     if (!serverName || !directory || !rconPassword || !agreeEula) {
       setError('Please provide the server name, directory, RCON password, and agree to the EULA.');
       return;
     }
-
-    setIsLoading(true);
-    try {
-      const variablesFileExists = await window.ipcRenderer.checkFileExistence(directory, 'variables.txt');
-      if (!variablesFileExists) {
-        setError('The chosen directory does not contain necessary files. Please select a valid server directory.');
-        setIsLoading(false);
-        return;
-      }
-
-      const newServer = {
-        name: serverName,
-        directory: directory,
-        icon: serverIcon,
-        rconPassword: rconPassword,
-      };
-      const addedServer = await window.api.addServer(newServer);
-      await window.api.initServer(addedServer.id);
-
-      setServerName('');
-      setDirectory('');
-      setServerIcon(defaultLogo);
-      setRconPassword('');
-      setAgreeEula(false);
-      setError(null);
-      onServerAdded(addedServer.id);
-    } catch (err) {
-      setError('Failed to add and initialize the server.');
-      console.error(err);
-    } finally {
-      setIsLoading(false);
+    const variablesFileExists = await window.ipcRenderer.checkFileExistence(directory, 'variables.txt');
+    if (!variablesFileExists) {
+      setError('The chosen directory does not contain necessary files. Please select a valid server directory.');
+      return;
     }
+
+    // Begin adding/init server process
+    setIsLoading(true);
+    const newServer = {
+      name: serverName,
+      directory: directory,
+      icon: serverIcon,
+      rconPassword: rconPassword,
+    };
+    
+    // Add Server
+    const addServerResponse = await window.api.addServer(newServer);
+    if (addServerResponse.status === 'success') {
+      const addedServer = addServerResponse.data;
+      // Init Server
+      const initServerResponse = await window.api.initServer(addedServer.id);
+      if (initServerResponse.status === 'success') {
+        setServerName('');
+        setDirectory('');
+        setServerIcon(defaultLogo);
+        setRconPassword('');
+        setAgreeEula(false);
+        setError(null);
+        onServerAdded(addedServer.id);
+      } else {
+        setError('Failed to initialize the server.');
+        await window.api.deleteServer(addedServer);
+      }
+    } else {
+      setError(addServerResponse.message);
+    }
+
+    // Stop Loading before finishing
+    setIsLoading(false);
+
   };
 
   return (

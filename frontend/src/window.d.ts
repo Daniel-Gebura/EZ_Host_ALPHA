@@ -23,11 +23,11 @@ declare global {
       getIpAddress: () => Promise<ApiResponse>;
       getServers: () => Promise<ApiResponse>;
       getServer: (id: string) => Promise<ApiResponse>;
-      addServer: (server: { name: string; directory: string; rconPassword: string; }) => Promise<any>;
+      addServer: (server: { name: string; directory: string; rconPassword: string; }) => Promise<ApiResponse>;
       updateServer: (id: string, server: any) => Promise<ApiResponse>;
       checkServerStatus: () => Promise<ApiResponse>;
       deleteServer: (id: string) => Promise<ApiResponse>;
-      initServer: (id: string) => Promise<string>;
+      initServer: (id: string) => Promise<ApiResponse>;
       startServer: (id: string) => Promise<ApiResponse>;
       saveServer: (id: string) => Promise<ApiResponse>;
       stopServer: (id: string) => Promise<ApiResponse>;
