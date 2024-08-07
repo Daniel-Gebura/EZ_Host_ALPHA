@@ -386,36 +386,8 @@ contextBridge.exposeInMainWorld('api', {
    * @returns {Promise<string>} The selected directory path
    */
   chooseDirectory: async () => {
-    try {
-      const response = await ipcRenderer.invoke('choose-directory');
-      // Parse the JSON response
-      const data = await response.json();
-
-      // Handle the HTTP response codes and return a structured object
-      if (response.ok) {
-        // Success response
-        return {
-          status: 'success',
-          message: data.message,
-          data: data.data,
-        };
-      } else {
-        // Error response
-        return {
-          status: 'error',
-          message: data.message || 'Failed to choose directory.',
-          error: data.error || 'An error occurred while choosing a directory.',
-        };
-      }
-    } catch (error) {
-      // Handle any network or unexpected errors
-      console.error('Error choosing directory:', error);
-      return {
-        status: 'error',
-        message: 'Failed to choose a directory.',
-        error: error.message,
-      };
-    }
+    const result = await ipcRenderer.invoke('choose-directory');
+    return result;
   },
   
   /**

@@ -24,13 +24,14 @@ export const ChooseDirectory: React.FC<ChooseDirectoryProps> = ({ value, onChang
    * If an error occurs, set the error state to display it in the UI.
    */
   const handleChooseDirectory = async () => {
-    const response = await  window.api.chooseDirectory();
-    if (response.status === 'success') {
-      const directoryPath = response.data
-      onChange(directoryPath);
-      setError(null); // Clear error state on success
-    }
-    else {
+    try {
+      const directoryPath = await window.api.chooseDirectory();
+      if (directoryPath) {
+        onChange(directoryPath);
+        setError(null); // Clear error state on success
+      }
+    } catch (error) {
+      console.error('Error choosing directory:', error);
       setError('Failed to choose directory. Please try again.');
     }
   };

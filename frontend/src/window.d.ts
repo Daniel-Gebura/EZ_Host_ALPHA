@@ -28,7 +28,7 @@ declare global {
       startServer: (id: string) => Promise<ApiResponse>;
       saveServer: (id: string) => Promise<ApiResponse>;
       stopServer: (id: string) => Promise<ApiResponse>;
-      chooseDirectory: () => Promise<ApiResponse>;
+      chooseDirectory: () => Promise<string>;
       checkFileExistence: (dir: string, filename: string) => Promise<boolean>;
       chooseFile: () => Promise<string>;
       getServerProperties: (id: string) => Promise<any>;
