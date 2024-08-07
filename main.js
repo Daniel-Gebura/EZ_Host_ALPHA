@@ -13,7 +13,6 @@ const { app, BrowserWindow, dialog, ipcMain } = require('electron'); // Electron
 const url = require('url'); // Module for URL handling
 const path = require('path'); // Module for file path handling
 const chokidar = require('chokidar'); // Module for watching file changes
-const { fileExists } = require('./backend/utils/validateUtilFunctions');
 
 let mainWindow;
 let watcher; // Declare watcher at the top level to ensure proper cleanup
@@ -78,34 +77,6 @@ function createMainWindow() {
     }
   });
 }
-
-/**
- * Handle the choose-directory IPC call
- */
-ipcMain.handle('choose-directory', async () => {
-  const result = await dialog.showOpenDialog(mainWindow, {
-    properties: ['openDirectory'],
-  });
-  return result.filePaths[0];
-});
-
-/**
- * Handle the check-file-existence IPC call
- */
-ipcMain.handle('check-file-existence', async (event, dir, filename) => {
-  return await fileExists(dir, filename);
-});
-
-/**
- * Handle the choose-file IPC call
- */
-ipcMain.handle('choose-file', async () => {
-  const result = await dialog.showOpenDialog(mainWindow, {
-    properties: ['openFile'],
-    filters: [{ name: 'Images', extensions: ['png', 'jpg', 'jpeg'] }],
-  });
-  return result.filePaths[0];
-});
 
 /**
  * START UP CALL: Application ready event
