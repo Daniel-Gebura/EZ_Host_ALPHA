@@ -51,10 +51,20 @@ export const GameSettingsTab: React.FC<GameSettingsTabProps> = ({ serverId, serv
    * Save the updated server properties to the backend API.
    */
   const saveProperties = async () => {
-    try {
-      await  window.api.saveServerProperties(serverId, properties);
-    } catch (error) {
-      console.error('Error saving server properties:', error);
+    const response = await window.api.saveServerProperties(serverId, properties);
+    if (response.status === 'success') {
+      setNotification({
+        message: response.message,
+        type: 'success',
+        key: Date.now(),
+      });
+    }
+    else {
+      setNotification({
+        message: response.message || response.error || 'An unexpected error occurred.',
+        type: 'error',
+        key: Date.now(),
+      });
     }
   };
 

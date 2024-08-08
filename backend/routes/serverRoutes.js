@@ -356,7 +356,11 @@ router.put('/:id/properties', (req, res) => {
   const { id } = req.params;
   const server = servers.find(s => s.id === id);
   if (!server) {
-    return res.status(404).send('Server not found');
+    return res.status(404).json({
+      status: 'error',
+      message: 'Server not found.',
+      error: 'The specified server ID does not exist.',
+    });
   }
 
   const serverPropertiesPath = path.join(server.directory, 'server.properties');
@@ -371,7 +375,10 @@ router.put('/:id/properties', (req, res) => {
 
   writePropertiesFile(serverPropertiesPath, updatedProperties);
 
-  res.status(200).send('Properties updated');
+  res.status(200).json({
+    status: 'success',
+    message: 'Server properties updated.',
+  });
 });
 
 /**

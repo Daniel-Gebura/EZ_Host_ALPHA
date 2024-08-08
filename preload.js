@@ -549,11 +549,40 @@ contextBridge.exposeInMainWorld('api', {
    * @returns {Promise<void>}
    */
   saveServerProperties: async (id, properties) => {
-    await fetch(`http://localhost:5000/api/servers/${id}/properties`, {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(properties),
-    });
+    try {
+      const response = await fetch(`http://localhost:5000/api/servers/${id}/properties`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(properties),
+      });
+
+      // Parse the JSON response
+      const data = await response.json();
+
+      // Handle the HTTP response codes and return a structured object
+      if (response.ok) {
+        // Success response
+        return {
+          status: 'success',
+          message: data.message,
+        };
+      } else {
+        // Error response
+        return {
+          status: 'error',
+          message: data.message || 'Failed to save server properties.',
+          error: data.error || 'An error occurred while saving the server properties.',
+        };
+      }
+    } catch (error) {
+      // Handle any network or unexpected errors
+      console.error('Error saving server properties:', error);
+      return {
+        status: 'error',
+        message: 'Failed to connect to the server.',
+        error: error.message,
+      };
+    }
   },
 
   /**
