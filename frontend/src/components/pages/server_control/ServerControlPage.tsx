@@ -26,37 +26,45 @@ export const ServerControlPage: React.FC = () => {
    * @param {string} serverId - The ID of the server.
    */
   const fetchServerDetails = async (serverId: string) => {
-    try {
-      const response = await  window.api.getServer(serverId);
-      if (response.status === 'success') {
-        const server = response.data
-        setServerName(server.name);
-        setStatus(server.status);
-        setIcon(server.icon || defaultLogo);
-      } else {
-        setNotification({
-          message: response.message || response.error || 'An unexpected error occurred.',
-          type: 'error',
-          key: Date.now(),
-        });
-      }
-      
-      const ram = await  window.api.getRamAllocation(serverId);
+    // Get the general server name, status, and icon
+    const response = await  window.api.getServer(serverId);
+    if (response.status === 'success') {
+      const server = response.data
+      setServerName(server.name);
+      setStatus(server.status);
+      setIcon(server.icon || defaultLogo);
+    } else {
+      setNotification({
+        message: response.message || response.error || 'An unexpected error occurred.',
+        type: 'error',
+        key: Date.now(),
+      });
+    }
+    
+    // Get the server's RAM allocation
+    const ramRequest = await window.api.getRamAllocation(serverId);
+    if (ramRequest.status === 'success') {
+      const ram = ramRequest.data
       setRamAllocation(ram);
-
-      const ipRequest = await window.api.getIpAddress();
-      if (ipRequest.status === 'success') {
-        const ipAddress = ipRequest.data
-        setIp(ipAddress);
-      } else {
-        setNotification({
-          message: ipRequest.message || ipRequest.error || 'An unexpected error occurred.',
-          type: 'error',
-          key: Date.now(),
-        });
-      }
-    } catch (error: any) {
-      console.error('Error fetching server details:', error);
+    } else {
+      setNotification({
+        message: ramRequest.message || ramRequest.error || 'An unexpected error occurred.',
+        type: 'error',
+        key: Date.now(),
+      });
+    }
+    
+    // Get the server's local IP Address
+    const ipRequest = await window.api.getIpAddress();
+    if (ipRequest.status === 'success') {
+      const ipAddress = ipRequest.data
+      setIp(ipAddress);
+    } else {
+      setNotification({
+        message: ipRequest.message || ipRequest.error || 'An unexpected error occurred.',
+        type: 'error',
+        key: Date.now(),
+      });
     }
   };
 

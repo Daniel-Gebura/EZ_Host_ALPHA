@@ -33,7 +33,7 @@ declare global {
       stopServer: (id: string) => Promise<ApiResponse>;
       getServerProperties: (id: string) => Promise<ApiResponse>;
       saveServerProperties: (id: string, properties: any) => Promise<ApiResponse>;
-      getRamAllocation: (id: string) => Promise<number>;
+      getRamAllocation: (id: string) => Promise<ApiResponse>;
       updateRamAllocation: (id: string, ram: number) => Promise<string>;
       sendRconCommand: (id: string, command: string) => Promise<string>;
       getPlayers: (id: string) => Promise<string[]>;

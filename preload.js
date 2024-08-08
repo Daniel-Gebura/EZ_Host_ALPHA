@@ -591,12 +591,37 @@ contextBridge.exposeInMainWorld('api', {
    * @returns {Promise<number>} The RAM allocation in GB
    */
   getRamAllocation: async (id) => {
-    const response = await fetch(`http://localhost:5000/api/servers/${id}/ram`);
-    if (!response.ok) {
-      throw new Error('Failed to fetch RAM allocation');
+    try {
+      const response = await fetch(`http://localhost:5000/api/servers/${id}/ram`);
+
+      // Parse the JSON response
+      const data = await response.json();
+
+      // Handle the HTTP response codes and return a structured object
+      if (response.ok) {
+        // Success response
+        return {
+          status: 'success',
+          message: data.message,
+          data: data.data,
+        };
+      } else {
+        // Error response
+        return {
+          status: 'error',
+          message: data.message || 'Failed to retrieve RAM allocation.',
+          error: data.error || 'An error occurred while fetching the RAM allocation.',
+        };
+      }
+    } catch (error) {
+      // Handle any network or unexpected errors
+      console.error('Error fetching RAM allocation:', error);
+      return {
+        status: 'error',
+        message: 'Failed to connect to the server.',
+        error: error.message,
+      };
     }
-    const { ram } = await response.json();
-    return ram;
   },
 
   /**
