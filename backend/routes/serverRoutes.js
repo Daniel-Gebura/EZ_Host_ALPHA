@@ -423,19 +423,30 @@ router.put('/:id/ram', (req, res) => {
   const { ram } = req.body;
   const server = servers.find(s => s.id === id);
   if (!server) {
-    return res.status(404).send('Server not found');
+    return res.status(404).json({
+      status: 'error',
+      message: 'Server not found.',
+      error: 'The specified server ID does not exist.',
+    });
   }
 
   const variablesFilePath = path.join(server.directory, 'variables.txt');
   if (!fs.existsSync(variablesFilePath)) {
-    return res.status(404).send('variables.txt not found');
+    return res.status(404).json({
+      status: 'error',
+      message: 'variables.txt not found.',
+      error: 'variables.txt file not found in specified directory.',
+    });
   }
 
   let variablesContent = fs.readFileSync(variablesFilePath, 'utf8');
   variablesContent = variablesContent.replace(/-Xmx\d+G/, `-Xmx${ram}G`);
 
   fs.writeFileSync(variablesFilePath, variablesContent, 'utf8');
-  res.status(200).send('RAM allocation updated');
+  res.status(200).json({
+    status: 'success',
+    message: 'RAM allocation updated successfully.',
+  });
 });
 
 /**

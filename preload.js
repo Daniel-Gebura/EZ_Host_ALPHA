@@ -631,20 +631,43 @@ contextBridge.exposeInMainWorld('api', {
    * @returns {Promise<string>} Response from the server
    */
   updateRamAllocation: async (id, ram) => {
-    const response = await fetch(
-      `http://localhost:5000/api/servers/${id}/ram`,
-      {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ ram }),
+    try {
+      const response = await fetch(`http://localhost:5000/api/servers/${id}/ram`,{
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ ram }),
+      });
+
+      // Parse the JSON response
+      const data = await response.json();
+
+      // Handle the HTTP response codes and return a structured object
+      if (response.ok) {
+        // Success response
+        return {
+          status: 'success',
+          message: data.message,
+        };
+      } else {
+        // Error response
+        return {
+          status: 'error',
+          message: data.message || 'Failed to update RAM allocation.',
+          error: data.error || 'An error occurred while updating RAM allocation.',
+        };
       }
-    );
-    if (!response.ok) {
-      throw new Error('Failed to update RAM allocation');
+    } catch (error) {
+      // Handle any network or unexpected errors
+      console.error('Error updating RAM allocation:', error);
+      return {
+        status: 'error',
+        message: 'Failed to connect to the server.',
+        error: error.message,
+      };
     }
-    return response.text();
+
   },
 
   /**

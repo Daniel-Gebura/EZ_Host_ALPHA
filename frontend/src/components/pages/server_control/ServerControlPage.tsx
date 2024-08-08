@@ -200,12 +200,22 @@ export const ServerControlPage: React.FC = () => {
       return;
     }
 
-    try {
-      await window.api.updateRamAllocation(currentServerId, newRam);
+    const response = await window.api.updateRamAllocation(currentServerId, newRam);
+    if (response.status === 'success') {
       setRamAllocation(newRam);
-    } catch (error: any) {
-      console.error('Error updating RAM allocation:', error);
+      setNotification({
+        message: response.message,
+        type: 'success',
+        key: Date.now(),
+      });
     }
+    else {
+      setNotification({
+        message: response.message || response.error || 'An unexpected error occurred.',
+        type: 'error',
+        key: Date.now(),
+      });
+    }  
   };
 
   return (
