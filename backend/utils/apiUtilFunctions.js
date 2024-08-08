@@ -123,8 +123,6 @@ const sendRconCommand = async (serverId, command, res, servers, dataFilePath, ca
 
   if (command === 'stop') {
     server.status = 'Stopping...';
-  } else if (command === 'restart') {
-    server.status = 'Restarting...';
   }
   saveServers(servers, dataFilePath);
 

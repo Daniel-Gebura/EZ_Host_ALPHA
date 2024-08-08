@@ -119,10 +119,10 @@ export const ServerControlPage: React.FC = () => {
           response = await window.api.startServer(currentServerId);
           break;
         case 'save':
-          response = await window.api.saveServer(currentServerId);
+          response = await window.api.sendRconCommand(currentServerId, 'save-all');
           break;
         case 'stop':
-          response = await window.api.stopServer(currentServerId);
+          response = await window.api.sendRconCommand(currentServerId, 'stop');
           break;
         default:
           response = { status: 'error', message: 'Invalid action', error: 'Action not recognized' };

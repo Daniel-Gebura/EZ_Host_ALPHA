@@ -677,15 +677,40 @@ contextBridge.exposeInMainWorld('api', {
    * @returns {Promise<string>} The server response
    */
   sendRconCommand: async (id, command) => {
-    const response = await fetch(
-      `http://localhost:5000/api/servers/${id}/rcon`,
-      {
+    try {
+      const response = await fetch(`http://localhost:5000/api/servers/${id}/rcon`,{
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ command }),
+      });
+
+      // Parse the JSON response
+      const data = await response.json();
+
+      // Handle the HTTP response codes and return a structured object
+      if (response.ok) {
+        // Success response
+        return {
+          status: 'success',
+          message: data.message,
+        };
+      } else {
+        // Error response
+        return {
+          status: 'error',
+          message: data.message || 'Failed to send rcon command.',
+          error: data.error || 'An error occurred while send rcon command.',
+        };
       }
-    );
-    return response.text();
+    } catch (error) {
+      // Handle any network or unexpected errors
+      console.error('Error sending Rcon command:', error);
+      return {
+        status: 'error',
+        message: 'Failed to connect to the server.',
+        error: error.message,
+      };
+    }
   },
 
   /**

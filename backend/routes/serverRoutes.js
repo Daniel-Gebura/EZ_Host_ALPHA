@@ -308,14 +308,14 @@ router.post('/:id/start', async (req, res) => {
  * Endpoint to save a server
  */
 router.post('/:id/save', (req, res) => {
-  sendRconCommand(req.params.id, 'save-all', res, servers, DATA_FILE);
+  return sendRconCommand(req.params.id, 'save-all', res, servers, DATA_FILE);
 });
 
 /**
  * Endpoint to stop a server
  */
 router.post('/:id/stop', (req, res) => {
-  sendRconCommand(req.params.id, 'stop', res, servers, DATA_FILE);
+  return sendRconCommand(req.params.id, 'stop', res, servers, DATA_FILE);
 });
 
 /**
@@ -455,7 +455,7 @@ router.put('/:id/ram', (req, res) => {
 router.post('/:id/rcon', async (req, res) => {
     const { id } = req.params;
     const { command } = req.body;
-    await sendRconCommand(id, command, res);
+    return sendRconCommand(id, command, res, servers, DATA_FILE);
   });
 
 /**
