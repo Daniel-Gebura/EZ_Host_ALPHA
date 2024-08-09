@@ -88,7 +88,7 @@ export const GameSettingsTab: React.FC<GameSettingsTabProps> = ({ serverId, serv
   return (
     <div className="bg-base-300 shadow-lg rounded-lg p-6 mb-4">
       {notification && <Notification key={notification.key} message={notification.message} type={notification.type} />}
-      <h2 className="text-2xl font-bold mb-4">Server Properties</h2>
+      <h2 className="text-2xl font-bold mb-4">Game Settings</h2>
       <div className="grid grid-cols-1 gap-4">
         <div>
           <label className="block text-sm font-medium mb-1">Allow Flying</label>

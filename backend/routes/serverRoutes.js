@@ -303,21 +303,6 @@ router.post('/:id/start', async (req, res) => {
   }
 });
 
-
-/**
- * Endpoint to save a server
- */
-router.post('/:id/save', (req, res) => {
-  return sendRconCommand(req.params.id, 'save-all', res, servers, DATA_FILE);
-});
-
-/**
- * Endpoint to stop a server
- */
-router.post('/:id/stop', (req, res) => {
-  return sendRconCommand(req.params.id, 'stop', res, servers, DATA_FILE);
-});
-
 /**
  * Endpoint to get server properties by ID
  */
@@ -465,11 +450,14 @@ router.get('/:id/players', async (req, res) => {
   const { id } = req.params;
   const server = servers.find(s => s.id === id);
   if (!server) {
-    return res.status(404).send('Server not found');
+    return res.status(404).json({
+      status: 'error',
+      message: 'Server not found.',
+      error: 'The specified server ID does not exist.',
+    });
   }
 
-  const players = await getPlayersList(server.rconPassword);
-  res.json(players);
+  return await getPlayersList(server.rconPassword, res);
 });
 
 /**

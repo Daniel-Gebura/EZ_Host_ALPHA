@@ -162,20 +162,23 @@ const sendRconCommand = async (serverId, command, res, servers, dataFilePath, ca
  * @param {string} rconPassword - The RCON password
  * @returns {Promise<Array<string>>} - The list of players
  */
-const getPlayersList = async (rconPassword) => {
-  try {
-    const rcon = await Rcon.connect({ host: 'localhost', port: 25575, password: rconPassword });
-    const response = await rcon.send('list');
-    await rcon.end();
+const getPlayersList = async (rconPassword, res) => {
+  // Establish RCON connection
+  const rcon = await Rcon.connect({ host: 'localhost', port: 25575, password: rconPassword });
 
-    const match = response.match(/There are \d+\/\d+ players online: (.+)/);
-    const players = match ? match[1].split(', ') : [];
+  // Send the 'list' command to fetch player list
+  const response = await rcon.send('list');
+  await rcon.end(); // Close the RCON connection
 
-    return players;
-  } catch (error) {
-    console.error('Error fetching players list:', error);
-    return [];
-  }
+  // Extract player names from the response
+  const match = response.match(/There are \d+\/\d+ players online: (.+)/);
+  const players = match ? match[1].split(', ') : [];
+
+  res.status(200).json({
+    status: 'success',
+    message: 'Server retrieved successfully.',
+    data: players,
+  });
 };
 
 module.exports = {

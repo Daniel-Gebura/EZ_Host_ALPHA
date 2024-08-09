@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { Notification } from '../../../common/Notification';
 
 interface PlayerListProps {
   serverId: string;
@@ -17,20 +18,26 @@ interface PlayerListProps {
 export const PlayerList: React.FC<PlayerListProps> = ({ serverId, status }) => {
   const [players, setPlayers] = useState<string[]>([]);
   const [selectedPlayer, setSelectedPlayer] = useState<string | null>(null);
+  const [notification, setNotification] = useState<{ message: string, type: 'success' | 'error' | 'warning', key: number } | null>(null);
 
   /**
-   * Fetch the list of players when the server status is 'Online'.
+   * Fetch the list of players from the server.
    */
-  useEffect(() => {
-    const fetchPlayers = async () => {
-      try {
-        const playersList = await window.api.getPlayers(serverId);
-        setPlayers(playersList);
-      } catch (error) {
-        console.error('Error fetching players list:', error);
-      }
-    };
+  const fetchPlayers = async () => {
+    const response = await window.api.getPlayers(serverId);
+    if (response.status === 'success') {
+      const playersList = response.data;
+      setPlayers(playersList);
+    } else {
+      setNotification({
+        message: response.message || response.error || 'An unexpected error occurred.',
+        type: 'error',
+        key: Date.now(),
+      });
+    }
+  };
 
+  useEffect(() => {
     if (status === 'Online') {
       fetchPlayers();
     }
@@ -60,30 +67,33 @@ export const PlayerList: React.FC<PlayerListProps> = ({ serverId, status }) => {
     }
   };
 
+  /**
+   * Handle the refresh button click to refetch the player list.
+   */
+  const handleRefresh = () => {
+    fetchPlayers();
+  };
+
   return (
-    <div className="mt-4">
-      <h3 className="text-xl font-bold mb-4">Players</h3>
-      <ul className="list-disc pl-5">
-        {players.map((player) => (
-          <li
-            key={player}
-            className={`mb-2 ${status === 'Online' ? 'cursor-pointer' : 'text-gray-400'}`}
-            onClick={() => handlePlayerClick(player)}
-          >
-            {player}
-            {selectedPlayer === player && (
-              <div className="dropdown-content mt-1">
-                <button className="btn btn-sm btn-primary mr-2" onClick={() => handleSetOp(player, true)}>
-                  OP
-                </button>
-                <button className="btn btn-sm btn-secondary" onClick={() => handleSetOp(player, false)}>
-                  Un-OP
-                </button>
-              </div>
-            )}
-          </li>
-        ))}
-      </ul>
+    <div className="mt-4 text-left"> {/* Ensure everything is aligned to the left */}
+      {notification && <Notification key={notification.key} message={notification.message} type={notification.type} />}
+      <div className="flex items-start mb-4"> {/* Align items to the start (left) */}
+        <h3 className="text-xl font-bold mr-2">Players</h3>
+        <button className="btn btn-outline btn-sm" onClick={handleRefresh} title="Refresh Player List">
+          &#x21bb; {/* Unicode character for a refresh arrow */}
+        </button>
+      </div>
+      {players.length > 0 ? (
+        <ul className="list-disc pl-5">
+          {players.map((player) => (
+            <li key={player} className="mb-2">
+              {player}
+            </li>
+          ))}
+        </ul>
+      ) : (
+        <p>No Players Online</p>
+      )}
     </div>
   );
 };

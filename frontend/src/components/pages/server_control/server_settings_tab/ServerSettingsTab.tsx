@@ -4,6 +4,8 @@ interface ServerSettingsTabProps {
   ip: string;
   ramAllocation: number;
   onRamChange: (newRam: number) => void;
+  serverId: string;
+  serverStatus: 'Offline' | 'Starting...' | 'Online' | 'Stopping...' | 'Restarting...';
 }
 
 /**
@@ -14,9 +16,11 @@ interface ServerSettingsTabProps {
  * @param {string} props.ip - The IP address of the server.
  * @param {number} props.ramAllocation - The current RAM allocation for the server.
  * @param {function} props.onRamChange - The function to call when the RAM allocation is changed.
+ * @param {string} props.serverId - The ID of the server.
+ * @param {'Offline' | 'Starting...' | 'Online' | 'Stopping...' | 'Restarting...'} props.serverStatus - The current server status.
  * @returns {JSX.Element} The rendered ServerSettingsTab component.
  */
-export const ServerSettingsTab: React.FC<ServerSettingsTabProps> = ({ ip, ramAllocation, onRamChange }) => {
+export const ServerSettingsTab: React.FC<ServerSettingsTabProps> = ({ ip, ramAllocation, onRamChange, serverId, serverStatus }) => {
   const [ram, setRam] = useState(ramAllocation);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
@@ -59,10 +63,10 @@ export const ServerSettingsTab: React.FC<ServerSettingsTabProps> = ({ ip, ramAll
 
   return (
     <div className="p-4 bg-base-200 rounded-lg shadow-md">
-      <h2 className="text-2xl font-bold mb-4">Server Details</h2>
+      <h2 className="text-2xl font-bold mb-4">Server Settings</h2>
 
       <div className="mb-4">
-        <label className="block text-sm font-medium text-gray-700">IP Address</label>
+        <label className="block text-sm font-bold text-gray-400">IP Address</label>
         <div className="flex items-center">
           <input type="text" readOnly value={ip} className="input input-bordered w-full max-w-xs" />
           <button className="btn btn-outline ml-2" onClick={() => navigator.clipboard.writeText(ip)}>
@@ -72,7 +76,7 @@ export const ServerSettingsTab: React.FC<ServerSettingsTabProps> = ({ ip, ramAll
       </div>
 
       <div className="mb-4">
-        <label className="block text-sm font-medium text-gray-700">RAM Allocation (GB)</label>
+        <label className="block text-sm font-bold text-gray-400">RAM Allocation (GB)</label>
         <div className="flex items-center">
           <button className="btn btn-outline" onClick={handleDecrement}>-</button>
           <input type="number" readOnly value={ram} className="input input-bordered mx-2 w-16 text-center" />

@@ -428,82 +428,6 @@ contextBridge.exposeInMainWorld('api', {
   },
 
   /**
-   * Save a server by ID
-   * @param {string} id - Server ID
-   * @returns {Promise<object>} Response from the server
-   */
-  saveServer: async (id) => {
-    try {
-      const response = await fetch(`http://localhost:5000/api/servers/${id}/save`, {
-          method: 'POST',
-      });
-
-      // Parse the JSON response
-      const data = await response.json();
-
-      // Check for HTTP status and handle accordingly
-      if (response.ok) {
-        return { 
-          status: 'success', 
-          message: data.message, 
-          data: data.output 
-        };
-      } else {
-        return {
-          status: 'error',
-          message: data.message,
-          error: data.error || 'Unknown error occurred',
-        };
-      }
-    } catch (error) {
-      console.error('Error saving server:', error);
-      return {
-        status: 'error',
-        message: 'Failed to connect to server',
-        error: error.message,
-      };
-    }
-  },
-
-  /**
-   * Stop a server by ID
-   * @param {string} id - Server ID
-   * @returns {Promise<string>} Response from the server
-   */
-  stopServer: async (id) => {
-    try {
-      const response = await fetch(`http://localhost:5000/api/servers/${id}/stop`, {
-          method: 'POST',
-      });
-
-      // Parse the JSON response
-      const data = await response.json();
-
-      // Check for HTTP status and handle accordingly
-      if (response.ok) {
-        return { 
-          status: 'success', 
-          message: data.message, 
-          data: data.output 
-        };
-      } else {
-        return {
-          status: 'error',
-          message: data.message,
-          error: data.error || 'Unknown error occurred',
-        };
-      }
-    } catch (error) {
-      console.error('Error stopping server:', error);
-      return {
-        status: 'error',
-        message: 'Failed to connect to server',
-        error: error.message,
-      };
-    }
-  },
-
-  /**
    * Get server properties by ID
    * @param {string} id - Server ID
    * @returns {Promise<Object>} The server properties
@@ -719,13 +643,37 @@ contextBridge.exposeInMainWorld('api', {
    * @returns {Promise<string[]>} List of player names
    */
   getPlayers: async (id) => {
-    const response = await fetch(
-      `http://localhost:5000/api/servers/${id}/players`
-    );
-    if (!response.ok) {
-      throw new Error('Failed to fetch players list');
+    try {
+      const response = await fetch(`http://localhost:5000/api/servers/${id}/players`);
+
+      // Parse the JSON response
+      const data = await response.json();
+
+      // Handle the HTTP response codes and return a structured object
+      if (response.ok) {
+        // Success response
+        return {
+          status: 'success',
+          message: data.message,
+          data: data.data,
+        };
+      } else {
+        // Error response
+        return {
+          status: 'error',
+          message: data.message || 'Failed to retrieve player list.',
+          error: data.error || 'An error occurred while fetching the player list.',
+        };
+      }
+    } catch (error) {
+      // Handle any network or unexpected errors
+      console.error('Error fetching player list:', error);
+      return {
+        status: 'error',
+        message: 'Failed to connect to the server.',
+        error: error.message,
+      };
     }
-    return response.json();
   },
 
   /**

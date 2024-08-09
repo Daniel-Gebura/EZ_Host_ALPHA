@@ -14,7 +14,7 @@ export const ServerControlPage: React.FC = () => {
   const [serverName, setServerName] = useState('');
   const [status, setStatus] = useState<'Offline' | 'Starting...' | 'Online' | 'Stopping...' | 'Restarting...'>('Offline');
   const [icon, setIcon] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState<'home' | 'properties' | 'details'>('home');
+  const [activeTab, setActiveTab] = useState<'home' | 'game-settings' | 'server-settings'>('home');
   const [notification, setNotification] = useState<{ message: string, type: 'success' | 'error' | 'warning', key: number } | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [ramAllocation, setRamAllocation] = useState(4);
@@ -236,23 +236,23 @@ export const ServerControlPage: React.FC = () => {
             Home
           </a>
           <a
-            className={`tab ${activeTab === 'properties' ? 'tab-active bg-blue-500' : ''}`}
-            onClick={() => setActiveTab('properties')}
+            className={`tab ${activeTab === 'game-settings' ? 'tab-active bg-blue-500' : ''}`}
+            onClick={() => setActiveTab('game-settings')}
           >
-            Server Properties
+            Game Settings
           </a>
           <a
-            className={`tab ${activeTab === 'details' ? 'tab-active bg-blue-500' : ''}`}
-            onClick={() => setActiveTab('details')}
+            className={`tab ${activeTab === 'server-settings' ? 'tab-active bg-blue-500' : ''}`}
+            onClick={() => setActiveTab('server-settings')}
           >
-            Server Details
+            Server Settings
           </a>
         </div>
       </div>
 
       {activeTab === 'home' && <HomeTab status={status} handleAction={handleAction} removeServer={removeServer} serverId={currentServerId!} />}
-      {activeTab === 'properties' && <GameSettingsTab serverId={currentServerId!} serverStatus={status} />}
-      {activeTab === 'details' && <ServerSettingsTab ip={ip} ramAllocation={ramAllocation} onRamChange={handleRamChange} />}
+      {activeTab === 'game-settings' && <GameSettingsTab serverId={currentServerId!} serverStatus={status} />}
+      {activeTab === 'server-settings' && <ServerSettingsTab ip={ip} ramAllocation={ramAllocation} onRamChange={handleRamChange} serverId={currentServerId!} serverStatus={status} />}
       
       {isModalOpen && (
         <div className="modal modal-open">

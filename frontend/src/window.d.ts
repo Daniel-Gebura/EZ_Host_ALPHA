@@ -29,14 +29,12 @@ declare global {
       deleteServer: (id: string) => Promise<ApiResponse>;
       initServer: (id: string) => Promise<ApiResponse>;
       startServer: (id: string) => Promise<ApiResponse>;
-      saveServer: (id: string) => Promise<ApiResponse>;
-      stopServer: (id: string) => Promise<ApiResponse>;
       getServerProperties: (id: string) => Promise<ApiResponse>;
       saveServerProperties: (id: string, properties: any) => Promise<ApiResponse>;
       getRamAllocation: (id: string) => Promise<ApiResponse>;
       updateRamAllocation: (id: string, ram: number) => Promise<ApiResponse>;
       sendRconCommand: (id: string, command: string) => Promise<ApiResponse>;
-      getPlayers: (id: string) => Promise<string[]>;
+      getPlayers: (id: string) => Promise<ApiResponse>;
       setPlayerOp: (id: string, playerName: string, op: boolean) => Promise<string>;
     };
   }
